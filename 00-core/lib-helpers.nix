@@ -1,5 +1,6 @@
 {lib, ...}: let
-  dnsMap = import ../10-gateway/dns-map.nix;
+  # SSoT Domain Generator
+  getDomain = config: name: "${name}.${config.my.configs.identity.subdomain}.${config.my.configs.identity.domain}";
 in {
   mkService = {
     config,
@@ -7,50 +8,53 @@ in {
     port ? null,
     useSSO ? true,
     description ? "Managed Service",
-    readWritePaths ? [],
-    allowNetwork ? true,
     netns ? null,
+    extraServiceConfig ? {},
+    readWritePaths ? [],
   }: let
-    finalPort =
-      if port != null
-      then port
-      else if config.my.ports ? ${name}
-      then config.my.ports.${name}
-      else throw "mkService: No port defined for ${name}";
-
-    host =
-      if dnsMap.dnsMapping ? ${name}
-      then dnsMap.dnsMapping.${name}
-      else "${name}.nix.${dnsMap.baseDomain}";
-
-    target = "http://${
-      if netns != null
-      then "10.200.1.2"
-      else "127.0.0.1"
-    }:${toString finalPort}";
+    # Port aus SSoT ports.nix holen, falls nicht explizit übergeben
+    finalPort = if port != null then port else config.my.ports.${name};
+    
+    # Target URL (VPN-Netns Support)
+    targetUrl = "http://${if netns != null then "10.200.1.2" else "127.0.0.1"}:${toString finalPort}";
+    
+    # FQDN generieren
+    hostName = getDomain config name;
   in {
-    systemd.services."${name}" = {
-      serviceConfig = {
-        Description = lib.mkDefault description;
-        ProtectSystem = lib.mkDefault "strict";
-        ProtectHome = lib.mkDefault true;
-        PrivateTmp = lib.mkDefault true;
-        PrivateDevices = lib.mkDefault true;
-        NoNewPrivileges = lib.mkDefault true;
-        Restart = lib.mkDefault "always";
-        ReadWritePaths = lib.mkDefault readWritePaths;
-        NetworkNamespacePath = lib.mkIf (netns != null) "/run/netns/${netns}";
-      };
+    # 🛡️ Systemd Hardening & Sandboxing
+    systemd.services.${name} = {
+      inherit description;
+      serviceConfig = lib.recursiveUpdate {
+        ProtectSystem = "strict";
+        ProtectHome = true;
+        PrivateTmp = true;
+        NoNewPrivileges = true;
+        ProtectControlGroups = true;
+        ProtectKernelModules = true;
+        ProtectKernelTunables = true;
+        RestrictRealtime = true;
+        RestrictSUIDSGID = true;
+        MemoryDenyWriteExecute = true;
+        LockPersonality = true;
+        ReadWritePaths = readWritePaths;
+      } extraServiceConfig;
     };
 
-    services.caddy.virtualHosts."${host}" = {
+    # 🌐 Caddy Reverse Proxy (Aviation-Grade)
+    services.caddy.virtualHosts."${hostName}" = {
       extraConfig = ''
-        @trusted_network remote_ip 127.0.0.1 100.64.0.0/10 ${lib.concatStringsSep " " config.my.configs.network.lanCidrs}
-        handle @trusted_network {
-          reverse_proxy ${target}
+        # Vertrauenswürdiges lokales Netzwerk ohne SSO
+        @trusted_network {
+          remote_ip ${config.my.configs.network.lanCidr}
         }
+        
+        handle @trusted_network {
+          reverse_proxy ${targetUrl}
+        }
+
+        # Externer Zugriff mit SSO Schutz
         ${lib.optionalString useSSO "import sso_auth"}
-        reverse_proxy ${target}
+        reverse_proxy ${targetUrl}
       '';
     };
   };
