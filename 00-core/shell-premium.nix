@@ -1,42 +1,50 @@
 { config, lib, pkgs, ... }:
 let
-  # 🚀 NMS v4.0 Metadaten
+  # 🚀 NMS v4.2 Metadaten (Aviation-Grade Cockpit)
   nms = {
     id = "NIXH-00-COR-029";
-    title = "Shell Premium";
-    description = "Advanced shell workflow with fastfetch MOTD, service status health-checks, and power-user aliases.";
+    title = "Shell Premium (M1 Abrams Edition)";
+    description = "Hardened and optimized shell environment with Caddy health-checks and fastfetch reporting.";
     layer = 00;
     nixpkgs.category = "system/settings";
     capabilities = [ "shell/premium" "observability/motd" "system/status-checker" ];
-    audit.last_reviewed = "2026-03-02";
+    audit.last_reviewed = "2026-04-27";
     audit.complexity = 2;
+    source_repo = "grapefruit89/mynixos";
   };
 
   user = config.my.configs.identity.user;
-  host = config.my.configs.identity.host;
   domain = config.my.configs.identity.domain;
   
+  # 📊 Fastfetch: Aviation-Grade Dashboard
   fastfetchConfig = pkgs.writeText "fastfetch-homelab.jsonc" (builtins.toJSON {
     logo = { source = "nixos"; padding = { top = 1; left = 2; }; };
     display = { separator = " ➜ "; color = { keys = "blue"; title = "green"; }; };
     modules = [
       { type = "title"; format = "{user-name}@{host-name}"; } "separator"
       { type = "os"; key = "OS"; } { type = "kernel"; key = "Kernel"; } { type = "uptime"; key = "Uptime"; }
-      { type = "packages"; key = "Packages"; } { type = "shell"; key = "Shell"; } "break"
-      { type = "cpu"; key = "CPU"; } { type = "gpu"; key = "GPU"; } { type = "memory"; key = "Memory"; }
+      { type = "packages"; key = "Pkgs"; } { type = "shell"; key = "Shell"; } "break"
+      { type = "cpu"; key = "CPU"; } { type = "gpu"; key = "GPU"; } { type = "memory"; key = "Mem"; }
       { type = "disk"; key = "Disk (/)"; folders = "/"; } "break"
-      { type = "localip"; key = "LAN IP"; compact = true; } { type = "custom"; format = "${config.my.configs.server.tailscaleIP}"; key = "Tailscale"; } "break"
-      { type = "custom"; format = "https://${domain}"; key = "Dashboard"; } { type = "custom"; format = "https://traefik.${domain}"; key = "Traefik"; } "break" "colors"
+      { type = "localip"; key = "LAN"; compact = true; }
+      { type = "custom"; format = "https://${domain}"; key = "Base"; }
+      { type = "custom"; format = "https://admin.${domain}"; key = "Admin"; } "break" "colors"
     ];
   });
   
+  # 🔧 Health-Check (Aligned with Layer 10/20/30)
   serviceStatusScript = pkgs.writeShellScriptBin "check-services" ''
     #!/usr/bin/env bash
-    CRITICAL_SERVICES=("sshd:SSH" "traefik:Traefik" "tailscaled:Tailscale" "jellyfin:Jellyfin" "fail2ban:Fail2ban")
-    echo -e "\n🔧 Service Status:\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    # Services aus 10-gtw, 20-infra, 30-media
+    CRITICAL_SERVICES=("sshd:SSH" "caddy:Proxy" "tailscaled:VPN" "jellyfin:Jellyfin" "postgres:Database")
+    echo -e "\n🛡️  Aviation-Grade Service Status:\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     for entry in "''${CRITICAL_SERVICES[@]}"; do
       service="''${entry%%:*}"; label="''${entry##*:}"
-      if systemctl is-active --quiet "$service"; then echo "  ✅ $label"; else echo "  ❌ $label (FEHLER!)"; fi
+      if systemctl is-active --quiet "$service"; then
+        echo -e "  ✅ \e[32m$label\e[0m"
+      else
+        echo -e "  ❌ \e[31m$label (DOWN!)\e[0m"
+      fi
     done
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   '';
@@ -49,29 +57,50 @@ in
     description = "NMS metadata for shell-premium module";
   };
 
-  options.my.shell.premium.enable = lib.mkEnableOption "Advanced Shell Features (Fastfetch, Service Checks)";
-
   config = lib.mkIf (config.my.shell.premium.enable && user == "moritz") {
+    # 🏎️ Essential Aliases (The Workflow)
     programs.bash.shellAliases = {
-      nsw = "sudo nixos-rebuild switch"; ntest = "sudo nixos-rebuild test"; ndry = "sudo nixos-rebuild dry-run"; nboot = "sudo nixos-rebuild boot";
-      nup = "nix flake update"; nclean = "sudo nix-env -p /nix/var/nix/profiles/system --delete-generations +5 && sudo nix-store --gc";
-      nopt = "sudo nix-store --optimise"; ngen = "sudo nix-env -p /nix/var/nix/profiles/system --list-generations";
-      ncfg = "cd /etc/nixos"; ngit = "cd /etc/nixos && git status -sb"; nlog = "journalctl -xef";
-      ls = "${pkgs.eza}/bin/eza --icons"; ll = "${pkgs.eza}/bin/eza -la --icons --git"; tree = "${pkgs.eza}/bin/eza --tree --icons";
-      cat = "${pkgs.bat}/bin/bat --paging=never"; less = "${pkgs.bat}/bin/bat"; top = "${pkgs.htop}/bin/htop"; df = "${pkgs.duf}/bin/duf"; du = "${pkgs.dust}/bin/dust";
-      sysinfo = "${pkgs.fastfetch}/bin/fastfetch --config ${fastfetchConfig}"; services = "${serviceStatusScript}/bin/check-services"; ports = "sudo ss -tulpn";
-      gs = "git status -sb"; ga = "git add"; gc = "git commit -m"; gp = "git push"; gl = "git log --oneline --graph --decorate --all -n 10";
+      # Nix-Rebuild shortcuts
+      nsw = "sudo nixos-rebuild switch --flake .#default";
+      ntest = "sudo nixos-rebuild test --flake .#default";
+      ndry = "sudo nixos-rebuild dry-run --flake .#default";
+      
+      # Maintenance
+      nup = "nix flake update";
+      nclean = "sudo nix-env -p /nix/var/nix/profiles/system --delete-generations +3 && sudo nix-store --gc";
+      nopt = "sudo nix-store --optimise";
+      nlog = "journalctl -xef";
+      
+      # Modern Tooling (Aviation-Grade)
+      ls = "${pkgs.eza}/bin/eza --icons";
+      ll = "${pkgs.eza}/bin/eza -la --icons --git";
+      tree = "${pkgs.eza}/bin/eza --tree --icons";
+      cat = "${pkgs.bat}/bin/bat --paging=never";
+      sysinfo = "${pkgs.fastfetch}/bin/fastfetch --config ${fastfetchConfig}";
+      services = "${serviceStatusScript}/bin/check-services";
+      ports = "sudo ss -tulpn | grep LISTEN";
+      
+      # Git Shortcuts
+      gs = "git status -sb";
+      ga = "git add";
+      gc = "git commit -m";
+      gp = "git push";
     };
     
+    # 🏁 Shell Init
     programs.bash.interactiveShellInit = ''
-      if [ -n "$SSH_CONNECTION" ] || [ "$TERM" = "xterm-256color" ]; then
+      # Don't run in non-interactive sessions
+      if [[ $- == *i* ]]; then
         ${pkgs.fastfetch}/bin/fastfetch --config ${fastfetchConfig}
         ${serviceStatusScript}/bin/check-services
-        echo "💡 Tipp: Nutze 'aliases' für eine Liste aller Shortcuts"
-        ${lib.optionalString config.my.configs.bastelmodus "echo '⚠️ WARNUNG: Bastelmodus ist AKTIV (Firewall AUS)'"}
+        echo "💡 Hint: 'nsw' to rebuild, 'nlog' for logs, 'services' for health."
       fi
     '';
     
-    environment.systemPackages = with pkgs; [ bat eza ripgrep fd duf dust htop btop nix-tree nix-diff nixfmt-classic nix-output-monitor fastfetch micro git curl wget tree unzip file lsof ncdu serviceStatusScript ];
+    environment.systemPackages = with pkgs; [
+      bat eza ripgrep fd duf dust htop btop
+      nix-tree nix-diff nixfmt-classic nix-output-monitor
+      fastfetch micro git curl wget tree serviceStatusScript
+    ];
   };
 }

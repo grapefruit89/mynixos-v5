@@ -4,21 +4,21 @@
   lib,
   ...
 }: let
-  # 🚀 NMS v4.2 Metadaten
+  # 🚀 NMS v4.2 Metadaten (Aviation-Grade Security)
   nms = {
     id = "NIXH-00-COR-010";
-    title = "Fail2ban (SRE Aggressive)";
-    description = "Aggressive brute-force protection with specialized Caddy JSON filters and incremental banning.";
+    title = "Fail2ban (Edge Hardened)";
+    description = "Aggressive protection with deep Caddy JSON log inspection and incremental banning logic.";
     layer = 00;
     nixpkgs.category = "services/security";
-    capabilities = ["security/bruteforce-protection" "network/hardening"];
-    audit.last_reviewed = "2026-03-03";
+    capabilities = ["security/bruteforce-protection" "network/hardening" "caddy/security"];
+    audit.last_reviewed = "2026-04-27";
     audit.complexity = 2;
+    source_repo = "grapefruit89/mynixos";
   };
 
+  # SSoT Integration
   sshPort = toString config.my.ports.ssh;
-  lanCidrs = config.my.configs.network.lanCidrs;
-  tailnetCidrs = config.my.configs.network.tailnetCidrs;
 in {
   options.my.meta.fail2ban = lib.mkOption {
     type = lib.types.attrs;
@@ -30,22 +30,25 @@ in {
   config = lib.mkIf (config.my.services.fail2ban.enable or true) {
     services.fail2ban = {
       enable = true;
-      # 🛡️ GLOBAL HARDENING
+      # 🛡️ GLOBAL HARDENING (NFTables Standard)
       banaction = "nftables-multiport";
       banaction-allports = "nftables-allports";
-      ignoreIP = ["127.0.0.1/8" "::1"] ++ lanCidrs ++ tailnetCidrs;
+      
+      # Schutz gegen Selbstausschluss (SSoT Configs)
+      ignoreIP = [
+        "127.0.0.1/8" "::1"
+        config.my.configs.network.lanCidr
+      ];
 
       bantime = "1h";
       maxretry = 5;
 
-      # 📈 INCREMENTAL BANNING (Nixpkgs Native)
+      # 📈 INCREMENTAL BANNING (The Great Wall)
       bantime-increment = {
         enable = true;
         multipliers = "1 2 4 8 16 32 64";
-        maxtime = "168h"; # 1 Woche max
+        maxtime = "168h"; # Max 1 Woche
       };
-
-      daemonSettings.Definition.logtarget = "SYSLOG";
 
       jails = {
         sshd.settings = {
@@ -53,6 +56,8 @@ in {
           port = sshPort;
           mode = "aggressive";
         };
+        
+        # 🌐 Caddy-Auth: Schützt SSO & Login-Endpunkte
         caddy-auth.settings = {
           enabled = true;
           port = "http,https";
@@ -62,6 +67,8 @@ in {
           findtime = "5m";
           bantime = "24h";
         };
+
+        # 🔍 Caddy-Scan: Erkennt aggressive Bot-Scanner
         caddy-scan.settings = {
           enabled = true;
           port = "http,https";
@@ -74,7 +81,7 @@ in {
       };
     };
 
-    # 🔍 CUSTOM FILTERS
+    # 🔍 CUSTOM FILTERS (JSON Optimized)
     environment.etc = {
       "fail2ban/filter.d/caddy-json.conf".text = ''
         [Definition]
@@ -83,7 +90,8 @@ in {
       '';
       "fail2ban/filter.d/caddy-scan.conf".text = ''
         [Definition]
-        failregex = ^.*"remote_ip":"<ADDR>".*"uri":".*(?:/\.git|/\.env|/wp-admin|/wp-login\.php|/xmlrpc\.php)".*"status":404.*$
+        # Erweitert um gefährliche Bot-Muster (.env, .php, .config)
+        failregex = ^.*"remote_ip":"<ADDR>".*"uri":".*(?:\.env|\.git|\.config|\.php|\.zip|\.gz|wp-admin|wp-login|xmlrpc)".*"status":404.*$
         journalmatch = _SYSTEMD_UNIT=caddy.service
       '';
     };
@@ -97,10 +105,3 @@ in {
     };
   };
 }
-/**
-* ---
- * technical_integrity:
- *   checksum: sha256:5c444a82f277d479743d034c4cf03aa8819b05d9f9044d87daacb54ac8ba3368
- *   eof_marker: NIXHOME_VALID_EOF* ---
-*/
-

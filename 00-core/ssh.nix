@@ -4,22 +4,23 @@
   pkgs,
   ...
 }: let
-  # 🚀 NMS v4.2 Metadaten
+  # 🚀 NMS v4.2 Metadaten (Aviation-Grade Security)
   nms = {
     id = "NIXH-00-COR-032";
-    title = "SSH (SRE Expert Edition)";
-    description = "Hardened SSH daemon with connection protection, modern crypto and explicit legal banners.";
+    title = "SSH (Post-Quantum Hardened)";
+    description = "Hardened SSH daemon with Post-Quantum cryptography, strict CIDR-based forwarding and legal protections.";
     layer = 00;
     nixpkgs.category = "system/networking";
-    capabilities = ["security/ssh" "network/hardening"];
-    audit.last_reviewed = "2026-03-03";
+    capabilities = ["security/ssh" "network/hardening" "crypto/post-quantum"];
+    audit.last_reviewed = "2026-04-27";
     audit.complexity = 3;
+    source_repo = "grapefruit89/mynixos";
   };
+  
+  # SSoT Integration
   sshPort = config.my.ports.ssh;
   user = config.my.configs.identity.user;
-  lanCidrs = config.my.configs.network.lanCidrs;
-  tailnetCidrs = config.my.configs.network.tailnetCidrs;
-  matchCidrs = lib.concatStringsSep "," (lanCidrs ++ tailnetCidrs);
+  lanCidr = config.my.configs.network.lanCidr;
 in {
   options.my.meta.ssh = lib.mkOption {
     type = lib.types.attrs;
@@ -31,14 +32,15 @@ in {
   config = {
     services.openssh = {
       enable = true;
-      openFirewall = false;
-      ports = lib.mkForce [22 sshPort];
+      openFirewall = false; # 🛡️ Firewall wird separat in firewall.nix geregelt
+      ports = [ sshPort ]; # 💎 Nur der Custom Port aus SSoT erlaubt
 
-      # ⚖️ LEGAL BANNER
+      # ⚖️ AVIATION-GRADE LEGAL BANNER
       banner = ''
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        UNAUTHORIZED ACCESS TO THIS SYSTEM IS STRICTLY PROHIBITED
-        All activities are logged. SRE Cockpit v4.2 active.
+        NIXOS AVIATION-GRADE COCKPIT [v4.2]
+        UNAUTHORIZED ACCESS IS PROHIBITED BY POLICY NIXH-90-POL-001
+        System Owner: ${user} | Domain: ${config.my.configs.identity.domain}
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       '';
 
@@ -46,19 +48,19 @@ in {
         PermitRootLogin = "no";
         PasswordAuthentication = false;
         KbdInteractiveAuthentication = false;
-        AllowUsers = ["${user}"];
+        AllowUsers = [ user ];
         LogLevel = "VERBOSE";
         LoginGraceTime = 20;
-        MaxAuthTries = 3;
+        MaxAuthTries = 2;
         ClientAliveInterval = 300;
         ClientAliveCountMax = 2;
-        X11Forwarding = false; # 🛡️ Hardening: No X11 over SSH
+        X11Forwarding = false;
 
-        # 🏎️ MODERN CRYPTO (Curve25519 & ChaCha20)
+        # 🏎️ POST-QUANTUM CRYPTO (Aligned with SRE Standards)
         KexAlgorithms = [
+          "sntrup761x25519-sha512@openssh.com" # Post-Quantum champion
           "curve25519-sha256"
           "curve25519-sha256@libssh.org"
-          "sntrup761x25519-sha512@openssh.com"
         ];
         Ciphers = [
           "chacha20-poly1305@openssh.com"
@@ -66,9 +68,9 @@ in {
         ];
       };
 
-      # 🌍 INTERNAL ACCESS POLICY
+      # 🌍 INTERNAL ACCESS POLICY (SSH Forwarding nur für vertrauenswürdige IPs)
       extraConfig = ''
-        Match Address 127.0.0.1,::1,${matchCidrs}
+        Match Address 127.0.0.1,::1,${lanCidr}
           AllowTcpForwarding yes
           GatewayPorts yes
       '';
@@ -76,7 +78,7 @@ in {
 
     # 🛡️ SYSTEMD HARDENING
     systemd.services.sshd = {
-      stopIfChanged = false;
+      stopIfChanged = false; # Verhindert SSH-Verlust bei Updates
       serviceConfig = {
         Restart = "always";
         RestartSec = "5s";
@@ -85,22 +87,7 @@ in {
         PrivateTmp = true;
         ProtectSystem = "strict";
         ProtectHome = "read-only";
-        CapabilityBoundingSet = [
-          "CAP_CHOWN"
-          "CAP_SETUID"
-          "CAP_SETGID"
-          "CAP_SYS_CHROOT"
-          "CAP_AUDIT_WRITE"
-          "CAP_NET_BIND_SERVICE"
-        ];
       };
     };
   };
 }
-/**
-* ---
- * technical_integrity:
- *   checksum: sha256:01c344dc17f10361ad8ed7045216eb8cbf3730ef91aab37c67cb4147acb85d8d
- *   eof_marker: NIXHOME_VALID_EOF* ---
-*/
-

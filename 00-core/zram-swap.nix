@@ -3,19 +3,20 @@
   lib,
   ...
 }: let
-  # 🚀 NMS v4.2 Metadaten
+  # 🚀 NMS v4.2 Metadaten (Aviation-Grade RAM-Tuning)
   nms = {
     id = "NIXH-00-COR-040";
-    title = "Zram Swap (RAM-Efficiency)";
-    description = "Compressed RAM swap tuning for high performance without SSD wear and prioritized execution.";
+    title = "Zram Swap (AI Optimized)";
+    description = "Optimized compressed RAM swap for AI workloads (Ollama/Claude). High swappiness for CPU-efficient memory management.";
     layer = 00;
     nixpkgs.category = "system/settings";
-    capabilities = ["system/performance" "hardware/ram-optimization"];
-    audit.last_reviewed = "2026-03-03";
+    capabilities = ["system/performance" "hardware/ram-optimization" "ai/optimization"];
+    audit.last_reviewed = "2026-04-27";
     audit.complexity = 2;
   };
 
-  ramGB = config.my.configs.hardware.ramGB;
+  # RAM-Detection (Fallback auf 16GB falls nicht definiert)
+  ramGB = config.my.configs.hardware.ramGB or 16;
 in {
   options.my.meta.zram_swap = lib.mkOption {
     type = lib.types.attrs;
@@ -27,26 +28,19 @@ in {
   config = {
     zramSwap = {
       enable = true;
-      algorithm = "zstd";
-      # 🛡️ Nixpkgs Standard: Höhere Priorität als Disk-Swap
+      algorithm = "zstd"; # 💎 Aviation-Grade standard for best ratio
       priority = 100;
       memoryPercent =
-        if ramGB <= 4
-        then 75
-        else if ramGB <= 8
-        then 50
-        else 25;
+        if ramGB <= 4 then 75
+        else if ramGB <= 8 then 60
+        else 40; # 🚀 40% of RAM for ZRAM to buffer AI models
     };
+    
     boot.kernel.sysctl = {
-      "vm.swappiness" = lib.mkForce 180;
-      "vm.page-cluster" = lib.mkDefault 0;
+      # 🏎️ ZRAM Performance Tuning
+      "vm.swappiness" = lib.mkForce 180; # Kernels move pages aggressively to ZRAM
+      "vm.page-cluster" = 0;             # Skip expensive read-ahead on ZRAM
+      "vm.vfs_cache_pressure" = 50;      # Keep directory entries in RAM longer
     };
   };
 }
-/**
-* ---
- * technical_integrity:
- *   checksum: sha256:63becf5c9cceaadd8b32e544808b1ab4c449497c3107adb69f043880b7d0d10d
- *   eof_marker: NIXHOME_VALID_EOF* ---
-*/
-

@@ -4,16 +4,17 @@
   pkgs,
   ...
 }: let
-  # 🚀 NMS v4.2 Metadaten
+  # 🚀 NMS v4.2 Metadaten (Aviation-Grade Audit)
   nms = {
     id = "NIXH-00-COR-017";
-    title = "Kernel Slim (Hardened)";
-    description = "Optimized and hardened kernel for Q958 by blacklisting unused modules and tuning sysctl.";
+    title = "Kernel Slim (Advanced Hardened)";
+    description = "Aviation-grade optimized and hardened kernel. Max security via slab_nomerge and poison-paging.";
     layer = 00;
     nixpkgs.category = "system/boot";
     capabilities = ["kernel/hardening" "system/performance" "security/sysctl"];
-    audit.last_reviewed = "2026-03-03";
+    audit.last_reviewed = "2026-04-27";
     audit.complexity = 3;
+    source_repo = "grapefruit89/mynixos";
   };
 
   cfg = config.my.profiles.hardware.q958;
@@ -41,94 +42,69 @@ in {
   config = lib.mkIf (config.my.services.kernelSlim.enable && cfg.enable) {
     boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
 
-    # 🛡️ MODULE BLACKLIST (Reduced Attack Surface)
+    # 🛡️ MODULE BLACKLIST (Minimal Surface Area)
     boot.blacklistedKernelModules = [
-      "bluetooth"
-      "btusb"
-      "btrtl"
-      "btbcm"
-      "btintel"
-      "bnep"
-      "rfcomm"
-      "iwlwifi"
-      "ath9k"
-      "ath10k_core"
-      "ath10k_pci"
-      "rtl8192ce"
-      "rtl8192cu"
-      "rtl8192de"
-      "rtl8188ee"
-      "mt76"
-      "brcmfmac"
-      "brcmutil"
-      "nouveau"
-      "radeon"
-      "amdgpu"
-      "mgag200"
-      "ast"
-      "pcspkr"
-      "iTCO_wdt"
-      "iTCO_vendor_support"
+      "bluetooth" "btusb" "btrtl" "btbcm" "btintel" "bnep" "rfcomm"
+      "iwlwifi" "ath9k" "ath10k_core" "ath10k_pci" "rtl8192ce" 
+      "rtl8192cu" "rtl8192de" "rtl8188ee" "mt76" "brcmfmac" "brcmutil"
+      "nouveau" "radeon" "amdgpu" "mgag200" "ast" "pcspkr" "iTCO_wdt"
       "thunderbolt"
     ];
 
-    hardware.enableRedistributableFirmware = lib.mkForce false;
-    hardware.firmware = lib.mkForce [pkgs.linux-firmware];
-
-    # 🏎️ KERNEL SYSCTL HARDENING (Aviation Grade)
+    # 🏎️ KERNEL SYSCTL HARDENING
     boot.kernel.sysctl = {
-      # IPv4 Stack
+      # IPv4/v6 Stack Hardening
       "net.ipv4.conf.all.rp_filter" = lib.mkForce 1;
       "net.ipv4.conf.default.rp_filter" = lib.mkForce 1;
       "net.ipv4.tcp_syncookies" = lib.mkForce 1;
-      "net.ipv4.tcp_rfc1323" = 1;
-      "net.ipv4.tcp_sack" = 1;
-      "net.ipv4.tcp_fastopen" = 3;
-
+      "net.ipv4.icmp_echo_ignore_broadcasts" = true;
+      "net.ipv4.conf.all.accept_redirects" = false;
+      "net.ipv4.conf.all.secure_redirects" = false;
+      
       # Security & Integrity
       "kernel.kptr_restrict" = lib.mkForce 2;
       "kernel.dmesg_restrict" = lib.mkForce 1;
-      "kernel.unprivileged_bpf_disabled" = 1; # 💎 Essential Hardening
+      "kernel.unprivileged_bpf_disabled" = 1; 
+      "net.core.bpf_jit_enable" = false; # 🛡️ Against JIT spray
+      "kernel.ftrace_enabled" = false;
       "kernel.perf_event_paranoid" = 3;
 
       # Memory & Performance
       "vm.swappiness" = 10;
       "vm.vfs_cache_pressure" = 50;
-      "kernel.shmmax" = 1073741824; # 1GB Shm for AI/DB
     };
+
+    # 💎 BOOT TIME HARDENING (From NixOS Wiki & Fragments)
+    boot.kernelParams = [
+      "quiet"
+      "loglevel=3"
+      "systemd.show_status=auto"
+      "slab_nomerge"        # Prevents heap grooming
+      "page_poison=1"       # Overwrites free'd pages
+      "page_alloc.shuffle=1" # Randomizes page allocation
+      "debugfs=off"         # Closes debug attack vector
+      "i915.enable_guc=3"   # Q958 GPU Logic
+    ];
 
     boot.initrd.availableKernelModules = lib.mkForce ["ahci" "sd_mod" "xhci_pci" "usbhid" "usb_storage"];
 
     environment.systemPackages = with pkgs; [
       linuxPackages_latest.perf
       ramBenchmark
-      kmod
-      pciutils
-      usbutils
+      kmod pciutils usbutils
     ];
-    programs.bash.shellAliases = {ram-bench = "${ramBenchmark}/bin/ram-benchmark";};
 
-    boot.kernelParams = ["quiet" "loglevel=3" "systemd.show_status=auto" "rd.udev.log_level=3" "logo.nologo"];
+    programs.bash.shellAliases = { ram-bench = "${ramBenchmark}/bin/ram-benchmark"; };
 
     systemd.services.kernel-slim-info = {
       description = "Kernel Slim Info Banner";
       wantedBy = ["multi-user.target"];
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-      };
+      serviceConfig = { Type = "oneshot"; RemainAfterExit = true; };
       script = ''
-        logger -t kernel-slim "Optimized kernel loaded (Q958 profile)"
+        logger -t kernel-slim "Aviation-Grade Hardened Kernel loaded (Q958 profile)"
         MODULES=$(lsmod | wc -l)
         logger -t kernel-slim "Loaded modules: $((MODULES - 1))"
       '';
     };
   };
 }
-/**
-* ---
- * technical_integrity:
- *   checksum: sha256:8757415fb158e6673a10c5aee208112b7d339f8f014e2c90e9a3e6c8ff51e319
- *   eof_marker: NIXHOME_VALID_EOF* ---
-*/
-
