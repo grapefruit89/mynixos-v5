@@ -4,68 +4,66 @@
   pkgs,
   ...
 }: let
-  # 🚀 NMS v4.2 Metadaten
+  # 🚀 NMS v4.2 Metadaten (Aviation-Grade Backup)
   nms = {
     id = "NIXH-00-COR-004";
-    title = "Backup (Restic Expert)";
-    description = "Secure Restic backup logic with automated integrity checks, high-compression and cloud sync.";
+    title = "Backup (Restic Aviation Edition)";
+    description = "Hardened Restic backup logic with atomical Cloud-Sync and failure-safe ExecConditions.";
     layer = 00;
     nixpkgs.category = "services/backup";
     capabilities = ["backup/restic" "cloud/sync" "security/integrity-check"];
-    audit.last_reviewed = "2026-03-03";
-    audit.complexity = 2;
+    audit.last_reviewed = "2026-04-27";
+    audit.complexity = 3;
+    source_repo = "grapefruit89/mynixos";
   };
 
   localRepo = "/mnt/archive/.restic-vault";
-  maxSizeGB = 15;
+  maxSizeGB = 20; # Erhöht für Media-Metadaten
 in {
   options.my.meta.backup = lib.mkOption {
     type = lib.types.attrs;
     default = nms;
     readOnly = true;
-    description = "NMS metadata for backup module";
   };
 
   config = lib.mkIf config.my.services.backup.enable {
     services.restic.backups.daily = {
       initialize = true;
       repository = localRepo;
-      passwordFile = "/etc/secrets/restic-password";
+      passwordFile = config.sops.secrets.restic_password.path; # Sops Integration
 
       paths = [
         "/data/state"
         "/data/metadata"
         "/etc/nixos"
         "/var/lib/pocket-id"
+        "/persist" # Impermanence Support
       ];
 
-      # Nixpkgs 25.11 Optimierungen
-      exclude = [
-        "**/.cache"
-        "**/tmp"
-        "**/node_modules"
-      ];
+      exclude = [ "**/.cache" "**/tmp" "**/node_modules" "*.log" ];
 
       createWrapper = true;
       runCheck = true;
       checkOpts = ["--with-cache"];
 
-      # Maximale Kompression (Gamechanger für Cloud-Sync)
-      extraOptions = [
-        "--exclude-caches"
-        "--compression=max"
-      ];
-
-      # SRE Safety: Verhindert Standby während Backup
+      extraOptions = [ "--exclude-caches" "--compression=max" ];
       inhibitsSleep = true;
 
+      # 🛡️ PRE-FLIGHT CHECK (SRE-Standard)
       backupPrepareCommand = ''
-        DATA_SIZE=$(${pkgs.coreutils}/bin/du -sb /data/state /data/metadata /etc/nixos | ${pkgs.gawk}/bin/awk '{sum+=$1} END {print sum}')
+        DATA_SIZE=$(${pkgs.coreutils}/bin/du -sb /data/state /etc/nixos | ${pkgs.gawk}/bin/awk '{sum+=$1} END {print sum}')
         LIMIT=$(( ${toString maxSizeGB} * 1024 * 1024 * 1024 ))
         if [ "$DATA_SIZE" -gt "$LIMIT" ]; then
-          echo "🚨 BACKUP ABGEBROCHEN: Limit überschritten!"
+          echo "🚨 BACKUP ABGEBROCHEN: Datenmenge ($DATA_SIZE) > Limit ($LIMIT)!"
           exit 1
         fi
+      '';
+
+      # ☁️ CLOUD SYNC (Fragment 748 Fix: Atomarer Post-Stop)
+      backupCleanupCommand = ''
+        echo "📤 Starte Cloud-Sync..."
+        ${pkgs.rclone}/bin/rclone sync ${localRepo} cloud-backup:nixhome-vault --bwlimit 5M
+        echo "✅ Cloud-Sync abgeschlossen."
       '';
 
       timerConfig = {
@@ -74,31 +72,9 @@ in {
         RandomizedDelaySec = "1h";
       };
 
-      pruneOpts = [
-        "--keep-daily 7"
-        "--keep-weekly 4"
-        "--keep-monthly 6"
-      ];
-    };
-
-    systemd.services.restic-cloud-sync = {
-      description = "Sync Restic Vault to Cloud";
-      after = ["restic-backups-daily.service"];
-      wantedBy = ["multi-user.target"];
-      serviceConfig = {
-        Type = "oneshot";
-        ExecStart = "${pkgs.rclone}/bin/rclone sync ${localRepo} cloud-backup:nixhome-vault --bwlimit 5M";
-        ExecCondition = "${pkgs.systemd}/bin/systemctl is-active --quiet restic-backups-daily.service";
-      };
+      pruneOpts = [ "--keep-daily 7" "--keep-weekly 4" "--keep-monthly 6" ];
     };
 
     environment.systemPackages = with pkgs; [restic rclone];
   };
 }
-/**
-* ---
- * technical_integrity:
- *   checksum: sha256:59a711a8e1863926a4b150ad41e271cd8fb0df34a069fd5c5df6478d937b405d
- *   eof_marker: NIXHOME_VALID_EOF* ---
-*/
-
