@@ -26,34 +26,39 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    # ⚙️ CPU & Microcode
     hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
     hardware.firmware = [pkgs.linux-firmware];
 
     # 🏎️ INTEL GPU OPTIMIZATION (Nixpkgs Hardware Standard)
     boot.kernelParams = [
-      "i915.enable_guc=3" # 💎 Update auf v3 für i3-9100
-      "i915.enable_fbc=1"
-      "i915.enable_psr=1"
+      "i915.enable_guc=3" # 💎 Enable GuC/HuC loading
+      "i915.enable_fbc=1" # Framebuffer compression
+      "i915.enable_psr=1" # Panel Self Refresh
     ];
     boot.kernelModules = ["i915"];
 
+    # 🚀 Hardware-Beschleunigung (UHD 630 / QuickSync)
     hardware.graphics = {
       enable = true;
       extraPackages = with pkgs; [
-        intel-media-driver # VA-API
+        intel-media-driver   # iHD driver (Broadwell+)
+        intel-vaapi-driver   # i965 driver (Fallback)
+        libvdpau-va-gl       # VDPAU Bridge
         intel-compute-runtime # OpenCL
-        vpl-gpu-rt # OneVPL
-        libvdpau-va-gl # VDPAU Bridge
+        vpl-gpu-rt           # OneVPL for newer ffmpeg
       ];
     };
 
     environment.sessionVariables.LIBVA_DRIVER_NAME = "iHD";
+    
     environment.systemPackages = with pkgs; [
-      libva-utils
-      intel-gpu-tools
-      vulkan-tools
+      libva-utils      # vainfo
+      intel-gpu-tools  # intel_gpu_top
+      vulkan-tools     # vulkaninfo
     ];
 
+    # Berechtigungen für Media-Services
     users.users.${config.my.configs.identity.user}.extraGroups = ["video" "render"];
   };
 }
@@ -63,4 +68,3 @@ in {
  *   checksum: sha256:3320a25690cd5a9c3b6155791edf76fc573f3b3d07273af97f4a0077772ba350
  *   eof_marker: NIXHOME_VALID_EOF* ---
 */
-
