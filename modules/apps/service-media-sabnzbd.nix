@@ -41,8 +41,8 @@ in
     };
     incompleteDir = lib.mkOption { 
       type = lib.types.str; 
-      default = "${srePaths.tierB}/downloads/incomplete"; 
-      description = "Fast cache for active downloads (Tier B)";
+      default = "/run/sabnzbd-tmp"; 
+      description = "RAM disk for active downloads (SSD Endurance Hardening)";
     };
     downloadDir = lib.mkOption { 
       type = lib.types.str; 
@@ -92,6 +92,10 @@ in
 
         # 🔑 SECRET ISOLATION (Source: Fragment 3335)
         serviceConfig = {
+          # 🚀 SSD-ENDURANCE HARDENING (Move incomplete to RAM)
+          RuntimeDirectory = "sabnzbd-tmp";
+          RuntimeDirectoryMode = "0750";
+
           # Load API Keys into the service context safely
           LoadCredential = lib.flatten [
             (lib.optional (cfg.apiKeyFile != null) "SAB_API_KEY:${toString cfg.apiKeyFile}")
@@ -117,7 +121,6 @@ in
       # 📁 PERMISSION MANAGEMENT
       systemd.tmpfiles.rules = [
         "d ${cfg.stateDir} 0750 ${cfg.user} ${cfg.group} -"
-        "d ${cfg.incompleteDir} 0775 ${cfg.user} ${cfg.group} -"
         "d ${cfg.downloadDir} 0775 ${cfg.user} ${cfg.group} -"
       ];
 
