@@ -181,6 +181,25 @@ in {
           import compression
         }
 
+        # --- WAKE ON DEMAND (Power Saver) ---
+        # Note: Requires caddy-wol plugin
+        (wake_on_demand) {
+          handle_errors {
+            @offline expression {err.status_code} == 502
+            handle @offline {
+              # wake_on_lan {args[0]} # MAC Address
+              header Content-Type "text/html"
+              respond <<HTML
+                <html><body style="background:#000;color:#eee;text-align:center;padding-top:20%;">
+                <h1>⚡ Awakening Server...</h1>
+                <p>The requested service is powering up. Auto-refresh in 10s.</p>
+                <script>setTimeout(function(){ location.reload(); }, 10000);</script>
+                </body></html>
+              HTML 200
+            }
+          }
+        }
+
         # --- STREAM OPTIMIZATION (Jellyfin / Audiobookshelf) ---
         (proxy_stream) {
           reverse_proxy {args[0]} {
@@ -192,6 +211,7 @@ in {
             header_down X-Accel-Buffering no
           }
           import compression
+          import wake_on_demand
         }
 
         # --- WILDCARD SUBDOMAIN ---
