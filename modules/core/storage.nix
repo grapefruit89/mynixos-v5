@@ -69,6 +69,11 @@ in
       '';
     };
 
-    environment.systemPackages = with pkgs; [ mergerfs util-linux ];
+    # 💤 HDD Spindown Policy (Aviation-Grade Ghosting Prevention)
+    services.udev.extraRules = ''
+      SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", RUN+="${pkgs.hdparm}/bin/hdparm -S 120 /dev/%k"
+    '';
+
+    environment.systemPackages = with pkgs; [ mergerfs util-linux hdparm ];
   };
 }
