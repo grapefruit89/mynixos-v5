@@ -1,3 +1,10 @@
+# ---
+# nms_id: APP-SEC-VAULTWARDEN
+# title: Vaultwarden Password Manager
+# capabilities: ["security/vault"]
+# status: "aviation-hardened"
+# tier_strategy: "ABC-v5.1"
+# ---
 {
   config,
   lib,

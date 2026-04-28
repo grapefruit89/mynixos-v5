@@ -1,3 +1,10 @@
+# ---
+# nms_id: APP-TOOLS-OLIVETIN
+# title: OliveTin Web CLI
+# capabilities: ["tools/cli"]
+# status: "aviation-hardened"
+# tier_strategy: "ABC-v5.1"
+# ---
 {
   config,
   lib,

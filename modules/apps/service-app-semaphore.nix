@@ -1,3 +1,10 @@
+# ---
+# nms_id: APP-AUTO-SEMAPHORE
+# title: Ansible Semaphore
+# capabilities: ["automation/ansible"]
+# status: "aviation-hardened"
+# tier_strategy: "ABC-v5.1"
+# ---
 { lib, config, ... }:
 let
   # 🚀 NMS v4.0 Metadaten

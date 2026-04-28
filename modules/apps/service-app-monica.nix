@@ -1,3 +1,10 @@
+# ---
+# nms_id: APP-SOCIAL-MONICA
+# title: Monica CRM
+# capabilities: ["social/crm"]
+# status: "aviation-hardened"
+# tier_strategy: "ABC-v5.1"
+# ---
 { config, lib, pkgs, ... }:
 let
   nms = { id = "NIXH-60-APP-006"; title = "Monica"; description = "Personal CRM."; layer = 60; nixpkgs.category = "services/web-apps"; capabilities = [ "web/crm" ]; audit.last_reviewed = "2026-03-02"; audit.complexity = 3; };

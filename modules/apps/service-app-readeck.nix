@@ -1,3 +1,10 @@
+# ---
+# nms_id: APP-TOOLS-READECK
+# title: Readeck Reader
+# capabilities: ["tools/reader"]
+# status: "aviation-hardened"
+# tier_strategy: "ABC-v5.1"
+# ---
 { config, lib, pkgs, ... }:
 let
   # 🚀 NMS v4.0 Metadaten

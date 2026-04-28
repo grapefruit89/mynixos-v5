@@ -1,3 +1,10 @@
+# ---
+# nms_id: APP-AUTO-HA
+# title: Home Assistant
+# capabilities: ["automation/iot"]
+# status: "aviation-hardened"
+# tier_strategy: "ABC-v5.1"
+# ---
 { config, lib, pkgs, myLib, ... }:
 let
   # 🚀 NMS v4.2 Metadaten (Aviation-Grade Home Assistant)

@@ -1,3 +1,10 @@
+# ---
+# nms_id: APP-MEDIA-LIDARR
+# title: Lidarr Music Manager
+# capabilities: ["media/management", "media/music"]
+# status: "aviation-hardened"
+# tier_strategy: "ABC-v5.1"
+# ---
 { config, lib, pkgs, utils, myLib, ... }:
 let
   # 🚀 NMS v4.2 Metadaten (Aviation-Grade Lidarr)

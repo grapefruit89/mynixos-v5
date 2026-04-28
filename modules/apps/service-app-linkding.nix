@@ -1,3 +1,10 @@
+# ---
+# nms_id: APP-TOOLS-LINKDING
+# title: Linkding Bookmarks
+# capabilities: ["tools/bookmarks"]
+# status: "aviation-hardened"
+# tier_strategy: "ABC-v5.1"
+# ---
 { lib, config, ... }:
 let
   # 🚀 NMS v4.0 Metadaten

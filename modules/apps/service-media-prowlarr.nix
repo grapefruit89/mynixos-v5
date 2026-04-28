@@ -1,3 +1,10 @@
+# ---
+# nms_id: APP-MEDIA-PROWLARR
+# title: Prowlarr Indexer Manager
+# capabilities: ["media/indexing"]
+# status: "aviation-hardened"
+# tier_strategy: "ABC-v5.1"
+# ---
 { config, lib, pkgs, utils, myLib, ... }:
 let
   # 🚀 NMS v4.2 Metadaten (Aviation-Grade Prowlarr)

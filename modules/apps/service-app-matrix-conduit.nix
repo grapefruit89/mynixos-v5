@@ -1,3 +1,10 @@
+# ---
+# nms_id: APP-SOCIAL-CONDUIT
+# title: Matrix Conduit
+# capabilities: ["social/chat"]
+# status: "aviation-hardened"
+# tier_strategy: "ABC-v5.1"
+# ---
 { config, lib, pkgs, ... }:
 let
   # 🚀 NMS v4.0 Metadaten

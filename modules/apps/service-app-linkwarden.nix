@@ -1,3 +1,10 @@
+# ---
+# nms_id: APP-TOOLS-LINKWARDEN
+# title: Linkwarden
+# capabilities: ["tools/bookmarks"]
+# status: "aviation-hardened"
+# tier_strategy: "ABC-v5.1"
+# ---
 {
   config,
   lib,

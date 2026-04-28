@@ -1,3 +1,10 @@
+# ---
+# nms_id: APP-MEDIA-SABNZBD
+# title: SABnzbd Usenet Downloader
+# capabilities: ["media/downloading"]
+# status: "aviation-hardened"
+# tier_strategy: "ABC-v5.1"
+# ---
 { config, lib, pkgs, myLib, ... }:
 let
   # 🚀 NMS v4.2 Metadaten (Aviation-Grade SABnzbd)

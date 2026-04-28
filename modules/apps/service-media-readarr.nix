@@ -1,3 +1,10 @@
+# ---
+# nms_id: APP-MEDIA-READARR
+# title: Readarr Book Manager
+# capabilities: ["media/management", "media/books"]
+# status: "aviation-hardened"
+# tier_strategy: "ABC-v5.1"
+# ---
 { config, lib, pkgs, utils, myLib, ... }:
 let
   # 🚀 NMS v4.2 Metadaten (Aviation-Grade Readarr)

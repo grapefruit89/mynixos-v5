@@ -1,3 +1,10 @@
+# ---
+# nms_id: APP-TOOLS-MINIFLUX
+# title: Miniflux RSS
+# capabilities: ["tools/rss"]
+# status: "aviation-hardened"
+# tier_strategy: "ABC-v5.1"
+# ---
 { config, lib, ... }:
 let
   # 🚀 NMS v4.0 Metadaten
