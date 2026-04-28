@@ -32,3 +32,10 @@ Dieses Dokument listet bekannte Einschränkungen, akzeptierte Restrisiken und ge
 - **Problem:** API-Endpunkte (arr-Apps) sind von der Challenge befreit, unterliegen aber dem Stage-0 Limit (30 req/min).
 - **Risiko:** Mobile Apps könnten bei intensiver Synchronisation blockiert werden.
 - **Lösung:** Token-basierte Whitelist für bekannte API-Clients in Caddy.
+
+## 🔵 Architektur & Dateizugriff
+
+### [M-10] Dateizugriffs-Evolution (SFTP vs WebDAV)
+- **Status:** Aktuell ist nur SFTP aktiv (Port 53844).
+- **Lücke:** Obsidian-Vault-Sync erfordert WebDAV; native Windows-Netzlaufwerke sind via SMB/WebDAV komfortabler.
+- **Strategie:** SFTP bleibt Standard für Admin/Universal. WebDAV wird bei Bedarf für Obsidian via Caddy (SSO-protected) nachgerüstet.
