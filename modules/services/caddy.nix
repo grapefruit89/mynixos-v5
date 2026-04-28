@@ -99,7 +99,8 @@ in {
         # --- SSO AUTH (Pocket-ID) ---
         (sso_auth) {
           @needs_auth {
-            not remote_ip ${trustedIPs}
+            not remote_ip 127.0.0.1
+            not header_regexp host ^auth\.
           }
           forward_auth @needs_auth localhost:${toString config.my.ports.pocketId} {
             uri /api/auth/verify

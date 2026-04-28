@@ -37,33 +37,50 @@ let
     fi
 
     echo "📊 Current free space on Tier B ($SOURCE_DIR): ''${FREE_GB} GB"
-
     echo "⚠️ Low space detected (''${FREE_GB} GB < ''${LOW_THRESHOLD_GB} GB). Evacuating oldest files..."
 
-    while [ "$FREE_GB" -lt "$TARGET_FREE_GB" ]; do
-      OLDEST=$(find "$SOURCE_DIR" -type f -printf '%T@ %p\n' | sort -n | head -1 | cut -d' ' -f2-)
+    MAX_ITERATIONS=100
+    COUNT=0
+
+    while [ "$FREE_GB" -lt "$TARGET_FREE_GB" ] && [ "$COUNT" -lt "$MAX_ITERATIONS" ]; do
+      COUNT=$((COUNT + 1))
+
+      # 🛡️ Find oldest file, excluding critical database patterns
+      OLDEST=$(find "$SOURCE_DIR" -type f \
+        ! -name "*.wal" ! -name "*.db" ! -name "*.sqlite" ! -name "*.db-journal" \
+        -printf '%T@ %p\n' | sort -n | head -1 | cut -d' ' -f2-)
+
       if [ -z "$OLDEST" ]; then
-        echo "ℹ️ No more files found to move."
+        echo "ℹ️ No more safe files found to move."
         break
       fi
+
       if ${pkgs.lsof}/bin/lsof "$OLDEST" > /dev/null 2>&1; then
-        echo "⏭️ Skipping active file: $OLDEST"
+        echo "⏭️ Skipping active file: $OLDEST (touching to defer)"
         touch "$OLDEST"
         continue
       fi
+
       REL_PATH=''${OLDEST#"$SOURCE_DIR/"}
       DEST_DIR=$(dirname "$TARGET_DIR/$REL_PATH")
+
       if [ "$DRY_RUN" -eq 1 ]; then
         echo "[DRY-RUN] Would move: $REL_PATH"
-        FREE_GB=$((FREE_GB + 1)) 
+        FREE_GB=$((FREE_GB + 5)) # Estimate move
       else
         echo "🚚 Moving: $REL_PATH"
         mkdir -p "$DEST_DIR"
-        mv "$OLDEST" "$TARGET_DIR/$REL_PATH"
+        # 🛡️ TRANSACTIONAL MOVE: Copy -> Verify -> Delete
+        ${pkgs.rsync}/bin/rsync -a --remove-source-files "$OLDEST" "$TARGET_DIR/$REL_PATH"
+
         FREE_SPACE=$(${pkgs.coreutils}/bin/df --output=avail "$SOURCE_DIR" | tail -1)
         FREE_GB=$((FREE_SPACE / 1024 / 1024))
       fi
     done
+
+    if [ "$COUNT" -ge "$MAX_ITERATIONS" ]; then
+      echo "⚠️ Mover reached MAX_ITERATIONS ($MAX_ITERATIONS). Stopping for safety."
+    fi
 
     if [ "$DRY_RUN" -eq 0 ]; then
       find "$SOURCE_DIR" -type d -empty -delete

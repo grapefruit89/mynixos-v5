@@ -15,6 +15,7 @@ let
   
   cfg = config.my.services.storagePool;
   # Pfade aus SSoT Registry
+  srePaths = config.my.configs.paths;
   lanIP = config.my.configs.network.lanIP;
 in
 {
@@ -32,7 +33,15 @@ in
         where = "/storage";
         what = "/mnt/cache:/mnt/hdd1:/mnt/hdd2";
         type = "fuse.mergerfs";
-        options = "allow_other,use_ino,cache.files=auto-full,cache.entry=3600,cache.attr=3600,cache.readdir=true,dropcacheonclose=true,category.create=mfs,minfreespace=50G,fsname=mergerfs-pool,noatime";
+        options = "allow_other,use_ino,cache.files=off,cache.entry=3600,cache.attr=3600,cache.readdir=true,dropcacheonclose=true,category.create=mfs,minfreespace=50G,fsname=mergerfs-pool,noatime";
+        wantedBy = [ "multi-user.target" ];
+      }
+      {
+        description = "App Data Synergy Pool (Tier A/B)";
+        where = "/mnt/app-data-synergy";
+        what = "${srePaths.appData}:${srePaths.tierB}/appdata";
+        type = "fuse.mergerfs";
+        options = "allow_other,use_ino,cache.files=off,dropcacheonclose=true,category.create=mfs,minfreespace=50G,fsname=app-data-synergy,noatime";
         wantedBy = [ "multi-user.target" ];
       }
     ];
@@ -63,6 +72,7 @@ in
       script = ''
         # Verzeichnisse anlegen
         mkdir -p /storage/{media,downloads,documents,backups}
+        mkdir -p ${srePaths.tierB}/appdata
         # Rechte setzen (Media-Gruppe)
         chown -R root:media /storage/media /storage/downloads
         chmod -R 775 /storage/media /storage/downloads

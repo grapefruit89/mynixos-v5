@@ -46,6 +46,10 @@ in
   config = {
     system.stateVersion = "25.11";
     networking.hostName = "nixhome";
+
+    # 🛠️ MCP-NIXOS INTEGRATION
+    nixpkgs.overlays = [ inputs.mcp-nixos.overlays.default ];
+    environment.systemPackages = [ pkgs.mcp-nixos ];
     
     # 🚩 GLOBAL TOGGLES (Aus der Registry)
     my.services = {

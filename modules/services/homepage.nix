@@ -12,7 +12,7 @@ let
     audit.complexity = 2;
   };
 
-  dnsMap = import ./dns-map.nix config;
+  dnsMap = import ./dns-map.nix { inherit config; };
   host = dnsMap.dnsMapping.dashboard or "dash.${config.my.configs.identity.subdomain}.${config.my.configs.identity.domain}";
 in
 {

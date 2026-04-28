@@ -75,7 +75,8 @@ in {
       publish = {
         enable = true;
         addresses = true;
-        workstation = true;
+        workstation = false; # M-03: No info leakage
+        userServices = false;
       };
     };
   };

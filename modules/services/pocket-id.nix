@@ -36,15 +36,13 @@ in {
       }
     ];
 
-    warnings = ["pocket-id: public_registration = true ist aktiv!"];
-
     services.pocket-id = {
       enable = true;
       dataDir = "/var/lib/pocket-id";
       settings = {
         issuer = lib.mkForce "https://auth.${subdomain}.${domain}";
         title = "NixHome Identity";
-        public_registration = true; # Für erste Einrichtung OK
+        public_registration = false;
       };
     };
 

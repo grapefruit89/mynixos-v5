@@ -29,6 +29,13 @@ in {
   }: let
     hostName = getDomain config name;
     targetUrl = if socket then "unix//run/service-sockets/${name}.sock" else "localhost:${toString port}";
+    srePaths = config.my.configs.paths;
+    
+    # 🚀 NEW: ABC-Tiering Path Distribution
+    # Databases & State -> Tier A (NVMe)
+    # Caches & Temp -> Tier B (SSD)
+    appDataDir = "${srePaths.appData}/${name}";
+    appCacheDir = "${srePaths.appCache}/${name}";
     
     # VPN-Logik (Source: nixarr / Maroka-chan)
     finalNetns = if useVPN then (if netns != null then netns else "vpn-${name}") else null;
@@ -47,9 +54,13 @@ in {
         PrivateTmp = true;
         NoNewPrivileges = true;
         
-        # 💾 PERSISTENCE (Tier A)
-        StateDirectory = name;
-        ReadWritePaths = readWritePaths ++ [ "/var/lib/${name}" ];
+        # 💾 PERSISTENCE (Tier A vs Tier B)
+        # Note: StateDirectory is managed by systemd, we link it via bind-mounts or explicit paths
+        ReadWritePaths = readWritePaths ++ [ 
+          appDataDir 
+          appCacheDir
+          "/var/lib/${name}" 
+        ];
         
         # 🌐 VPN CONFINEMENT
         NetworkNamespacePath = lib.mkIf (finalNetns != null) "/var/run/netns/${finalNetns}";
@@ -57,6 +68,7 @@ in {
     };
 
     # 🌐 2. CADDY REVERSE PROXY
+    # ... (unchanged)
     services.caddy.virtualHosts."${hostName}" = {
       extraConfig = let
         proxyCommand = if isStream then "import proxy_stream ${targetUrl}" else "reverse_proxy ${targetUrl}";
@@ -117,7 +129,9 @@ in {
         PrivateTmp = true;
         NoNewPrivileges = true;
         RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" ];
+        # C-04 Safeguard: Strict memory limits for all streamers
         MemoryMax = memoryMax;
+        MemoryHigh = "85%"; # Gentle throttling before hard kill
         CPUWeight = cpuWeight;
         OOMScoreAdjust = oomScoreAdjust;
         PrivateDevices = if useGPU then lib.mkForce false else true;

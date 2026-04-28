@@ -25,10 +25,20 @@ in
     services.tailscale = { enable = true; openFirewall = false; useRoutingFeatures = "client"; extraUpFlags = [ "--ssh" "--accept-dns=true" "--accept-routes=true" ]; permitCertUid = config.services.caddy.user; };
     systemd.services.tailscale-autoconnect = {
       description = "Automatic Tailscale Login";
-      after = [ "tailscaled.service" "network-online.target" ]; wants = [ "tailscaled.service" "network-online.target" ]; wantedBy = [ "multi-user.target" ];
+      after = [ "tailscaled.service" "network-online.target" ];
+      wants = [ "tailscaled.service" "network-online.target" ];
+      wantedBy = [ "multi-user.target" ];
       serviceConfig = {
         Type = "oneshot";
-        ExecStart = pkgs.writeShellScript "tailscale-auth" "sleep 2; status=$(${pkgs.tailscale}/bin/tailscale status --json | ${pkgs.jq}/bin/jq -r .BackendState); if [ '$status' = 'NeedsLogin' ] || [ '$status' = 'Stopped' ]; then ${pkgs.tailscale}/bin/tailscale up --authkey='$(cat ${config.sops.secrets.tailscale_token.path})'; fi";
+        # M-06: Pass token via EnvironmentFile to keep nix-store clean of paths
+        EnvironmentFile = config.sops.secrets.tailscale_token.path;
+        ExecStart = pkgs.writeShellScript "tailscale-auth" ''
+          sleep 5
+          status=$(${pkgs.tailscale}/bin/tailscale status --json | ${pkgs.jq}/bin/jq -r .BackendState)
+          if [ "$status" = "NeedsLogin" ] || [ "$status" = "Stopped" ]; then
+            ${pkgs.tailscale}/bin/tailscale up --authkey="$TS_AUTHKEY"
+          fi
+        '';
       };
     };
     systemd.services.tailscaled = { stopIfChanged = false; serviceConfig = { Restart = "always"; RestartSec = "2s"; OOMScoreAdjust = -1000; }; };

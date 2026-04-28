@@ -37,7 +37,10 @@ in {
       defaultSopsFormat = "yaml";
       
       age = {
-        sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
+        sshKeyPaths = [ 
+          "/etc/ssh/ssh_host_ed25519_key"
+          "/persist/etc/ssh/ssh_host_ed25519_key" # Direct path fallback for boot resilience
+        ];
         keyFile = "/var/lib/sops-nix/key.txt";
         generateKey = true;
       };

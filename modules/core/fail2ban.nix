@@ -56,6 +56,14 @@ in {
           port = sshPort;
           mode = "aggressive";
         };
+
+        # 🚨 SSH Rescue Protection (H-03)
+        sshd-rescue.settings = {
+          enabled = true;
+          port = "2222";
+          mode = "aggressive";
+          maxretry = 3;
+        };
         
         # 🌐 Caddy-Auth: Schützt SSO & Login-Endpunkte
         caddy-auth.settings = {

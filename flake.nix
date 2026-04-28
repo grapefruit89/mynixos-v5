@@ -11,6 +11,8 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     impermanence.url = "github:nix-community/impermanence";
+    
+    mcp-nixos.url = "github:utensils/mcp-nixos";
   };
 
   outputs = { self, nixpkgs, ... }@inputs: let

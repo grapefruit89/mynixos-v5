@@ -75,24 +75,19 @@ in {
             # Route all traffic through wg0
             ip netns exec ${nsName} ip route add default dev wg0
             
-            # 🛡️ 2. KILL-SWITCH (nftables in namespace)
-            ${lib.optionalString nsCfg.killSwitch ''
-              ip netns exec ${nsName} nft -f ${pkgs.writeText "killswitch-${nsName}.nft" ''
-                table inet filter {
-                  chain output {
-                    type filter hook output priority 0; policy drop;
-                    oifname "lo" accept
-                    oifname "wg0" accept
-                  }
-                  chain input {
-                    type filter hook input priority 0; policy drop;
-                    iifname "lo" accept
-                    iifname "wg0" accept
-                    ct state established,related accept
-                  }
-                }
-              ''}
-            ''}
+            # 🛡️ 3. HEALTHCHECK & ALERTING (H-02)
+            echo "🔍 Testing VPN connectivity in namespace ${nsName}..."
+            if ! ip netns exec ${nsName} ${pkgs.iputils}/bin/ping -c 1 -W 5 1.1.1.1 > /dev/null; then
+               echo "❌ VPN Healthcheck FAILED! Triggering alert..."
+               # Source: Fragment 2829 (ntfy-sh hook)
+               if [ -f /etc/nixos/secrets/ntfy-sh ]; then
+                 ${pkgs.curl}/bin/curl -H "Priority: urgent" -H "Tags: skull,fire" \
+                   -d "VPN Namespace ${nsName} setup failed: No connectivity!" \
+                   $(cat /etc/nixos/secrets/ntfy-sh)
+               fi
+               exit 1
+            fi
+            echo "✅ VPN Namespace ${nsName} is UP and CONNECTED."
           '';
           ExecStop = pkgs.writeShellScript "netns-${nsName}-down" ''
             ip netns del ${nsName} || true

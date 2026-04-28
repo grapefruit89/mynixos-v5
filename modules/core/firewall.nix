@@ -53,7 +53,9 @@ in {
         ip protocol icmp accept
       '';
 
-      logRefusedConnections = false; # Reduziert Log-Spam
+      # 🔍 INTRUSION DETECTION (H-09)
+      # Log refused connections for auditing (Portscans, LAN Recon)
+      logRefusedConnections = true;
     };
   };
 }

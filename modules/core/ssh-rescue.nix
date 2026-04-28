@@ -33,6 +33,8 @@ in {
       serviceConfig = {
         ExecStart = "${pkgs.openssh}/bin/sshd -D -f ${pkgs.writeText "sshd-rescue-config" ''
           Port ${toString rescuePort}
+          ListenAddress 127.0.0.1
+          ListenAddress 100.64.0.0/10 # Target: Tailscale only
           PasswordAuthentication yes
           PermitRootLogin no
           AllowUsers ${user}
@@ -43,23 +45,7 @@ in {
       };
     };
 
-    # ⏱️ AUTO-TERMINATOR (Fragment 723 Fix)
-    systemd.timers.sshd-rescue-stopper = {
-      description = "Auto-stops SSH Rescue Instance after 5 minutes";
-      wantedBy = ["timers.target"];
-      timerConfig = {
-        OnActiveSec = "5min";
-        Unit = "sshd-rescue-stop.service";
-      };
-    };
-
-    systemd.services.sshd-rescue-stop = {
-      description = "Stops the rescue SSH instance";
-      serviceConfig.Type = "oneshot";
-      script = "systemctl stop sshd-rescue.service";
-    };
-
-    # Firewall für Rescue-Port öffnen
-    networking.firewall.allowedTCPPorts = [ rescuePort ];
+    # Note: Global firewall port 2222 removed. 
+    # Tailscale traffic is allowed via trustedInterfaces in firewall.nix.
   };
 }

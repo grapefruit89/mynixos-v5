@@ -48,8 +48,8 @@ in
     };
     incompleteDir = lib.mkOption { 
       type = lib.types.str; 
-      default = "/run/sabnzbd-tmp"; 
-      description = "RAM disk for active downloads (SSD Endurance Hardening)";
+      default = "${srePaths.tierB}/incomplete/sabnzbd"; 
+      description = "Staging area for active downloads (Tier B SATA SSD for large 4K payloads)";
     };
     downloadDir = lib.mkOption { 
       type = lib.types.str; 

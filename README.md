@@ -1,42 +1,40 @@
-# 🛰️ NixHome MetaBibliothek (NMS v2.3)
-## Code ↔ Docs ↔ Knowledge — Die Isomorphie-Zentrale
+# 🛰️ NixHome MetaBibliothek (v5.0 - Horizontal Responsibility)
 
-Willkommen in der **MetaBibliothek**. Dies ist die Single Source of Truth für das gesamte Wissen deines Fujitsu Q958 Homelabs. Sie vereint deine realen NixOS-Konfigurationen mit dem geistigen Erbe aus über 650 historischen Dokumenten (11.000+ Wissens-Chunks).
-
----
-
-### 📂 Architektur-Layer (Isomorph zum Repo)
-
-Jeder Ordner hier spiegelt exakt einen Layer in `/etc/nixos/` wider:
-
-*   **[00-core](./00-core/)**: Das Fundament. Sicherheit, Hardware-Profile (Q958), SSoT-Configs und Shell-Premium.
-*   **[10-infrastructure](./10-infrastructure/)**: Die Plattform. Caddy Edge Proxy, AdGuard DNS, Pocket-ID (SSO) und PostgreSQL.
-*   **[20-automation](./20-automation/)**: Intelligenz & Steuerung. Lokale KI (Ollama/Claude), Home-Assistant und n8n.
-*   **[30-media](./30-media/)**: Der Media-Stack. Jellyfin mit HW-Beschleunigung, *arr-Suite und ABC-Tiering Storage.
-*   **[40-knowledge](./40-knowledge/)**: Wissensmanagement. Paperless-ngx und RSS-Reader.
-*   **[50-apps](./50-apps/)**: Zusätzliche Web-Apps wie Vaultwarden, Monica und Matrix.
-*   **[80-analyse](./80-analyse/)**: Observability. Echtzeit-Monitoring mit Netdata und Scrutiny.
-*   **[90-policy](./90-policy/)**: Die Leitplanken. Binary-Only Policy und Sicherheits-Assertions.
+Welcome to the **Aviation-Grade SRE Center**. This repository manages the Fujitsu Q958 Homelab using a modular, horizontal architecture designed for maximum security, isolation, and maintainability.
 
 ---
 
-### 🛠️ SRE Standards & Metadaten
+### 📂 Horizontal Architecture (The Silos)
 
-Alle Dokumente folgen dem **NMS v2.3 Standard**. Jedes File enthält einen maschinenlesbaren Header:
+Following the **V5.0 "Horizontal Responsibility"** paradigm, the repository is organized into specialized functional silos rather than vertical layers:
 
-```yaml
-id: "NIXH-LAYER-CAT-NUM"  # Eindeutige Identität
-ref.code: "path/to.nix"   # Direkte Verbindung zum echten Code
-audit.doc_status: "enriched" # Status der Wissens-Anreicherung
-```
+*   **[hardware/](./hardware/)**: Hardware-specific configurations (e.g., `q958`). Contains BIOS settings, disk layouts, and low-level registry mappings.
+*   **[modules/](./modules/)**: Functional logic building blocks.
+    *   **core/**: System essentials (Boot, Network, Impermanence, ABC-Tiering).
+    *   **apps/**: Hardened application modules (Automation, Knowledge, Media).
+    *   **services/**: Infrastructure services (Caddy M1 Abrams, Tailscale, SSO).
+    *   **security/**: Hardened core, binary-only policies, and security assertions.
+*   **[profiles/](./profiles/)**: Mission-ready bundles. These integrate multiple modules into cohesive system personalities (e.g., `base-server`, `media-beast`).
+*   **[users/](./users/)**: Isolated user identities (Moritz, Freund). Manages Home-Manager configs and personal preferences.
+
+---
+
+### 🏆 SRE Standards & Patterns
+
+*   **`mkService` Factory**: A standardized factory for all web applications. It automatically applies **Titanium Hardening**, Caddy Reverse Proxy (with SSO), and ABC-Tiering persistence.
+*   **Impermanence (Tier A)**: The root filesystem is volatile. Only explicitly defined paths in `/persist` (Tier A) survive a reboot.
+*   **ABC-Tiering Storage**:
+    *   **Tier A (NVMe)**: System state & critical databases (`/persist`).
+    *   **Tier B (SSD)**: Cache, transcodes, and active logs.
+    *   **Tier C (HDD)**: Bulk media archive and cold backups.
+*   **Aviation-Grade Hardening**: Kernel module locking, systemd sandboxing, and strict service slimming.
 
 ---
 
-### 🚀 Schnelleinstieg für Obsidian
-*   **[Master Config (SSoT)](./00-core/configs.md)**: Wer bin ich? (IPs, Domains, Quotas)
-*   **[Edge Proxy (Caddy)](./10-infrastructure/caddy.md)**: Wer darf rein? (Ingress, Geoblock, SSO)
-*   **[Storage Strategy](./00-core/storage.md)**: Wo liegen die Daten? (mergerfs, Tiering)
-*   **[Security Policy](./90-policy/security-assertions.md)**: Bin ich sicher? (Automatisierte Compliance)
+### 🚀 Key Mission Profiles
+*   **[base-server.nix](./profiles/base-server.nix)**: The fundamental system core.
+*   **[media-beast.nix](./profiles/media-beast.nix)**: Full-throttle entertainment stack with GPU acceleration.
+*   **[security-hardened.nix](./profiles/security-hardened.nix)**: Maximum isolation for critical infrastructure.
 
 ---
-*Generiert am 2026-03-02 — Synthetisiert aus realem Code & historischem Wissen.*
+*Last Sync: 2026-04-28 | Architecture Version: 5.0 (Horizontal)*
