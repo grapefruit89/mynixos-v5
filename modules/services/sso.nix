@@ -4,7 +4,7 @@ let
   cfg = config.my.services.pocketId;
   domain = config.my.configs.identity.domain;
   pocketIdPort = config.my.ports.pocketId;
-  dnsMap = import ./dns-map.nix;
+  dnsMap = import ./dns-map.nix config;
   allUrls = (map (h: "https://${h}") (lib.attrValues dnsMap.dnsMapping)) ++ [ "https://auth.${domain}/callback" ];
 in
 {

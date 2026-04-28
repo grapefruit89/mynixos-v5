@@ -12,8 +12,8 @@ let
     audit.complexity = 2;
   };
 
-  dnsMap = import ./dns-map.nix;
-  host = dnsMap.dnsMapping.dashboard or "nixhome.${dnsMap.baseDomain}";
+  dnsMap = import ./dns-map.nix config;
+  host = dnsMap.dnsMapping.dashboard or "dash.${config.my.configs.identity.subdomain}.${config.my.configs.identity.domain}";
 in
 {
   options.my.meta.homepage = lib.mkOption {

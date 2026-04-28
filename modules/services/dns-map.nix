@@ -1,6 +1,8 @@
+config: 
 let
-  baseDomain = "m7c5.de";
-  sub = "nix";
+  identity = config.my.configs.identity;
+  baseDomain = identity.domain;
+  sub = identity.subdomain;
   d = "${sub}.${baseDomain}";
 in
 {
