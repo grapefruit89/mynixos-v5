@@ -18,6 +18,7 @@ let
 
   cfg = config.my.media.jellyfin;
   srePaths = config.my.configs.paths;
+  ssdMetadataDir = "${srePaths.tierB}/metadata/jellyfin";
   
   # Spezifische Kodierungs-Config (Aviation-Grade Defaults)
   encodingXml = pkgs.writeText "encoding.xml" ''
@@ -87,8 +88,14 @@ in
 
       # 📁 BIND MOUNTS FÜR METADATEN (ABC-Tiering / ADR 852)
       systemd.tmpfiles.rules = [
-        "d /mnt/fast-pool/metadata/jellyfin 0775 jellyfin media -"
+        "d ${ssdMetadataDir} 0775 jellyfin media -"
       ];
+
+      fileSystems."/var/lib/jellyfin/metadata" = {
+        device = ssdMetadataDir;
+        options = [ "bind" ];
+        dependsOn = [ srePaths.tierB ];
+      };
     }
   ]);
 }
