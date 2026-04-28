@@ -39,10 +39,10 @@ in
 
     # 🚀 HDD-Silence-Protocol: Inode Warmer
     systemd.services.hdd-inode-warmer = {
-      description = "Warmer for HDD Metadata Cache";
+      description = "Refined Inode Warmer for HDD Ghost-Tree";
       serviceConfig = {
         Type = "oneshot";
-        ExecStart = "${pkgs.findutils}/bin/find /storage -maxdepth 3";
+        ExecStart = "${pkgs.findutils}/bin/find /mnt/hdd_pool -mindepth 1 -maxdepth 5 -exec stat {} +";
       };
     };
 
