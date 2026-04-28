@@ -32,10 +32,28 @@ in
         where = "/storage";
         what = "/mnt/cache:/mnt/hdd1:/mnt/hdd2";
         type = "fuse.mergerfs";
-        options = "allow_other,use_ino,cache.readdir=true,dropcacheonclose=true,category.create=mfs,minfreespace=50G,fsname=mergerfs-pool,direct_io,noatime";
+        options = "allow_other,use_ino,cache.files=auto-full,cache.entry=3600,cache.attr=3600,cache.readdir=true,dropcacheonclose=true,category.create=mfs,minfreespace=50G,fsname=mergerfs-pool,noatime";
         wantedBy = [ "multi-user.target" ];
       }
     ];
+
+    # 🚀 HDD-Silence-Protocol: Inode Warmer
+    systemd.services.hdd-inode-warmer = {
+      description = "Warmer for HDD Metadata Cache";
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = "${pkgs.findutils}/bin/find /storage -maxdepth 3";
+      };
+    };
+
+    systemd.timers.hdd-inode-warmer = {
+      description = "Timer for HDD Metadata Cache Warmer";
+      timerConfig = {
+        OnCalendar = "00/6:00:00";
+        Unit = "hdd-inode-warmer.service";
+      };
+      wantedBy = [ "timers.target" ];
+    };
 
     # 🛡️ Path Enforcement (Aviation-Grade Permissions)
     systemd.services.storage-init = {
