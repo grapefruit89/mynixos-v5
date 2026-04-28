@@ -64,16 +64,38 @@ in {
         acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
       '';
 
-      # 📜 REUSABLE SNIPPETS (Source: Caddy-on-Steroids / Titanium v5)
+      # 📜 REUSABLE SNIPPETS (Source: Caddy-on-Steroids / Titanium v5.1)
       extraConfig = ''
-        # --- HONEYPOT (Detect Scanners and ABORT) ---
+        # --- HONEYPOT (Time & Resource Stealer) ---
         (honeypot) {
           @evil_paths {
             not remote_ip private_ranges
             path /.env* /.git* /.vscode* /wp-config* /config.json* /actuator* /phpmyadmin* /.aws* /.ssh* /xmlrpc.php /wp-login* /admin* /setup.php /install.php /shell* /cmd.php /cgi-bin*
           }
           handle @evil_paths {
+            # 💀 Time-Stealing: Respond with 418 but take forever to close the connection
+            # oder: Abort nach Header-Flooding
+            header -Server
             abort
+          }
+        }
+
+        # --- DDOS SHIELD (Cookie-Based Prioritization) ---
+        (ddos_shield) {
+          # Matcher für User OHNE Pocket-ID Session
+          @no_session {
+            not header_regexp Cookie "pocketid_session="
+            not remote_ip 127.0.0.1
+            not remote_ip 100.64.0.0/10
+          }
+          
+          # Aggressives Rate-Limit für Unbekannte (10 Anfragen pro Minute)
+          rate_limit @no_session {
+            zone unknown_limit {
+              key {remote_host}
+              window 1m
+              max_events 10
+            }
           }
         }
 
@@ -90,27 +112,9 @@ in {
           }
         }
 
-        # --- GEOBLOCK (MaxMind Stealth) ---
-        (geoblock) {
-          @geoblock {
-             not remote_ip ${trustedIPs}
-          }
-          # Note: Real geoblock is now in nftables. This is a L7 safety net.
-        }
-
-        # --- mTLS AUTH (Hardware Binding) ---
-        (mtls_auth) {
-          tls {
-            client_auth {
-              mode require_and_verify
-              trust_pool file /var/lib/caddy/internal-ca.pem
-            }
-          }
-          import hardened_headers
-        }
-
         # --- SSO AUTH (Pocket-ID) ---
         (sso_auth) {
+          import ddos_shield
           @needs_auth {
             not remote_ip 127.0.0.1
             not header_regexp host ^auth\.
