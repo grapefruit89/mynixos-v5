@@ -14,15 +14,29 @@ let
 
     echo "--- 📦 Starting Capacity-Based Smart Mover ---"
 
+    # Check if HDD is active
+    # Assuming /dev/sda and /dev/sdb are your HDDs (Tier C)
+    IS_AWAKE=$(${pkgs.hdparm}/bin/hdparm -C /dev/sd[a-z] | grep -c "active/idle" || true)
+    
+    # Space Check
     FREE_SPACE=$(${pkgs.coreutils}/bin/df --output=avail "$SOURCE_DIR" | tail -1)
     FREE_GB=$((FREE_SPACE / 1024 / 1024))
 
-    echo "📊 Current free space on Tier B ($SOURCE_DIR): ''${FREE_GB} GB"
-
-    if [ "$FREE_GB" -ge "$LOW_THRESHOLD_GB" ]; then
-      echo "✅ Sufficient space available. No action required."
-      exit 0
+    # LOGIC:
+    # 1. If space is CRITICAL (< 10GB) -> Always move.
+    # 2. If space is LOW (< 20GB) AND HDD is awake -> Move.
+    # 3. Else -> Exit.
+    
+    if [ "$FREE_GB" -lt 10 ]; then
+       echo "🚀 SPACE CRITICAL ($FREE_GB GB). Forcing move regardless of HDD state."
+    elif [ "$FREE_GB" -lt 20 ] && [ "$IS_AWAKE" -gt 0 ]; then
+       echo "⚖️ LOW SPACE ($FREE_GB GB) and HDD is AWAKE ($IS_AWAKE active). Starting move."
+    else
+       echo "💤 Conditions not met for move (Free: $FREE_GB GB, HDD Awake: $IS_AWAKE). Skipping to avoid spin-up."
+       exit 0
     fi
+
+    echo "📊 Current free space on Tier B ($SOURCE_DIR): ''${FREE_GB} GB"
 
     echo "⚠️ Low space detected (''${FREE_GB} GB < ''${LOW_THRESHOLD_GB} GB). Evacuating oldest files..."
 
