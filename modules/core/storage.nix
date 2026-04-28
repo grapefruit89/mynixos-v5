@@ -32,7 +32,7 @@ in
         where = "/storage";
         what = "/mnt/cache:/mnt/hdd1:/mnt/hdd2";
         type = "fuse.mergerfs";
-        options = "allow_other,use_ino,cache.readdir=true,dropcacheonclose=true,category.create=mfs,minfreespace=50G,fsname=mergerfs-pool,direct_io";
+        options = "allow_other,use_ino,cache.readdir=true,dropcacheonclose=true,category.create=mfs,minfreespace=50G,fsname=mergerfs-pool,direct_io,noatime";
         wantedBy = [ "multi-user.target" ];
       }
     ];
