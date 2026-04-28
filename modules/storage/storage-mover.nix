@@ -2,76 +2,77 @@
 let
   cfg = config.my.storage.mover;
   srePaths = config.my.configs.paths;
-  
+
   moverScript = pkgs.writeShellScript "smart-mover" ''
     set -euo pipefail
-    
-    SOURCE="${cfg.ssdDir}"
-    TARGET="${cfg.hddDir}"
+
+    SOURCE_DIR="${cfg.ssdDir}"
+    TARGET_DIR="${cfg.hddDir}"
+    LOW_THRESHOLD_GB=${toString cfg.lowSpaceThresholdGB}
+    TARGET_FREE_GB=${toString cfg.targetFreeGB}
     DRY_RUN=${if cfg.dryRun then "1" else "0"}
-    AGE_DAYS=${toString cfg.minAgeDays}
-    THRESHOLD_GB=${toString cfg.lowSpaceThresholdGB}
-    
-    echo "--- 📦 Starting Smart Mover [DryRun: $DRY_RUN, Age: $AGE_DAYS, Threshold: $THRESHOLD_GB GB] ---"
-    
-    FREE_SPACE=$(${pkgs.coreutils}/bin/df --output=avail "$SOURCE" | tail -1)
+
+    echo "--- 📦 Starting Capacity-Based Smart Mover ---"
+
+    FREE_SPACE=$(${pkgs.coreutils}/bin/df --output=avail "$SOURCE_DIR" | tail -1)
     FREE_GB=$((FREE_SPACE / 1024 / 1024))
-    
-    FORCE_MOVE=0
-    if [ "$FREE_GB" -lt "$THRESHOLD_GB" ]; then
-      echo "⚠️ Low space detected ($FREE_GB GB < $THRESHOLD_GB GB). Forcing move of older files."
-      FORCE_MOVE=1
+
+    echo "📊 Current free space on Tier B ($SOURCE_DIR): ''${FREE_GB} GB"
+
+    if [ "$FREE_GB" -ge "$LOW_THRESHOLD_GB" ]; then
+      echo "✅ Sufficient space available. No action required."
+      exit 0
     fi
 
-    FIND_AGE=$AGE_DAYS
-    [ "$FORCE_MOVE" -eq 1 ] && FIND_AGE=7
+    echo "⚠️ Low space detected (''${FREE_GB} GB < ''${LOW_THRESHOLD_GB} GB). Evacuating oldest files..."
 
-    echo "🔍 Scanning for files older than $FIND_AGE days..."
-    
-    find "$SOURCE" -type f -mtime +"$FIND_AGE" | while read -r file; do
-      if ${pkgs.lsof}/bin/lsof "$file" > /dev/null 2>&1; then
-        echo "⏭️ Skipping active file: $file"
+    while [ "$FREE_GB" -lt "$TARGET_FREE_GB" ]; do
+      OLDEST=$(find "$SOURCE_DIR" -type f -printf '%T@ %p\n' | sort -n | head -1 | cut -d' ' -f2-)
+      if [ -z "$OLDEST" ]; then
+        echo "ℹ️ No more files found to move."
+        break
+      fi
+      if ${pkgs.lsof}/bin/lsof "$OLDEST" > /dev/null 2>&1; then
+        echo "⏭️ Skipping active file: $OLDEST"
+        touch "$OLDEST"
         continue
       fi
-
-      REL_PATH=''${file#"$SOURCE/"}
-      DEST_DIR=$(dirname "$TARGET/$REL_PATH")
-
+      REL_PATH=''${OLDEST#"$SOURCE_DIR/"}
+      DEST_DIR=$(dirname "$TARGET_DIR/$REL_PATH")
       if [ "$DRY_RUN" -eq 1 ]; then
         echo "[DRY-RUN] Would move: $REL_PATH"
+        FREE_GB=$((FREE_GB + 1)) 
       else
         echo "🚚 Moving: $REL_PATH"
         mkdir -p "$DEST_DIR"
-        ${pkgs.rsync}/bin/rsync -a --remove-source-files "$file" "$TARGET/$REL_PATH"
+        mv "$OLDEST" "$TARGET_DIR/$REL_PATH"
+        FREE_SPACE=$(${pkgs.coreutils}/bin/df --output=avail "$SOURCE_DIR" | tail -1)
+        FREE_GB=$((FREE_SPACE / 1024 / 1024))
       fi
     done
 
     if [ "$DRY_RUN" -eq 0 ]; then
-      find "$SOURCE" -type d -empty -delete
+      find "$SOURCE_DIR" -type d -empty -delete
       echo "🧹 Cleaned up empty directories."
-      if systemctl is-active --quiet update-metadata-db.service; then
-         systemctl start update-metadata-db.service
-         echo "🔄 Metadata DB update triggered."
-      fi
     fi
-    
-    echo "--- ✅ Mover finished ---"
+
+    echo "--- ✅ Mover finished. Current free space: ''${FREE_GB} GB ---"
   '';
 
 in
 {
   options.my.storage.mover = {
     enable = lib.mkEnableOption "Smart Storage Tiering Mover";
-    ssdDir = lib.mkOption { type = lib.types.str; default = "${srePaths.tierB}/media"; };
-    hddDir = lib.mkOption { type = lib.types.str; default = "${srePaths.tierC}/media"; };
-    minAgeDays = lib.mkOption { type = lib.types.int; default = 30; };
-    lowSpaceThresholdGB = lib.mkOption { type = lib.types.int; default = 100; };
+    ssdDir = lib.mkOption { type = lib.types.str; default = srePaths.downloads; };
+    hddDir = lib.mkOption { type = lib.types.str; default = "${srePaths.tierC}/downloads"; };
+    lowSpaceThresholdGB = lib.mkOption { type = lib.types.int; default = 20; };
+    targetFreeGB = lib.mkOption { type = lib.types.int; default = 50; };
     dryRun = lib.mkOption { type = lib.types.bool; default = false; };
   };
 
   config = lib.mkIf cfg.enable {
     systemd.services.storage-mover = {
-      description = "Aviation-Grade Smart Mover (SSD -> HDD)";
+      description = "Capacity-Based Smart Mover (SSD -> HDD)";
       after = [ "network.target" ];
       serviceConfig = {
         Type = "oneshot";
@@ -85,7 +86,7 @@ in
     systemd.timers.storage-mover = {
       wantedBy = [ "timers.target" ];
       timerConfig = {
-        OnCalendar = "*-*-* 04:00:00";
+        OnCalendar = "daily";
         Persistent = true;
         RandomizedDelaySec = "1h";
       };
