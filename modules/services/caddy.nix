@@ -124,7 +124,7 @@ in {
             not header_regexp Cookie "pocketid_session="
             not remote_ip 127.0.0.1
             not remote_ip ${trustedIPs}
-            not path /api/* /socket.io/* /json/* /web/assets/*
+            not path /api/* /socket.io/* /json/* /web/assets/* /Users/* /jellyfin/*
             method GET
           }
           handle @need_challenge {
