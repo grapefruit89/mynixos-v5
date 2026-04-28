@@ -2,7 +2,7 @@
 let
   cfg = config.my.logging.vector;
   srePaths = config.my.configs.paths;
-  logDir = "${srePaths.tierB}/logs/vector";
+  logDir = "${srePaths.tierC}/logs/system";
   maxTotalSizeMB = 1024;  # 1 GB
 in
 {
@@ -39,7 +39,8 @@ in
           path = "${logDir}/journal-%Y-%m-%d.log";
           encoding.codec = "ndjson";
           compression = "gzip";
-          batch.max_bytes = cfg.maxFileSizeMB * 1024 * 1024;
+          batch.max_bytes = 50 * 1024 * 1024; # 50MB for HDD efficiency
+          batch.timeout_secs = 300; # 5 minutes to let HDD sleep
           healthcheck = true;
         };
       };
