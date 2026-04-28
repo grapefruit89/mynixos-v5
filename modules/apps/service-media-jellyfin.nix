@@ -24,7 +24,7 @@ let
     <?xml version="1.0" encoding="utf-8"?>
     <EncodingOptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
       <EncodingThreadCount>-1</EncodingThreadCount>
-      <TranscodingTempPath>${srePaths.tierB}/cache/jellyfin/transcoding-temp</TranscodingTempPath>
+      <TranscodingTempPath>/run/jellyfin-transcode</TranscodingTempPath>
       <EnableHardwareAcceleration>true</EnableHardwareAcceleration>
       <HardwareAccelerationType>qsv</HardwareAccelerationType>
     </EncodingOptions>
@@ -65,16 +65,19 @@ in
         environment = {
           OCL_ICD_VENDORS = "intel";
           LIBVA_DRIVER_NAME = "iHD"; # Force modern Intel Driver
+          FFMPEG_TRANSCODING_TEMP_DIR = "/run/jellyfin-transcode";
         };
 
         # Automatischer Sync der SRE-Encoding-Policy
+        # Transcoding moved to RAM disk (/run/jellyfin-transcode) via RuntimeDirectory
         preStart = ''
           mkdir -p ${srePaths.stateDir}/jellyfin/config
           cp -f ${encodingXml} ${srePaths.stateDir}/jellyfin/config/encoding.xml
-          mkdir -p ${srePaths.tierB}/cache/jellyfin/transcoding-temp
         '';
 
         serviceConfig = {
+          RuntimeDirectory = "jellyfin-transcode";
+          RuntimeDirectoryMode = "0750";
           # Netzwerk-Schild (Ergänzend zur Factory)
           IPAddressAllow = [ "127.0.0.1/8" "::1/128" ] 
             ++ config.my.configs.network.lanCidrs
