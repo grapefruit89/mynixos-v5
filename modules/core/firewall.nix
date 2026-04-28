@@ -56,16 +56,11 @@ in {
         # Block everything NOT from allowed countries on public port 443
         tcp dport 443 ip saddr != @allowed_countries counter drop
 
-        # 🌍 IPv6 GEOBLOCK PROTECTION
-        set allowed_countries_v6 {
-          type ipv6_addr
-          flags interval
-          elements = {
-            2001:470:1f0b::/48, 2001:67c:2564::/48 # Beispiel DE/AT
-            # Hinweis: Muss dynamisch befüllt werden
-          }
-        }
-        tcp dport 443 ip6 saddr != @allowed_countries_v6 counter drop
+        # 🌍 IPv6 PROTECTION (WAN-Block)
+        # Block all public IPv6 traffic to Port 443. 
+        # Only IPv4 (with Geoblock) is allowed from WAN.
+        # LAN-IPv6 is still allowed via trustedInterfaces.
+        tcp dport 443 ip6 saddr != { ::1/128, fe80::/10 } counter drop
 
         # DNS Support für das LAN (AdGuard)
         ip saddr ${lanCidr} tcp dport 53 accept
