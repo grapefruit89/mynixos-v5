@@ -86,10 +86,10 @@ in {
           @no_session {
             not header_regexp Cookie "pocketid_session="
             not remote_ip 127.0.0.1
-            not remote_ip 100.64.0.0/10
+            not remote_ip ${trustedIPs}
           }
           
-          # Aggressives Rate-Limit für Unbekannte (10 Anfragen pro Minute)
+          # Aggressives Rate-Limit für Unbekannte im WAN (10 Anfragen pro Minute)
           rate_limit @no_session {
             zone unknown_limit {
               key {remote_host}
