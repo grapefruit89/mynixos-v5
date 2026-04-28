@@ -80,41 +80,79 @@ in {
           }
         }
 
-        # --- DDOS SHIELD (Cookie-Based Prioritization) ---
+        # --- DDOS SHIELD (3-Stage Defense) ---
         (ddos_shield) {
-          # Matcher für User OHNE Pocket-ID Session
-          @no_session {
+          # Stage 2: Authenticated (Pocket-ID) -> No Limits
+          @is_auth {
+            header_regexp Cookie "pocketid_session="
+          }
+
+          # Stage 1: Verified Human (JS-Challenge passed) -> 100 req/min
+          @is_human {
+            header_regexp Cookie "m7c5_human=verified"
+            not remote_ip 127.0.0.1
+            not remote_ip ${trustedIPs}
+          }
+          rate_limit @is_human {
+            zone human_limit {
+              key {remote_host}
+              window 1m
+              max_events 100
+            }
+          }
+
+          # Stage 0: Unknown/Bots (WAN) -> 5 req/min
+          @is_unknown {
+            not header_regexp Cookie "m7c5_human=verified"
             not header_regexp Cookie "pocketid_session="
             not remote_ip 127.0.0.1
             not remote_ip ${trustedIPs}
           }
-          
-          # Aggressives Rate-Limit für Unbekannte im WAN (10 Anfragen pro Minute)
-          rate_limit @no_session {
-            zone unknown_limit {
+          rate_limit @is_unknown {
+            zone bot_limit {
               key {remote_host}
               window 1m
-              max_events 10
+              max_events 5
             }
           }
         }
 
-        # --- HARDENED HEADERS (Aviation-Grade Stealth) ---
-        (hardened_headers) {
-          header {
-            X-Content-Type-Options nosniff
-            X-Frame-Options DENY
-            Referrer-Policy no-referrer-when-downgrade
-            Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-            Permissions-Policy interest-cohort=()
-            Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self';"
-            -Server
+        # --- JS CHALLENGE PAGE ---
+        (human_challenge) {
+          @need_challenge {
+            not header_regexp Cookie "m7c5_human=verified"
+            not header_regexp Cookie "pocketid_session="
+            not remote_ip 127.0.0.1
+            not remote_ip ${trustedIPs}
+            method GET
+          }
+          # Serve a tiny PoW/Math page that sets the cookie and reloads
+          handle @need_challenge {
+            header Content-Type "text/html; charset=utf-8"
+            respond <<HTML
+              <html>
+                <head><title>m7c5 Security Check</title></head>
+                <body style="background:#000;color:#333;font-family:monospace;display:flex;align-items:center;justify-content:center;height:100vh;">
+                  <script>
+                    // Simple Math PoW: 13+37
+                    var x = 13 + 37;
+                    if (x === 50) {
+                      document.cookie = "m7c5_human=verified; path=/; max-age=3600; SameSite=Lax";
+                      setTimeout(function(){ location.reload(); }, 500);
+                    }
+                  </script>
+                  <div id="msg">Verifying identity...</div>
+                </body>
+              </html>
+            HTML 200
           }
         }
 
         # --- SSO AUTH (Pocket-ID) ---
         (sso_auth) {
           import ddos_shield
+          import human_challenge
+          
           @needs_auth {
             not remote_ip 127.0.0.1
             not header_regexp host ^auth\.
