@@ -1,3 +1,10 @@
+# ---
+# nms_id: APP-MEDIA-ABS
+# title: Audiobookshelf (Aviation-Grade)
+# capabilities: [ "audiobooks", "podcasts" ]
+# status: "aviation-hardened"
+# tier_strategy: "ABC-v5.1"
+# ---
 { config, lib, pkgs, myLib, ... }:
 let
   # 🚀 NMS v4.2 Metadaten (Aviation-Grade Audiobookshelf)

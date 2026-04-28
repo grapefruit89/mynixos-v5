@@ -1,3 +1,10 @@
+# ---
+# nms_id: APP-MEDIA-JELLYFIN
+# title: Jellyfin (Aviation-Grade)
+# capabilities: [ "media", "jellyfin", "gpu" ]
+# status: "aviation-hardened"
+# tier_strategy: "ABC-v5.1"
+# ---
 { lib, pkgs, config, myLib, ... }:
 let
   # 🚀 NMS v4.2 Metadaten (Aviation-Grade Jellyfin)

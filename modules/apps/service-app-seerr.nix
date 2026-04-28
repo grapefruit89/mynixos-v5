@@ -1,3 +1,10 @@
+# ---
+# nms_id: APP-MEDIA-SEERR
+# title: Seerr (Aviation-Grade Requests)
+# capabilities: [ "requests", "media" ]
+# status: "aviation-hardened"
+# tier_strategy: "ABC-v5.1"
+# ---
 { config, lib, pkgs, myLib, ... }:
 let
   # 🚀 NMS v4.2 Metadaten (Aviation-Grade Seerr)

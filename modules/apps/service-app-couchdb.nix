@@ -1,3 +1,10 @@
+# ---
+# nms_id: APP-TOOLS-COUCHDB
+# title: CouchDB (Aviation-Grade)
+# capabilities: [ "nosql", "database" ]
+# status: "aviation-hardened"
+# tier_strategy: "ABC-v5.1"
+# ---
 { config, lib, pkgs, myLib, ... }:
 let
   # 🚀 NMS v4.2 Metadaten (Aviation-Grade CouchDB)

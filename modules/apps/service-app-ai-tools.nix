@@ -1,3 +1,10 @@
+# ---
+# nms_id: APP-TOOLS-AI-TOOLS
+# title: AI Tools (SRE Assisted)
+# capabilities: [ "ai", "shell" ]
+# status: "aviation-hardened"
+# tier_strategy: "ABC-v5.1"
+# ---
 { pkgs, lib, config, ... }:
 let
   # 🚀 NMS v4.0 Metadaten

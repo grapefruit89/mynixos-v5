@@ -1,3 +1,10 @@
+# ---
+# nms_id: APP-TOOLS-AI-AGENTS
+# title: Ai Agents (Ollama & Claude)
+# capabilities: [ "ai", "gpu" ]
+# status: "aviation-hardened"
+# tier_strategy: "ABC-v5.1"
+# ---
 { config, lib, pkgs, ... }:
 let
   # 🚀 NMS v4.0 Metadaten

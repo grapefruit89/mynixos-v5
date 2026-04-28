@@ -1,3 +1,10 @@
+# ---
+# nms_id: APP-MEDIA-RADARR
+# title: Radarr (Aviation-Grade)
+# capabilities: [ "media", "movies", "downloads" ]
+# status: "aviation-hardened"
+# tier_strategy: "ABC-v5.1"
+# ---
 { config, lib, pkgs, myLib, ... }:
 let
   # 🚀 NMS v4.2 Metadaten (Aviation-Grade Radarr)

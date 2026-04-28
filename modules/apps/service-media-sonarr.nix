@@ -1,3 +1,10 @@
+# ---
+# nms_id: APP-MEDIA-SONARR
+# title: Sonarr (Aviation-Grade)
+# capabilities: [ "media", "tv", "downloads" ]
+# status: "aviation-hardened"
+# tier_strategy: "ABC-v5.1"
+# ---
 { config, lib, pkgs, utils, myLib, ... }:
 let
   # 🚀 NMS v4.2 Metadaten (Aviation-Grade Sonarr)

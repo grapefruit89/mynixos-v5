@@ -1,3 +1,10 @@
+# ---
+# nms_id: APP-MEDIA-NAVIDROME
+# title: Navidrome (Aviation-Grade Music Server)
+# capabilities: [ "music", "streaming" ]
+# status: "aviation-hardened"
+# tier_strategy: "ABC-v5.1"
+# ---
 { config, lib, pkgs, myLib, ... }:
 let
   nms = {
