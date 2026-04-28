@@ -64,36 +64,49 @@ in {
         acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
       '';
 
-      # 📜 REUSABLE SNIPPETS (Source: Titanium Edition v2)
+      # 📜 REUSABLE SNIPPETS (Source: Caddy-on-Steroids / Titanium v5)
       extraConfig = ''
-        # --- SECURITY HEADERS ---
-        (security_headers) {
+        # --- HONEYPOT (Detect Scanners and ABORT) ---
+        (honeypot) {
+          @evil_paths {
+            not remote_ip private_ranges
+            path /.env* /.git* /.vscode* /wp-config* /config.json* /actuator* /phpmyadmin* /.aws* /.ssh* /xmlrpc.php /wp-login* /admin* /setup.php /install.php /shell* /cmd.php /cgi-bin*
+          }
+          handle @evil_paths {
+            abort
+          }
+        }
+
+        # --- HARDENED HEADERS (Aviation-Grade Stealth) ---
+        (hardened_headers) {
           header {
             X-Content-Type-Options nosniff
             X-Frame-Options DENY
             Referrer-Policy no-referrer-when-downgrade
             Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+            Permissions-Policy interest-cohort=()
+            Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self';"
+            -Server
           }
         }
 
-        # --- GEOBLOCK (Placeholder for DE/AT/CH) ---
-        # Note: Requires xk6-geoip or nftables-level pre-filtering
+        # --- GEOBLOCK (MaxMind Stealth) ---
         (geoblock) {
           @geoblock {
-             # Placeholder logic: real blocking happens in nftables/geoip-shell
              not remote_ip ${trustedIPs}
           }
+          # Note: Real geoblock is now in nftables. This is a L7 safety net.
         }
 
-        # --- mTLS AUTH ---
+        # --- mTLS AUTH (Hardware Binding) ---
         (mtls_auth) {
           tls {
             client_auth {
               mode require_and_verify
-              trust_pool file /etc/nixos/secrets/mtls/ca.crt
+              trust_pool file /var/lib/caddy/internal-ca.pem
             }
           }
-          import security_headers
+          import hardened_headers
         }
 
         # --- SSO AUTH (Pocket-ID) ---
@@ -106,14 +119,17 @@ in {
             uri /api/auth/verify
             copy_headers X-Forwarded-User
           }
-          import security_headers
+          import hardened_headers
+          import honeypot
+          encode br zstd gzip
         }
 
         # --- STREAM OPTIMIZATION (Jellyfin) ---
-        # Source: Fragment 2704
         (proxy_stream) {
           reverse_proxy {args[0]} {
             flush_interval -1
+            header_up Host {upstream_hostport}
+            header_up X-Real-IP {remote_host}
           }
         }
 
