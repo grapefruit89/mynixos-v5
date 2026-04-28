@@ -47,25 +47,29 @@ in {
     services.caddy = {
       enable = true;
       
-      # 🛠️ GLOBAL OPTIONS (Source: Fragment 2526)
+      # 🛠️ GLOBAL OPTIONS (Source: Fragment 2526 / Performance Kick)
       globalConfig = ''
         admin localhost:2019
         
-        # 🧩 Rate Limiting Plugin Settings (Standard for Homelab)
-        order rate_limit before reverse_proxy
-
+        # 🧩 Performance & Resources
         servers {
           trusted_proxies static ${trustedIPs}
-          # Source: Fragment 2544
           trusted_proxies_strict
+          # Speed-up: Buffer settings
+          max_header_size 16kb
         }
         
         # ACME DNS-01 Challenge (Cloudflare)
         acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
       '';
 
-      # 📜 REUSABLE SNIPPETS (Source: Caddy-on-Steroids / Titanium v5.1)
+      # 📜 REUSABLE SNIPPETS (Source: Caddy-on-Steroids / Titanium v5.2)
       extraConfig = ''
+        # --- PERFORMANCE: COMPRESSION ---
+        (compression) {
+          encode br zstd gzip
+        }
+
         # --- HONEYPOT (Time & Resource Stealer) ---
         (honeypot) {
           @evil_paths {
@@ -73,8 +77,7 @@ in {
             path /.env* /.git* /.vscode* /wp-config* /config.json* /actuator* /phpmyadmin* /.aws* /.ssh* /xmlrpc.php /wp-login* /admin* /setup.php /install.php /shell* /cmd.php /cgi-bin*
           }
           handle @evil_paths {
-            # 💀 Time-Stealing: Respond with 418 but take forever to close the connection
-            # oder: Abort nach Header-Flooding
+            # 💀 Time-Stealing: Respond with teapot but take forever to close the connection
             header -Server
             abort
           }
@@ -147,6 +150,19 @@ in {
           }
         }
 
+        # --- HARDENED HEADERS (Aviation-Grade Stealth) ---
+        (hardened_headers) {
+          header {
+            X-Content-Type-Options nosniff
+            X-Frame-Options DENY
+            Referrer-Policy no-referrer-when-downgrade
+            Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+            Permissions-Policy interest-cohort=()
+            Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self';"
+            -Server
+          }
+        }
+
         # --- SSO AUTH (Pocket-ID) ---
         (sso_auth) {
           import ddos_shield
@@ -162,16 +178,20 @@ in {
           }
           import hardened_headers
           import honeypot
-          encode br zstd gzip
+          import compression
         }
 
-        # --- STREAM OPTIMIZATION (Jellyfin) ---
+        # --- STREAM OPTIMIZATION (Jellyfin / Audiobookshelf) ---
         (proxy_stream) {
           reverse_proxy {args[0]} {
+            # 🏎️ Zero-Latency Mode
             flush_interval -1
             header_up Host {upstream_hostport}
             header_up X-Real-IP {remote_host}
+            # 🛡️ Disable buffering for streams
+            header_down X-Accel-Buffering no
           }
+          import compression
         }
 
         # --- WILDCARD SUBDOMAIN ---
