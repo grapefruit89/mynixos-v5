@@ -45,7 +45,7 @@ in {
       };
     };
 
-    # Note: Global firewall port 2222 removed. 
-    # Tailscale traffic is allowed via trustedInterfaces in firewall.nix.
+    # Note: Global firewall port 2222 removal confirmed.
+    # Access is managed via ListenAddress (Local/Tailscale only).
   };
 }

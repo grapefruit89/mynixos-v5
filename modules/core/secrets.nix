@@ -39,7 +39,9 @@ in {
       age = {
         sshKeyPaths = [ 
           "/etc/ssh/ssh_host_ed25519_key"
-          "/persist/etc/ssh/ssh_host_ed25519_key" # Direct path fallback for boot resilience
+          "/persist/etc/ssh/ssh_host_ed25519_key"
+          # 🚨 C-03: EMERGENCY FALLBACK (Non-NVMe Path)
+          "${config.my.configs.paths.tierB}/secrets/emergency_age_key.txt" 
         ];
         keyFile = "/var/lib/sops-nix/key.txt";
         generateKey = true;
