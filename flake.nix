@@ -1,26 +1,46 @@
 {
-  description = "NixHome - Aviation Grade Homelab Configuration";
+  description = "NixHome - Aviation Grade Horizontal Configuration";
 
   inputs = {
-    # 🚀 UPGRADE: Nutzt die aktuellste Stable Version für 2026
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
-    # Alternative für Bleeding Edge: "github:nixos/nixpkgs/nixos-unstable"
+    
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
 
     home-manager.url = "github:nix-community/home-manager/release-25.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
+    impermanence.url = "github:nix-community/impermanence";
   };
 
-  outputs = { self, nixpkgs, ... }@inputs: {
+  outputs = { self, nixpkgs, ... }@inputs: let
+    # 🏆 Aviation-Grade System Library
+    myLib = import ./modules/core/lib-helpers.nix { inherit (nixpkgs) lib; pkgs = nixpkgs.legacyPackages.x86_64-linux; };
+    
+    # Standard-Args für alle Hosts
+    specialArgs = { inherit inputs myLib; };
+  in {
     nixosConfigurations = {
+      # 🚀 HOST: FUJITSU Q958 (DEIN SYSTEM)
       nixhome = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = { inherit inputs; };
+        inherit specialArgs;
         modules = [
-          ./configuration.nix
+          ./hardware/q958/hardware-configuration.nix
+          ./hardware/q958/hardware-profile.nix
+          ./configuration.nix # Der horizontale Entrypoint
         ];
       };
+
+      # 🤝 HOST: FREUNDES-PC (BEISPIEL)
+      # freund-pc = nixpkgs.lib.nixosSystem {
+      #   system = "x86_64-linux";
+      #   inherit specialArgs;
+      #   modules = [
+      #     ./hardware/freund/hardware-configuration.nix
+      #     ./configuration.nix 
+      #   ];
+      # };
     };
   };
 }

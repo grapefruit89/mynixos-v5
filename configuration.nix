@@ -1,15 +1,12 @@
-{ lib, pkgs, config, inputs, ... }:
+{ lib, pkgs, config, inputs, myLib, ... }:
 let
-  # 🚀 NMS v4.0 Metadaten
+  # 🚀 NMS v4.2 Metadaten (Aviation-Grade Orchestrator)
   nms = {
     id = "NIXH-00-SYS-ROOT-001";
-    title = "System Entrypoint";
-    description = "Consolidated system entrypoint using the 'Perfect Order' layer structure.";
-    layer = 00;
-    nixpkgs.category = "system/settings";
-    capabilities = [ "system/entrypoint" "architecture/hubs" "architecture/perfect-order" ];
-    audit.last_reviewed = "2026-03-02";
-    audit.complexity = 2;
+    title = "Modular Entrypoint (Horizontal)";
+    description = "New horizontal responsibility entrypoint. Decouples hardware, users, and common modules.";
+    layer = 0;
+    audit.last_reviewed = "2026-04-27";
   };
 in
 {
@@ -17,25 +14,46 @@ in
     type = lib.types.attrs;
     default = nms;
     readOnly = true;
-    description = "NMS metadata for configuration module";
   };
 
   imports = [
+    # 🛡️ 1. EXTERNAL PLUGINS
     inputs.sops-nix.nixosModules.sops
-    ./00-core/_imports.nix
-    ./10-gateway/_imports.nix
-    ./20-infrastructure/_imports.nix
-    ./30-automation/_imports.nix
-    ./40-media/_imports.nix
-    ./50-knowledge/_imports.nix
-    ./60-apps/_imports.nix
-    ./80-monitoring/_imports.nix
-    ./90-policy/_imports.nix
+    inputs.impermanence.nixosModules.impermanence
+    
+    # 🛠️ 2. SHARED SYSTEM LOGIC (CORE)
+    ./modules/core/configs.nix
+    ./modules/core/ports.nix
+    ./modules/core/registry.nix
+    ./modules/core/lib-helpers-meta.nix
+    ./modules/core/secrets.nix
+    ./modules/core/backup.nix
+    # ./modules/core/auto-locale.nix # In base-server integriert
+
+    # 🎖️ 3. MISSION PROFILES (Bundles)
+    ./profiles/base-server.nix
+    ./profiles/media-beast.nix
+    ./profiles/security-hardened.nix
+    ./profiles/automation-apps.nix
+    ./profiles/knowledge-apps.nix
+    ./profiles/extra-apps.nix
+
+    # 👤 4. PILOT (USER)
+    ./users/moritz/default.nix
+    ./users/moritz/home.nix
   ];
 
   config = {
     system.stateVersion = "25.11";
     networking.hostName = "nixhome";
-    swapDevices = [ { device = "/var/lib/swapfile"; size = 4096; } ];
+    
+    # 🚩 GLOBAL TOGGLES (Aus der Registry)
+    my.services = {
+      kernelSlim.enable = true;
+      shell.premium.enable = true;
+      storagePool.enable = true;
+      caddy.enable = true;
+      postgresql.enable = true;
+    };
   };
 }
