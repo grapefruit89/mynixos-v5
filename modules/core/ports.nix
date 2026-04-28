@@ -5,6 +5,7 @@
     type = lib.types.attrsOf lib.types.port;
     default = {
       # 10-Infrastructure
+      ssh = 53844;
       pocket-id = 8080;
       postgres = 5432;
       adguard = 3001; # Web UI
