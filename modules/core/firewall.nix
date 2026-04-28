@@ -34,31 +34,27 @@ in {
       trustedInterfaces = [ "lo" "tailscale0" ];
       
       # 🛡️ GLOBAL PUBLIC PORTS
+      # Nur HTTPS ist von außen erreichbar. Port 80 und SSH sind zu.
       allowedTCPPorts = [
-        80  # HTTP Redirect
         443 # HTTPS (Caddy Edge)
-        sshPort # Custom SSH (SSoT)
       ];
 
       # 📈 LAN-SPECIFIC RULES (DNS & Multicast)
       extraInputRules = ''
         # 🌍 GEOBLOCK PROTECTION (DE, AT, LT for public ports)
-        # Definieren eines Sets für zugelassene Länder (DE, AT, LT)
         set allowed_countries {
           type ipv4_addr
           flags interval
           elements = { 
-            # Deutschland, Österreich, Litauen IP-Ranges (Auszug/Platzhalter)
+            # Deutschland, Österreich, Litauen IP-Ranges
             2.16.0.0/13, 2.160.0.0/11, 5.0.0.0/14, 5.144.0.0/13, # DE
             62.178.0.0/15, 77.116.0.0/14, # AT
             78.56.0.0/13, 82.135.128.0/17 # LT
-            # Hinweis: In Produktion sollte hier ein dynamischer geoip-update Dienst laufen
           }
         }
 
-        # Block everything NOT from allowed countries on public ports
-        # Except for LAN/Tailscale which are already in trustedInterfaces
-        tcp dport { 80, 443, ${toString sshPort} } ip saddr != @allowed_countries counter drop
+        # Block everything NOT from allowed countries on public port 443
+        tcp dport 443 ip saddr != @allowed_countries counter drop
 
         # DNS Support für das LAN (AdGuard)
         ip saddr ${lanCidr} tcp dport 53 accept

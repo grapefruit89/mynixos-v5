@@ -68,20 +68,11 @@ in {
     };
 
     # 🌐 2. CADDY REVERSE PROXY
-    # ... (unchanged)
     services.caddy.virtualHosts."${hostName}" = {
       extraConfig = let
         proxyCommand = if isStream then "import proxy_stream ${targetUrl}" else "reverse_proxy ${targetUrl}";
       in ''
-        # LAN-Access: Trusted Network (No SSO)
-        @trusted_network {
-          remote_ip ${config.my.configs.network.lanCidr}
-        }
-        handle @trusted_network {
-          ${proxyCommand}
-        }
-
-        # Global-Access: Protected by SSO
+        # Global-Access: Strict SSO for everyone (including LAN)
         ${lib.optionalString useSSO "import sso_auth"}
         ${proxyCommand}
       '';
