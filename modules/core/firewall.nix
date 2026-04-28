@@ -42,20 +42,21 @@ in {
 
       # 📈 LAN-SPECIFIC RULES (DNS & Multicast)
       extraInputRules = ''
-        # 🌍 GEOBLOCK PROTECTION (DE Only for public ports)
-        # Definieren eines Sets für DE-IPs (Platzhalter, wird durch Script/Tool befüllt)
-        # In der Praxis wird dieses Set oft dynamisch geladen.
+        # 🌍 GEOBLOCK PROTECTION (DE, AT, LT for public ports)
+        # Definieren eines Sets für zugelassene Länder (DE, AT, LT)
         set allowed_countries {
           type ipv4_addr
           flags interval
           elements = { 
-            # Deutschland IP-Ranges (Beispiel-Auszug)
-            2.16.0.0/13, 2.160.0.0/11, 5.0.0.0/14, 5.144.0.0/13
-            # Hinweis: In Produktion sollte hier ein geoip-update Service laufen
+            # Deutschland, Österreich, Litauen IP-Ranges (Auszug/Platzhalter)
+            2.16.0.0/13, 2.160.0.0/11, 5.0.0.0/14, 5.144.0.0/13, # DE
+            62.178.0.0/15, 77.116.0.0/14, # AT
+            78.56.0.0/13, 82.135.128.0/17 # LT
+            # Hinweis: In Produktion sollte hier ein dynamischer geoip-update Dienst laufen
           }
         }
 
-        # Block everything NOT from DE on public ports
+        # Block everything NOT from allowed countries on public ports
         # Except for LAN/Tailscale which are already in trustedInterfaces
         tcp dport { 80, 443, ${toString sshPort} } ip saddr != @allowed_countries counter drop
 
