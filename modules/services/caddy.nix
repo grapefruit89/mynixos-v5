@@ -80,14 +80,14 @@ in {
           }
         }
 
-        # --- DDOS SHIELD (3-Stage Defense) ---
+        # --- DDOS SHIELD (3-Stage Defense - UX Optimized) ---
         (ddos_shield) {
           # Stage 2: Authenticated (Pocket-ID) -> No Limits
           @is_auth {
             header_regexp Cookie "pocketid_session="
           }
 
-          # Stage 1: Verified Human (JS-Challenge passed) -> 100 req/min
+          # Stage 1: Verified Human (JS-Challenge passed) -> 500 req/min
           @is_human {
             header_regexp Cookie "m7c5_human=verified"
             not remote_ip 127.0.0.1
@@ -97,11 +97,11 @@ in {
             zone human_limit {
               key {remote_host}
               window 1m
-              max_events 100
+              max_events 500
             }
           }
 
-          # Stage 0: Unknown/Bots (WAN) -> 5 req/min
+          # Stage 0: Unknown/Bots/API-Clients -> 30 req/min
           @is_unknown {
             not header_regexp Cookie "m7c5_human=verified"
             not header_regexp Cookie "pocketid_session="
@@ -112,21 +112,21 @@ in {
             zone bot_limit {
               key {remote_host}
               window 1m
-              max_events 5
+              max_events 30
             }
           }
         }
 
-        # --- JS CHALLENGE PAGE ---
+        # --- JS CHALLENGE PAGE (API Aware) ---
         (human_challenge) {
           @need_challenge {
             not header_regexp Cookie "m7c5_human=verified"
             not header_regexp Cookie "pocketid_session="
             not remote_ip 127.0.0.1
             not remote_ip ${trustedIPs}
+            not path /api/* /socket.io/* /json/* /web/assets/*
             method GET
           }
-          # Serve a tiny PoW/Math page that sets the cookie and reloads
           handle @need_challenge {
             header Content-Type "text/html; charset=utf-8"
             respond <<HTML
@@ -134,11 +134,10 @@ in {
                 <head><title>m7c5 Security Check</title></head>
                 <body style="background:#000;color:#333;font-family:monospace;display:flex;align-items:center;justify-content:center;height:100vh;">
                   <script>
-                    // Simple Math PoW: 13+37
                     var x = 13 + 37;
                     if (x === 50) {
                       document.cookie = "m7c5_human=verified; path=/; max-age=3600; SameSite=Lax";
-                      setTimeout(function(){ location.reload(); }, 500);
+                      location.reload(); 
                     }
                   </script>
                   <div id="msg">Verifying identity...</div>
