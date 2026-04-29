@@ -65,10 +65,6 @@ in
 
     # 🛠️ SYSCTL HARDENING & PERFORMANCE (Tracing Enabled)
     boot.kernel.sysctl = {
-      "vm.swappiness" = myLib.mkTracedOption "NIXH-HW-001" (lib.mkOption { 
-        type = lib.types.int; default = 10; 
-      }).default;
-      
       "kernel.nmi_watchdog" = 0;      # Save power by disabling NMI watchdog
       
       # Protected links for security in shared environments
