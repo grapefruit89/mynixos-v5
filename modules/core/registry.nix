@@ -38,16 +38,7 @@ in {
       aiAgents.enable = lib.mkEnableOption "AI (Ollama/Claude)";
       homeAssistant.enable = lib.mkEnableOption "Home Assistant";
       n8n.enable = lib.mkEnableOption "n8n Workflows";
-
-      # 30-Media
-      jellyfin.enable = lib.mkEnableOption "Jellyfin";
-      navidrome.enable = lib.mkEnableOption "Navidrome (Music)";
-      audiobookshelf.enable = lib.mkEnableOption "Audiobookshelf";
-      sonarr.enable = lib.mkEnableOption "Sonarr";
-      radarr.enable = lib.mkEnableOption "Radarr";
-      prowlarr.enable = lib.mkEnableOption "Prowlarr";
-      sabnzbd.enable = lib.mkEnableOption "SABnzbd";
-      storagePool.enable = lib.mkEnableOption "MergerFS Pool";
+      zigbeeStack.enable = lib.mkEnableOption "Zigbee Stack (Z2M + MQTT)";
 
       # 40-Knowledge
       paperless.enable = lib.mkEnableOption "Paperless-ngx";
@@ -68,21 +59,36 @@ in {
       kernelSlim.enable = lib.mkEnableOption "Kernel Slim";
       shell.premium.enable = lib.mkEnableOption "Shell Premium";
     };
+
+    media = {
+      jellyfin.enable = lib.mkEnableOption "Jellyfin";
+      navidrome.enable = lib.mkEnableOption "Navidrome (Music)";
+      audiobookshelf.enable = lib.mkEnableOption "Audiobookshelf";
+      sonarr.enable = lib.mkEnableOption "Sonarr";
+      radarr.enable = lib.mkEnableOption "Radarr";
+      prowlarr.enable = lib.mkEnableOption "Prowlarr";
+      sabnzbd.enable = lib.mkEnableOption "SABnzbd";
+      storagePool.enable = lib.mkEnableOption "MergerFS Pool";
+    };
   };
 
-  config.my.services = {
-    # Default Enabled für das Master-System
-    adguardhome.enable = lib.mkDefault true;
-    aiAgents.enable = lib.mkDefault true;
-    audiobookshelf.enable = lib.mkDefault true;
-    backup.enable = lib.mkDefault true;
-    jellyfin.enable = lib.mkDefault true;
-    navidrome.enable = lib.mkDefault true;
-    paperless.enable = lib.mkDefault true;
-    postgresql.enable = lib.mkDefault true;
-    sonarr.enable = lib.mkDefault true;
-    radarr.enable = lib.mkDefault true;
-    vaultwarden.enable = lib.mkDefault true;
-    shell.premium.enable = lib.mkDefault true;
+  config.my = {
+    services = {
+      # Default Enabled für das Master-System
+      adguardhome.enable = lib.mkDefault true;
+      aiAgents.enable = lib.mkDefault true;
+      backup.enable = lib.mkDefault true;
+      paperless.enable = lib.mkDefault true;
+      postgresql.enable = lib.mkDefault true;
+      vaultwarden.enable = lib.mkDefault true;
+      shell.premium.enable = lib.mkDefault true;
+    };
+    media = {
+      audiobookshelf.enable = lib.mkDefault true;
+      jellyfin.enable = lib.mkDefault true;
+      navidrome.enable = lib.mkDefault true;
+      sonarr.enable = lib.mkDefault true;
+      radarr.enable = lib.mkDefault true;
+    };
   };
 }

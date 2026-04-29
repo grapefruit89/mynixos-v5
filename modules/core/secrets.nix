@@ -33,7 +33,7 @@ in {
 
   config = {
     sops = {
-      defaultSopsFile = ../secrets.yaml;
+      defaultSopsFile = ../../secrets/secrets.yaml;
       defaultSopsFormat = "yaml";
       
       age = {
@@ -48,6 +48,10 @@ in {
       };
 
       secrets = {
+        # Identity
+        user_password = { neededForUsers = true; };
+        freund_password = { neededForUsers = true; };
+
         # Infrastructure
         cloudflare_token = {};
         github_token = {};

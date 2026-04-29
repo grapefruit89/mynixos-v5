@@ -13,7 +13,7 @@ let
     source_repo = "grapefruit89/mynixos";
   };
   
-  cfg = config.my.services.storagePool;
+  cfg = config.my.media.storagePool;
   # Pfade aus SSoT Registry
   srePaths = config.my.configs.paths;
   lanIP = config.my.configs.network.lanIP;

@@ -37,7 +37,10 @@ in
       settings = { title = "nixhome dashboard"; layout = { Media = { style = "grid"; columns = 3; }; Tools = { style = "grid"; columns = 3; }; Infrastructure = { style = "grid"; columns = 2; }; }; };
     };
     services.caddy.virtualHosts."${host}" = {
-      extraConfig = "@tailscale remote_ip 100.64.0.0/10\nhandle @tailscale { reverse_proxy 127.0.0.1:${toString config.my.ports.homepage} }\nimport sso_auth\nreverse_proxy 127.0.0.1:${toString config.my.ports.homepage}";
+      extraConfig = ''
+        import sso_auth
+        reverse_proxy 127.0.0.1:${toString config.my.ports.homepage}
+      '';
     };
   };
 }

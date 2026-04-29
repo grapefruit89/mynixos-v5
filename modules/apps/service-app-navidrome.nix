@@ -13,12 +13,12 @@ let
     layer = 40;
     audit.last_reviewed = "2026-04-28";
   };
-  cfg = config.my.apps.navidrome;
+  cfg = config.my.media.navidrome;
   srePaths = config.my.configs.paths;
   sreConfig = config.my.configs;
 in
 {
-  options.my.apps.navidrome = {
+  options.my.media.navidrome = {
     enable = lib.mkEnableOption "Navidrome Music Server";
     user = lib.mkOption { type = lib.types.str; default = "navidrome"; };
     group = lib.mkOption { type = lib.types.str; default = "media"; };

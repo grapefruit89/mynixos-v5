@@ -90,7 +90,7 @@ in {
         }
         { 
           name = "Pocket-ID"; 
-          url = "http://localhost:${toString config.my.ports.pocket-id}/health"; 
+          url = "http://localhost:${toString config.my.ports.pocketId}/health"; 
           interval = "60s"; 
           conditions = [ "[STATUS] == 200" ]; 
         }

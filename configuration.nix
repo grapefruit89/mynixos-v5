@@ -55,10 +55,11 @@ in
     my.services = {
       kernelSlim.enable = true;
       shell.premium.enable = true;
-      storagePool.enable = true;
       caddy.enable = true;
       postgresql.enable = true;
       linkding.enable = true;
     };
+
+    my.media.storagePool.enable = true;
   };
 }

@@ -6,12 +6,13 @@
     default = {
       # 10-Infrastructure
       ssh = 53844;
-      pocket-id = 8080;
+      pocketId = 8080;
       postgres = 5432;
       adguard = 3001; # Web UI
+      mqtt = 1883;
 
       # 20-Automation
-      home-assistant = 8123;
+      homeAssistant = 8123;
       n8n = 5678;
       ollama = 11434;
       zigbee2mqtt = 8084;
@@ -38,7 +39,7 @@
       # 80-Monitoring
       netdata = 19999;
       scrutiny = 8083;
-      uptime-kuma = 3002;
+      uptimeKuma = 3002;
       gatus = 8111;
     };
     description = "Central port registry (SSoT)";

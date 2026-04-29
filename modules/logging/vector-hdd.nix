@@ -82,8 +82,20 @@ in
         IOSchedulingClass = "idle";
         ExecStart = pkgs.writeShellScript "rotate-vector-logs" ''
           set -euo pipefail
+          # 1. Age-based deletion
           find ${logDir} -name "*.gz" -type f -mtime +${toString cfg.retentionDays} -delete
-          # ... total size limit logic ...
+          
+          # 2. Size-based deletion (Target: ${toString maxTotalSizeMB}MB)
+          CURRENT_SIZE=$(du -sm ${logDir} | cut -f1)
+          if [ "$CURRENT_SIZE" -gt ${toString maxTotalSizeMB} ]; then
+            echo "Log directory size ($CURRENT_SIZE MB) exceeds limit (${toString maxTotalSizeMB} MB). Cleaning up..."
+            # Delete oldest files first until under limit
+            ls -tr ${logDir}/*.gz | while read -r file; do
+              rm "$file"
+              CURRENT_SIZE=$(du -sm ${logDir} | cut -f1)
+              [ "$CURRENT_SIZE" -le ${toString maxTotalSizeMB} ] && break
+            done
+          fi
         '';
       };
     };

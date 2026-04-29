@@ -30,5 +30,5 @@
   };
 
   # 🎶 Aktivierung Navidrome
-  my.apps.navidrome.enable = true;
+  my.media.navidrome.enable = true;
 }
