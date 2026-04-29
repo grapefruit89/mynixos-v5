@@ -38,7 +38,7 @@ in
     enable = lib.mkEnableOption "SABnzbd Usenet Downloader";
     user = lib.mkOption { type = lib.types.str; default = "sabnzbd"; };
     group = lib.mkOption { type = lib.types.str; default = "media"; };
-    port = lib.mkOption { type = lib.types.port; default = 8080; };
+    port = lib.mkOption { type = lib.types.port; default = config.my.ports.sabnzbd; };
     
     # 💾 PATH STRATEGY (ABC-Tiering)
     stateDir = lib.mkOption { 

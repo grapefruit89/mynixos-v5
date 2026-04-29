@@ -21,7 +21,7 @@
       radarr = 7878;
       bazarr = 6767;
       prowlarr = 9696;
-      sabnzbd = 8080;
+      sabnzbd = 8081;
       navidrome = 4533;
       audiobookshelf = 8000;
 
@@ -30,14 +30,14 @@
       
       # 50-Apps
       vaultwarden = 8222;
-      monica = 8080;
+      monica = 8082;
       karakeep = 20003;
       couchdb = 5984;
       
       # 80-Monitoring
       netdata = 19999;
-      scrutiny = 8080;
-      uptime-kuma = 3001;
+      scrutiny = 8083;
+      uptime-kuma = 3002;
       gatus = 8111;
     };
     description = "Central port registry (SSoT)";
