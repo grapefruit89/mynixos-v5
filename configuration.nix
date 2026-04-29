@@ -59,6 +59,7 @@ in
       storagePool.enable = true;
       caddy.enable = true;
       postgresql.enable = true;
+      linkding.enable = true;
     };
   };
 }
