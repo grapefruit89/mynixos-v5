@@ -225,4 +225,52 @@ in {
       ];
     }
   ]);
+
+  # 🛡️ TITANIUM HARDENED SERVICE FACTORY (mkHardenedService)
+  # Ultra-secure wrapper with strict systemd sandboxing.
+  mkHardenedService = { 
+    name, 
+    extraConfig ? {}, 
+    gpuAccess ? false, 
+    serialAccess ? false, 
+    readWritePaths ? [] 
+  }: let
+    base = {
+      ProtectSystem = "strict";
+      ProtectHome = true;
+      PrivateTmp = true;
+      NoNewPrivileges = true;
+      ProtectKernelTunables = true;
+      ProtectKernelModules = true;
+      ProtectKernelLogs = true;
+      ProtectClock = true;
+      ProtectControlGroups = true;
+      MemoryDenyWriteExecute = true;
+      RestrictRealtime = true;
+      RestrictSUIDSGID = true;
+      LockPersonality = true;
+      RestrictNamespaces = true;
+
+      SystemCallFilter = [
+        "@system-service"
+        "~@clock @cpu-emulation @debug @module @mount @raw-io @reboot @swap @obsolete @privileged @keyring"
+      ];
+      SystemCallErrorNumber = "EPERM";
+      UMask = "0077";
+    };
+  in {
+    systemd.services.${name}.serviceConfig = lib.mkMerge [
+      base
+      (lib.optionalAttrs gpuAccess {
+        PrivateDevices = false;
+        DeviceAllow = [ "/dev/dri" "char-render" ];
+      })
+      (lib.optionalAttrs serialAccess {
+        PrivateDevices = false;
+        DeviceAllow = [ "/dev/ttyUSB*" "/dev/serial" ];
+      })
+      { ReadWritePaths = readWritePaths; }
+      extraConfig
+    ];
+  };
 }
