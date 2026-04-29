@@ -25,6 +25,9 @@ in {
       boot.kernelModules = [ "veth" "loop" "nvme" "ahci" "usb_storage" "tun" ];
       security.hideProcessInformation = true;
       boot.kernel.sysctl = {
+        "kernel.unprivileged_userns_clone" = 1;
+        "vm.unprivileged_userfaultfd" = 0;
+        "kernel.printk" = "3 3 3 3";
         "kernel.kptr_restrict" = 2;
         "kernel.dmesg_restrict" = 1;
         "kernel.unprivileged_bpf_disabled" = 1;
@@ -33,6 +36,9 @@ in {
         "kernel.ftrace_enabled" = false;
         "net.ipv4.conf.all.rp_filter" = 1;
         "net.ipv4.conf.default.rp_filter" = 1;
+        "net.ipv4.tcp_syncookies" = 1;
+        "net.ipv4.tcp_rfc1337" = 1;
+        "kernel.core_pattern" = "|/bin/false";
         "net.ipv4.icmp_echo_ignore_broadcasts" = true;
         "net.ipv4.conf.all.accept_redirects" = false;
         "net.ipv4.conf.default.accept_redirects" = false;
@@ -52,6 +58,7 @@ in {
         "ax25" "netrom" "rose"
         "ext2" "ext3" "jfs" "reiserfs" "hfs" "hfsplus" "ntfs" "vfat" "cramfs" "freevxfs" "minix" "nilfs2" "sysv" "ufs"
         "pcspkr" "iTCO_wdt"
+        "snd_hda_intel" "uvcvideo" "videodev" "ppp" "ip6table_filter"
       ];
     }
     {
@@ -66,6 +73,16 @@ in {
         pcscd.enable = false;
       };
       systemd.maskedUnits = [ "plymouth-quit-wait.service" "systemd-networkd-wait-online.service" ];
+      systemd.coredump.enable = false;
+
+      fileSystems."/proc" = {
+        fsType = "proc";
+        options = [ "hidepid=2" ];
+      };
+      fileSystems."/tmp" = {
+        fsType = "tmpfs";
+        options = [ "noexec" "nosuid" "nodev" "mode=1777" ];
+      };
     }
     { my.meta.hardened_core = nms; }
   ]);

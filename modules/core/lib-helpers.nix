@@ -8,7 +8,7 @@ let
     description = (opt.description or "") + " [Source: ${src}]"; 
   };
 
-in {
+in rec {
   inherit mkTracedOption;
 
   # 🏆 AVIATION-GRADE SERVICE FACTORY (mkService)
@@ -47,24 +47,26 @@ in {
       after = [ "network.target" ] ++ (lib.optional (finalNetns != null) "netns-${finalNetns}.service");
       bindsTo = lib.optional (finalNetns != null) "netns-${finalNetns}.service";
       
-      serviceConfig = lib.recursiveUpdate {
-        # 🛡️ TITANIUM HARDENING (ADR 001)
-        ProtectSystem = "strict";
-        ProtectHome = true;
-        PrivateTmp = true;
-        NoNewPrivileges = true;
-        
-        # 💾 PERSISTENCE (Tier A vs Tier B)
-        # Note: StateDirectory is managed by systemd, we link it via bind-mounts or explicit paths
-        ReadWritePaths = readWritePaths ++ [ 
-          appDataDir 
-          appCacheDir
-          "/var/lib/${name}" 
-        ];
-        
-        # 🌐 VPN CONFINEMENT
-        NetworkNamespacePath = lib.mkIf (finalNetns != null) "/var/run/netns/${finalNetns}";
-      } extraServiceConfig;
+      serviceConfig = lib.mkMerge [
+        {
+          # 🛡️ TITANIUM HARDENING (ADR 001)
+          ProtectSystem = "strict";
+          ProtectHome = true;
+          PrivateTmp = true;
+          NoNewPrivileges = true;
+          
+          # 💾 PERSISTENCE (Tier A vs Tier B)
+          ReadWritePaths = [ 
+            appDataDir 
+            appCacheDir
+            "/var/lib/${name}" 
+          ] ++ readWritePaths;
+          
+          # 🌐 VPN CONFINEMENT
+          NetworkNamespacePath = lib.mkIf (finalNetns != null) "/var/run/netns/${finalNetns}";
+        }
+        extraServiceConfig
+      ];
     };
 
     # 🌐 2. CADDY REVERSE PROXY
@@ -83,7 +85,13 @@ in {
       directories = [ "/var/lib/${name}" ];
     };
 
-    # 📊 4. TRACEABILITY
+    # 📂 4. DIRECTORY CREATION (ADR 044)
+    systemd.tmpfiles.rules = [
+      "d ${appDataDir} 0750 ${name} media -"
+      "d ${appCacheDir} 0750 ${name} media -"
+    ];
+
+    # 📊 5. TRACEABILITY
     my.meta.${name} = {
       id = "NIXH-AUTO-${name}";
       title = description;
@@ -110,7 +118,7 @@ in {
     cacheDir = "${srePaths.tierB}/cache/${name}";
     mediaDir = srePaths.mediaLibrary;
   in (lib.mkMerge [
-    (config.myLib.mkService {
+    (mkService {
       inherit config name port description persist useVPN;
       isStream = true;
       readWritePaths = [ cacheDir mediaDir ];
@@ -171,12 +179,13 @@ in {
       RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" ];
     };
   in (lib.mkMerge [
-    (config.myLib.mkService {
+    (mkService {
       inherit config name port description persist;
       useSSO = true;
       readWritePaths = [ stateDir consumeDir mediaDir cacheDir ];
       extraServiceConfig = pythonHardening // {
-        inherit MemoryMax oomScoreAdjust;
+        MemoryMax = memoryMax;
+        inherit oomScoreAdjust;
         CPUWeight = cpuWeight;
         LoadCredential = lib.optional (secretFile != null) "${lib.toUpper name}_SECRET_KEY:${toString secretFile}";
       };
