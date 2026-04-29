@@ -229,29 +229,17 @@ in {
       '';
     };
 
-    # 🛡️ SYSTEMD SANDBOXING (Aviation-Grade / Source: Fragment 2833)
-    systemd.services.caddy = {
-      # Source: Fragment 18333
-      serviceConfig = {
+    # 🛡️ SYSTEMD SANDBOXING (Unified Factory)
+    myLib.mkHardenedService {
+      name = "caddy";
+      readWritePaths = [ "/var/lib/caddy" "/var/log/caddy" ];
+      extraConfig = {
         EnvironmentFile = [config.sops.templates."caddy-env".path];
-        
-        # Holy State Persistence
-        StateDirectory = "caddy"; 
-        ReadWritePaths = [ "/var/lib/caddy" "/var/log/caddy" ];
-        
-        # Hardening Shield
-        ProtectSystem = "strict";
-        ProtectHome = true;
-        PrivateTmp = true;
-        PrivateDevices = true;
-        MemoryDenyWriteExecute = true;
-        OOMScoreAdjust = -500;
-        
-        # Grant low-port binding capability
         CapabilityBoundingSet = [ "CAP_NET_BIND_SERVICE" ];
         AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
+        OOMScoreAdjust = -500;
       };
-    };
+    }
 
     # 🧱 AUTOMATIC FIREWALL EXPOSURE
     networking.firewall.allowedTCPPorts = [ 80 443 ];
