@@ -75,13 +75,17 @@ in {
       pruneOpts = [ "--keep-daily 7" "--keep-weekly 4" "--keep-monthly 6" ];
     };
 
-    services.restic.backups.persist = {
+    services.restic.backups.remote = {
       initialize = true;
       repository = "s3:https://s3.eu-central-003.backblazeb2.com/nixhome-persist";
       passwordFile = config.sops.secrets.restic_password.path;
       environmentFile = config.sops.templates."backblaze-restic.env".path;
 
-      paths = [ "/persist" ];
+      paths = [
+        "/var/lib"
+        "/etc"
+        "/persist"
+      ];
       exclude = [ "**/.cache" "**/tmp" ];
 
       pruneOpts = [ "--keep-daily 7" "--keep-weekly 4" "--keep-monthly 6" ];
