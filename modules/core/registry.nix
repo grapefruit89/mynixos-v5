@@ -32,6 +32,7 @@ in {
       adguardhome.enable = lib.mkEnableOption "AdGuard Home";
       pocketId.enable = lib.mkEnableOption "Pocket-ID (OIDC)";
       postgresql.enable = lib.mkEnableOption "PostgreSQL Cluster";
+      caddy.enable = lib.mkEnableOption "Caddy Reverse Proxy";
       
       # 20-Automation
       aiAgents.enable = lib.mkEnableOption "AI (Ollama/Claude)";
@@ -51,6 +52,7 @@ in {
       # 40-Knowledge
       paperless.enable = lib.mkEnableOption "Paperless-ngx";
       miniflux.enable = lib.mkEnableOption "Miniflux RSS";
+      linkding.enable = lib.mkEnableOption "Linkding Bookmarks";
 
       # 50-Apps
       vaultwarden.enable = lib.mkEnableOption "Vaultwarden";
