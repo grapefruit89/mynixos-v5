@@ -59,6 +59,11 @@
     };
 
     hardware = {
+      profile = lib.mkOption {
+        type = lib.types.str;
+        default = "q958";
+        description = "The target hardware profile.";
+      };
       ramGB = myLib.mkTracedOption "SRC-CHAT-160" (lib.mkOption {
         type = lib.types.int;
         default = 16;
