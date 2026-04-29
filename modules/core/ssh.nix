@@ -48,6 +48,7 @@ in {
         PermitRootLogin = "no";
         PasswordAuthentication = false;
         KbdInteractiveAuthentication = false;
+        PermitEmptyPasswords = false;
         AllowUsers = [ user ];
         LogLevel = "VERBOSE";
         LoginGraceTime = 20;
