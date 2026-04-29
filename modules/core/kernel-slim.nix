@@ -68,7 +68,6 @@ in {
       "kernel.perf_event_paranoid" = 3;
 
       # Memory & Performance
-      "vm.swappiness" = 10;
       "vm.vfs_cache_pressure" = 50;
     };
 

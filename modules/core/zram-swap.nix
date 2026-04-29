@@ -38,7 +38,6 @@ in {
     
     boot.kernel.sysctl = {
       # 🏎️ ZRAM Performance Tuning
-      "vm.swappiness" = lib.mkForce 180; # Kernels move pages aggressively to ZRAM
       "vm.page-cluster" = 0;             # Skip expensive read-ahead on ZRAM
       "vm.vfs_cache_pressure" = 50;      # Keep directory entries in RAM longer
     };
