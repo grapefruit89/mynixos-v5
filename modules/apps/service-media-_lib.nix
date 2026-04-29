@@ -13,7 +13,7 @@ let
     else if name == "prowlarr" then 9696 
     else if name == "readarr" then 8787 
     else if name == "lidarr" then 8686 
-    else if name == "sabnzbd" then 8080 
+    else if name == "sabnzbd" then 8081 
     else if name == "jellyfin" then 8096 
     else if name == "jellyseerr" then 5055 
     else port;

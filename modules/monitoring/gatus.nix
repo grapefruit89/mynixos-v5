@@ -78,13 +78,13 @@ in {
         }
         { 
           name = "Jellyfin"; 
-          url = "http://localhost:8096/health"; 
+          url = "http://localhost:${toString config.my.ports.jellyfin}/health"; 
           interval = "60s"; 
           conditions = [ "[STATUS] == 200" ]; 
         }
         { 
           name = "Navidrome"; 
-          url = "http://localhost:4533/rest/ping.view"; 
+          url = "http://localhost:${toString config.my.ports.navidrome}/rest/ping.view"; 
           interval = "60s"; 
           conditions = [ "[STATUS] == 200" ]; 
         }

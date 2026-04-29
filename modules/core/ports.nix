@@ -14,6 +14,7 @@
       home-assistant = 8123;
       n8n = 5678;
       ollama = 11434;
+      zigbee2mqtt = 8084;
 
       # 30-Media
       jellyfin = 8096;

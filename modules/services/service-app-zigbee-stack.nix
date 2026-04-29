@@ -42,7 +42,7 @@ in
 
     zigbeePort = lib.mkOption { 
       type = lib.types.port; 
-      default = config.my.ports.zigbee2mqtt or 8080; 
+      default = config.my.ports.zigbee2mqtt; 
       description = "Zigbee2MQTT Frontend Port";
     };
 
