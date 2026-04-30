@@ -15,11 +15,11 @@ let
  type = "sqlite";
  path = "${srePaths.stateDir}/gatus/data.db";
  };
- web = {
- port = cfg.port;
- address = "0.0.0.0";
- };
- endpoints = cfg.endpoints ++ [
+      web = {
+        port = cfg.port;
+        address = "127.0.0.1";
+      };
+      endpoints = cfg.endpoints ++ [
  { 
  name = "Gatus Self"; 
  url = "http://localhost:${toString cfg.port}/api/v1/health"; 
