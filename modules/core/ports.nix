@@ -34,14 +34,14 @@
  
  # 50-Apps
  vaultwarden = 8222;
- monica = 8087;
+ monica = 8082;
  karakeep = 20003;
  couchdb = 5984;
  
  # 80-Monitoring
  netdata = 19999;
- scrutiny = 8088;
- uptimeKuma = 3005;
+ scrutiny = 8083;
+ uptimeKuma = 3002;
  gatus = 8111;
  };
  description = "Central port registry (SSoT)";
