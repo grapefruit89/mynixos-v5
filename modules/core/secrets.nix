@@ -104,5 +104,17 @@ in {
     };
     
     environment.systemPackages = [ pkgs.sops pkgs.age ];
+
+    # 🚨 C-03: AUTOMATED KEY BACKUP (Anti-Deadlock)
+    systemd.services.sops-key-sync = {
+      description = "Sync SSH host key to Tier B fallback";
+      after = [ "persist.mount" ];
+      wantedBy = [ "multi-user.target" ];
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = "${pkgs.bash}/bin/bash /etc/nixos/modules/core/scripts/sync-sops-keys.sh";
+        RemainAfterExit = true;
+      };
+    };
   };
 }

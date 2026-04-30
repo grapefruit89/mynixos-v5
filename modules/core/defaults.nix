@@ -1,4 +1,4 @@
-{lib, ...}: let
+{config, lib, ...}: let
   # 🚀 NMS v4.2 Metadaten
   nms = {
     id = "NIXH-00-COR-009";
@@ -126,6 +126,6 @@ in {
   };
 
   config = {
-    boot.kernel.sysctl."vm.swappiness" = lib.mkDefault 180;
+    boot.kernel.sysctl."vm.swappiness" = lib.mkDefault (if config.zramSwap.enable then 180 else 10);
   };
 }

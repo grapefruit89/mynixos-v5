@@ -59,8 +59,8 @@ in {
         # 🌍 IPv6 PROTECTION (WAN-Block)
         # Block all public IPv6 traffic to Port 443. 
         # Only IPv4 (with Geoblock) is allowed from WAN.
-        # LAN-IPv6 is still allowed via trustedInterfaces.
-        tcp dport 443 ip6 saddr != { ::1/128, fe80::/10 } counter drop
+        # LAN-IPv6 and Tailscale-IPv6 are allowed.
+        tcp dport 443 ip6 saddr != { ::1/128, fe80::/10, fd7a:115c:a1e0::/48 } counter drop
 
         # DNS Support für das LAN (AdGuard)
         ip saddr ${lanCidr} tcp dport 53 accept

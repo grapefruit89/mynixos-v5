@@ -48,6 +48,7 @@ let
       # 🛡️ Find oldest file, excluding critical database patterns
       OLDEST=$(find "$SOURCE_DIR" -type f \
         ! -name "*.wal" ! -name "*.db" ! -name "*.sqlite" ! -name "*.db-journal" \
+        ! -name "*.db-shm" ! -name "*.db-wal" ! -name "*.sqlite-shm" ! -name "*.sqlite-wal" \
         -printf '%T@ %p\n' | sort -n | head -1 | cut -d' ' -f2-)
 
       if [ -z "$OLDEST" ]; then

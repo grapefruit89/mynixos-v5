@@ -6,9 +6,9 @@
     default = {
       # 10-Infrastructure
       ssh = 53844;
-      pocketId = 8080;
+      pocketId = 8089;
       postgres = 5432;
-      adguard = 3001; # Web UI
+      adguard = 3004; # Web UI
       mqtt = 1883;
 
       # 20-Automation
@@ -16,6 +16,8 @@
       n8n = 5678;
       ollama = 11434;
       zigbee2mqtt = 8084;
+      linkding = 8085;
+      olivetin = 8086;
 
       # 30-Media
       jellyfin = 8096;
@@ -32,14 +34,14 @@
       
       # 50-Apps
       vaultwarden = 8222;
-      monica = 8082;
+      monica = 8087;
       karakeep = 20003;
       couchdb = 5984;
       
       # 80-Monitoring
       netdata = 19999;
-      scrutiny = 8083;
-      uptimeKuma = 3002;
+      scrutiny = 8088;
+      uptimeKuma = 3005;
       gatus = 8111;
     };
     description = "Central port registry (SSoT)";

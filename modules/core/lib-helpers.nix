@@ -201,6 +201,7 @@ in rec {
           ExecStart = "${config.services.${name}.package}/bin/celery -A ${name} worker -l info -c ${toString workerCount}";
           Restart = "always";
           ReadWritePaths = [ stateDir consumeDir mediaDir cacheDir ];
+          MemoryMax = memoryMax; # 🚀 Resource limit for worker
         };
       };
       systemd.services."${name}-beat" = {
@@ -213,6 +214,7 @@ in rec {
           ExecStart = "${config.services.${name}.package}/bin/celery -A ${name} beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler";
           Restart = "always";
           ReadWritePaths = [ stateDir ];
+          MemoryMax = "256M"; # 🚀 Beat is lightweight
         };
       };
       services.postgresql = lib.mkIf usePostgres {

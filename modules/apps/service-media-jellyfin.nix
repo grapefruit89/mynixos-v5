@@ -68,6 +68,18 @@ in
         group = "media";
       };
 
+      # 🚀 RAM-DISK FÜR TRANSCODING (Anti-HDD-Spinup)
+      systemd.mounts = [
+        {
+          where = "/run/jellyfin-transcode";
+          what = "tmpfs";
+          fsType = "tmpfs";
+          options = "size=2G,mode=750,uid=jellyfin,gid=media";
+          wantedBy = [ "jellyfin.service" ];
+          before = [ "jellyfin.service" ];
+        }
+      ];
+
       systemd.services.jellyfin = {
         # QuickSync Treiber-Kontext (Source: Fragment 2272)
         environment = {
@@ -77,15 +89,12 @@ in
         };
 
         # Automatischer Sync der SRE-Encoding-Policy
-        # Transcoding moved to RAM disk (/run/jellyfin-transcode) via RuntimeDirectory
         preStart = ''
           mkdir -p ${srePaths.stateDir}/jellyfin/config
           cp -f ${encodingXml} ${srePaths.stateDir}/jellyfin/config/encoding.xml
         '';
 
         serviceConfig = {
-          RuntimeDirectory = "jellyfin-transcode";
-          RuntimeDirectoryMode = "0750";
           # Netzwerk-Schild (Ergänzend zur Factory)
           IPAddressAllow = [ "127.0.0.1/8" "::1/128" ] 
             ++ config.my.configs.network.lanCidrs

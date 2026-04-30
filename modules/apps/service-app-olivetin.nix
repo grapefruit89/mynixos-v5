@@ -35,6 +35,8 @@ in {
     description = "NMS metadata for olivetin module";
   };
 
+  options.my.services.olivetin.enable = lib.mkEnableOption "OliveTin Web CLI";
+
   config = lib.mkIf config.my.services.olivetin.enable (lib.mkMerge [
     # 🎬 1. AVIATION-GRADE SERVICE FABRIK
     (myLib.mkService {

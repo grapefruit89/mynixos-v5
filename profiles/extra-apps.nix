@@ -9,7 +9,11 @@
     ../modules/apps/service-app-karakeep.nix
     ../modules/apps/service-app-filebrowser.nix
     ../modules/apps/service-app-couchdb.nix
+    ../modules/apps/service-app-linkding.nix
   ];
+
+  # 🟢 Aktivierte Dienste
+  my.services.linkding.enable = true;
 
   # Standard-Metadaten für das Profil
   my.meta.profile_extra = {
