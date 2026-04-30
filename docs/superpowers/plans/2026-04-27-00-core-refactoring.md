@@ -24,15 +24,15 @@ Optimiere das Hardware-Profile für den Q958. Entferne veraltete oder doppelte E
 # Edit temp_mynixos/00-core/host-q958-hardware-profile.nix
 { config, lib, pkgs, ... }:
 {
-  hardware.graphics = {
-    enable = true;
-    extraPackages = with pkgs; [
-      intel-media-driver
-      intel-vaapi-driver
-      libvdpau-va-gl
-    ];
-  };
-  hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+ hardware.graphics = {
+ enable = true;
+ extraPackages = with pkgs; [
+ intel-media-driver
+ intel-vaapi-driver
+ libvdpau-va-gl
+ ];
+ };
+ hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 }
 ```
 
@@ -44,10 +44,10 @@ Sorge dafür, dass `boot-safeguard.nix` nur die allernötigsten Boot-Parameter e
 # Edit temp_mynixos/00-core/boot-safeguard.nix
 { config, lib, ... }:
 {
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-  boot.kernelParams = [ "quiet" "loglevel=3" ];
-  boot.tmp.cleanOnBoot = true;
+ boot.loader.systemd-boot.enable = true;
+ boot.loader.efi.canTouchEfiVariables = true;
+ boot.kernelParams = [ "quiet" "loglevel=3" ];
+ boot.tmp.cleanOnBoot = true;
 }
 ```
 
@@ -77,16 +77,16 @@ Stelle sicher, dass `ports.nix` alle Ports als SSoT exportiert.
 # Edit temp_mynixos/00-core/ports.nix
 { lib, ... }:
 {
-  options.my.ports = lib.mkOption {
-    type = lib.types.attrsOf lib.types.port;
-    default = {
-      vaultwarden = 8222;
-      jellyfin = 8096;
-      paperless = 28981;
-      # Other ports...
-    };
-    description = "Central port registry (SSoT)";
-  };
+ options.my.ports = lib.mkOption {
+ type = lib.types.attrsOf lib.types.port;
+ default = {
+ vaultwarden = 8222;
+ jellyfin = 8096;
+ paperless = 28981;
+ # Other ports...
+ };
+ description = "Central port registry (SSoT)";
+ };
 }
 ```
 
@@ -98,15 +98,15 @@ Zentralisiere Domain und LAN-IPs in `configs.nix`.
 # Edit temp_mynixos/00-core/configs.nix
 { lib, ... }:
 {
-  options.my.configs = {
-    identity = {
-      domain = lib.mkOption { type = lib.types.str; default = "m7c5.de"; };
-      subdomain = lib.mkOption { type = lib.types.str; default = "nix"; };
-    };
-    server = {
-      lanIP = lib.mkOption { type = lib.types.str; default = "192.168.2.73"; };
-    };
-  };
+ options.my.configs = {
+ identity = {
+ domain = lib.mkOption { type = lib.types.str; default = "m7c5.de"; };
+ subdomain = lib.mkOption { type = lib.types.str; default = "nix"; };
+ };
+ server = {
+ lanIP = lib.mkOption { type = lib.types.str; default = "192.168.2.73"; };
+ };
+ };
 }
 ```
 
@@ -135,28 +135,28 @@ Erweitere `mkService` so, dass es Systemd-Sandboxing und Caddy-Reverse-Proxy-Log
 # Edit temp_mynixos/00-core/lib-helpers.nix
 { lib, ... }:
 let
-  # Fallback helper for missing dns-map
-  getDomain = config: name: "${name}.${config.my.configs.identity.subdomain}.${config.my.configs.identity.domain}";
+ # Fallback helper for missing dns-map
+ getDomain = config: name: "${name}.${config.my.configs.identity.subdomain}.${config.my.configs.identity.domain}";
 in {
-  mkService = { config, name, port ? null, useSSO ? true, description ? "Managed Service", netns ? null }:
-  let
-    finalPort = if port != null then port else config.my.ports.${name};
-    targetUrl = "http://${if netns != null then "10.200.1.2" else "127.0.0.1"}:${toString finalPort}";
-    hostName = getDomain config name;
-  in {
-    systemd.services.${name}.serviceConfig = {
-      Description = description;
-      ProtectSystem = "strict";
-      ProtectHome = true;
-      PrivateTmp = true;
-      NoNewPrivileges = true;
-    };
+ mkService = { config, name, port ? null, useSSO ? true, description ? "Managed Service", netns ? null }:
+ let
+ finalPort = if port != null then port else config.my.ports.${name};
+ targetUrl = "http://${if netns != null then "10.200.1.2" else "127.0.0.1"}:${toString finalPort}";
+ hostName = getDomain config name;
+ in {
+ systemd.services.${name}.serviceConfig = {
+ Description = description;
+ ProtectSystem = "strict";
+ ProtectHome = true;
+ PrivateTmp = true;
+ NoNewPrivileges = true;
+ };
 
-    services.caddy.virtualHosts.${hostName}.extraConfig = ''
-      ${lib.optionalString useSSO "import sso_auth"}
-      reverse_proxy ${targetUrl}
-    '';
-  };
+ services.caddy.virtualHosts.${hostName}.extraConfig = ''
+ ${lib.optionalString useSSO "import sso_auth"}
+ reverse_proxy ${targetUrl}
+ '';
+ };
 }
 ```
 
@@ -185,18 +185,18 @@ Implementiere das NMS (NixOS Management System) Metadaten-Schema, um Traceabilit
 # Edit temp_mynixos/00-core/lib-helpers-meta.nix
 { lib, ... }:
 {
-  options.my.meta = lib.mkOption {
-    type = lib.types.attrsOf (lib.types.submodule {
-      options = {
-        id = lib.mkOption { type = lib.types.str; };
-        title = lib.mkOption { type = lib.types.str; };
-        layer = lib.mkOption { type = lib.types.int; };
-        audit.last_reviewed = lib.mkOption { type = lib.types.str; };
-      };
-    });
-    default = {};
-    description = "NMS Traceability Metadata";
-  };
+ options.my.meta = lib.mkOption {
+ type = lib.types.attrsOf (lib.types.submodule {
+ options = {
+ id = lib.mkOption { type = lib.types.str; };
+ title = lib.mkOption { type = lib.types.str; };
+ layer = lib.mkOption { type = lib.types.int; };
+ audit.last_reviewed = lib.mkOption { type = lib.types.str; };
+ };
+ });
+ default = {};
+ description = "NMS Traceability Metadata";
+ };
 }
 ```
 

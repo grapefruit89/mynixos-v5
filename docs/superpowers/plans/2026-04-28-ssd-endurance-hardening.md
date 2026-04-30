@@ -20,11 +20,11 @@
 
 ```nix
 systemd.services.sabnzbd = {
-  serviceConfig = {
-    # 🚀 RAM-DISK for Incomplete Downloads (Max 8GB for 16GB System)
-    RuntimeDirectory = "sabnzbd-tmp";
-    RuntimeDirectoryMode = "0750";
-  };
+ serviceConfig = {
+ # 🚀 RAM-DISK for Incomplete Downloads (Max 8GB for 16GB System)
+ RuntimeDirectory = "sabnzbd-tmp";
+ RuntimeDirectoryMode = "0750";
+ };
 };
 ```
 
@@ -48,7 +48,7 @@ git commit -m "perf(sabnzbd): move incomplete downloads to RAM disk"
 
 ```nix
 let
-  logDir = "${srePaths.tierC}/logs/system";
+ logDir = "${srePaths.tierC}/logs/system";
 in
 # ... change sinks.file.path ...
 ```

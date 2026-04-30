@@ -52,7 +52,7 @@ The script checks if `/dev/disk/by-id/...` is spinning (via `hdparm -C`). If spi
 IS_AWAKE=$(hdparm -C /dev/sdX | grep -c "active/idle" || true)
 
 if [ "$FREE_GB" -ge "$LOW_THRESHOLD_GB" ] && [ "$IS_AWAKE" -eq 0 ]; then
-  echo "Disk is sleeping and space is OK. Sleeping too."
-  exit 0
+ echo "Disk is sleeping and space is OK. Sleeping too."
+ exit 0
 fi
 ```

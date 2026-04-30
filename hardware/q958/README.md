@@ -34,4 +34,4 @@ In accordance with **ADR-001 (Hardware-Geist Separation)**, all physical identif
 - **Sysctl:** `vm.swappiness=10` ensures the system only swaps to ZRAM when absolutely necessary.
 
 ---
-*Last Audit: 2026-04-27 | Status: AVIATION-GRADE*
+*Last Audit: 2026-04-27 | Status: hardened*

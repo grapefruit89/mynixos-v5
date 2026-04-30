@@ -10,7 +10,7 @@ Integrate Navidrome as the primary audio streaming server into the NixOS home la
 
 ## 2. Context & Constraints
 - **Architecture:** Horizontal Responsibility (v5.0).
-- **Hardening:** Aviation-Grade (SSO, LAN Bypass, Systemd hardening).
+- **Hardening:** hardened (SSO, LAN Bypass, Systemd hardening).
 - **Storage:** ABC-Tiering (Tier A for State, Tier B for Cache, Tier C for Bulk Media).
 - **Patterns:** Use `myLib.mkStreamer` factory.
 - **Port:** 4533 (Already registered in `ports.nix`).

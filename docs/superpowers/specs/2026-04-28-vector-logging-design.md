@@ -10,7 +10,7 @@ Implement a persistent logging pipeline that survives reboots (surmounting the c
 
 ## 2. Context & Constraints
 - **Architecture:** Horizontal Responsibility (v5.0).
-- **Hardening:** Aviation-Grade (Sensitive data masking).
+- **Hardening:** hardened (Sensitive data masking).
 - **Storage:** Tier B (SSD) for log archives to avoid NVMe wear and RAM usage.
 - **Framework:** Vector (Lightweight, Go/Rust-based).
 
@@ -19,13 +19,13 @@ Implement a persistent logging pipeline that survives reboots (surmounting the c
 ### 3.1 New Module: `modules/logging/vector-tier-b.nix`
 - **Source:** Pulls from `journald`.
 - **Transform:** 
-    - Masking of `/mnt/media`, `/mnt/hdd_pool`, `/mnt/tierC`.
-    - Masking of filenames (mkv, mp4, etc.).
-    - Masking of API keys (32+ chars).
+ - Masking of `/mnt/media`, `/mnt/hdd_pool`, `/mnt/tierC`.
+ - Masking of filenames (mkv, mp4, etc.).
+ - Masking of API keys (32+ chars).
 - **Sink:** 
-    - Local file on Tier B (`${srePaths.tierB}/logs/vector/journal-%Y-%m-%d.log.gz`).
-    - Format: NDJSON.
-    - Compression: GZIP.
+ - Local file on Tier B (`${srePaths.tierB}/logs/vector/journal-%Y-%m-%d.log.gz`).
+ - Format: NDJSON.
+ - Compression: GZIP.
 - **Rotation:** 14-day retention via `find` script and `systemd.timer`.
 
 ### 3.2 Profile Integration

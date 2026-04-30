@@ -24,14 +24,14 @@ Add `restic_password`, `backblaze_access_key`, and `backblaze_secret_key` to `so
 Add `templates."backblaze-restic.env"` to provide `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
 
 ```nix
-      templates."backblaze-restic.env" = {
-        owner = "root";
-        mode = "0400";
-        content = ''
-          AWS_ACCESS_KEY_ID="${config.sops.placeholder.backblaze_access_key}"
-          AWS_SECRET_ACCESS_KEY="${config.sops.placeholder.backblaze_secret_key}"
-        '';
-      };
+ templates."backblaze-restic.env" = {
+ owner = "root";
+ mode = "0400";
+ content = ''
+ AWS_ACCESS_KEY_ID="${config.sops.placeholder.backblaze_access_key}"
+ AWS_SECRET_ACCESS_KEY="${config.sops.placeholder.backblaze_secret_key}"
+ '';
+ };
 ```
 
 - [ ] **Step 3: Commit**
@@ -51,24 +51,24 @@ git commit -m "chore(secrets): add backblaze and restic secret definitions"
 - [ ] **Step 1: Add the 'persist' job**
 
 ```nix
-    services.restic.backups.persist = {
-      initialize = true;
-      repository = "s3:https://s3.eu-central-003.backblazeb2.com/nixhome-persist";
-      passwordFile = config.sops.secrets.restic_password.path;
-      environmentFile = config.sops.templates."backblaze-restic.env".path;
+ services.restic.backups.persist = {
+ initialize = true;
+ repository = "s3:https://s3.eu-central-003.backblazeb2.com/nixhome-persist";
+ passwordFile = config.sops.secrets.restic_password.path;
+ environmentFile = config.sops.templates."backblaze-restic.env".path;
 
-      paths = [ "/persist" ];
-      exclude = [ "**/.cache" "**/tmp" ];
+ paths = [ "/persist" ];
+ exclude = [ "**/.cache" "**/tmp" ];
 
-      pruneOpts = [ "--keep-daily 7" "--keep-weekly 4" "--keep-monthly 6" ];
-      
-      timerConfig = {
-        OnCalendar = "03:00";
-        Persistent = true;
-      };
-      
-      extraOptions = [ "--compression=max" ];
-    };
+ pruneOpts = [ "--keep-daily 7" "--keep-weekly 4" "--keep-monthly 6" ];
+ 
+ timerConfig = {
+ OnCalendar = "03:00";
+ Persistent = true;
+ };
+ 
+ extraOptions = [ "--compression=max" ];
+ };
 ```
 
 - [ ] **Step 2: Commit**

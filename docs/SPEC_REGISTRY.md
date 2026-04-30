@@ -4,9 +4,9 @@ Dieses Dokument ist die zentrale Master-Source für Traceability und Inspiration
 ## 🧬 Traceability Matrix
 
 > [!warning] SRE Audit Befunde (Stand 2026-03-02)
-> *   **CRITICAL BUG:** `PrivateDevices = true` in `jellyfin.nix` bricht das Hardware-Transcoding. (BEHOBEN in v4.0)
-> *   **ARCHITECTURAL GAP:** Fehlendes `mkEnableOption` Pattern. (BEHOBEN in v4.0 via registry.nix)
-> *   **DEPRECATION:** Deprecated Intel-Treiber entfernt. (BEHOBEN in v4.0)
+> * **CRITICAL BUG:** `PrivateDevices = true` in `jellyfin.nix` bricht das Hardware-Transcoding. (BEHOBEN in v4.0)
+> * **ARCHITECTURAL GAP:** Fehlendes `mkEnableOption` Pattern. (BEHOBEN in v4.0 via registry.nix)
+> * **DEPRECATION:** Deprecated Intel-Treiber entfernt. (BEHOBEN in v4.0)
 
 | ID | Nix-Modul | Dokumentation (MetaBib) | Inspiration / Vorbild |
 |---|---|---|---|

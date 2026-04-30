@@ -21,26 +21,26 @@
 ```nix
 { config, pkgs, lib, myLib, ... }:
 let
-  srePaths = config.my.configs.paths;
-  ssdMetadataDir = "${srePaths.tierB}/metadata/jellyfin";
+ srePaths = config.my.configs.paths;
+ ssdMetadataDir = "${srePaths.tierB}/metadata/jellyfin";
 in
 {
-  # ... existing mkStreamer ...
-  config = lib.mkIf cfg.enable (lib.mkMerge [
-    {
-      # Ensure SSD directory exists
-      systemd.tmpfiles.rules = [
-        "d ${ssdMetadataDir} 0775 jellyfin media - -"
-      ];
+ # ... existing mkStreamer ...
+ config = lib.mkIf cfg.enable (lib.mkMerge [
+ {
+ # Ensure SSD directory exists
+ systemd.tmpfiles.rules = [
+ "d ${ssdMetadataDir} 0775 jellyfin media - -"
+ ];
 
-      # Bind-Mount SSD Metadata to Jellyfin's standard path
-      fileSystems."/var/lib/jellyfin/metadata" = {
-        device = ssdMetadataDir;
-        options = [ "bind" "noatime" ];
-        depends = [ "${srePaths.tierB}" ];
-      };
-    }
-  ]);
+ # Bind-Mount SSD Metadata to Jellyfin's standard path
+ fileSystems."/var/lib/jellyfin/metadata" = {
+ device = ssdMetadataDir;
+ options = [ "bind" "noatime" ];
+ depends = [ "${srePaths.tierB}" ];
+ };
+ }
+ ]);
 }
 ```
 
@@ -61,8 +61,8 @@ git commit -m "perf(jellyfin): move metadata (thumbnails/fanart) to SSD Tier B"
 
 ```nix
 services.udev.extraRules = ''
-  # Aviation-Grade HDD Spindown: 10 Minutes (120 * 5s)
-  ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", RUN+="${pkgs.hdparm}/bin/hdparm -B 127 -S 120 /dev/%k"
+ # hardened HDD Spindown: 10 Minutes (120 * 5s)
+ ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", RUN+="${pkgs.hdparm}/bin/hdparm -B 127 -S 120 /dev/%k"
 '';
 ```
 
@@ -81,11 +81,11 @@ Make it read enough metadata to keep the tree in RAM.
 
 ```nix
 systemd.services.hdd-inode-warmer = {
-  description = "Refined Inode Warmer for HDD Ghost-Tree";
-  serviceConfig = {
-    Type = "oneshot";
-    ExecStart = "${pkgs.findutils}/bin/find /mnt/hdd_pool -mindepth 1 -maxdepth 5 -exec stat {} +";
-  };
+ description = "Refined Inode Warmer for HDD Ghost-Tree";
+ serviceConfig = {
+ Type = "oneshot";
+ ExecStart = "${pkgs.findutils}/bin/find /mnt/hdd_pool -mindepth 1 -maxdepth 5 -exec stat {} +";
+ };
 };
 ```
 

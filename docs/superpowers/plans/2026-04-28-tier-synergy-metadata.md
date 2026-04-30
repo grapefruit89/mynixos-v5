@@ -38,7 +38,7 @@ Each file gets a header like:
 # nms_id: APP-MEDIA-001
 # title: Jellyfin Media Server
 # capabilities: [ "streaming", "transcoding", "metadata-caching" ]
-# status: "aviation-hardened"
+# status: "hardened"
 # ---
 ```
 
