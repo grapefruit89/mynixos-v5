@@ -65,12 +65,12 @@ in {
  # DNS Support für das LAN (AdGuard)
  ip saddr ${lanCidr} tcp dport 53 accept
  ip saddr ${lanCidr} udp dport 53 accept
- ip6 saddr { ::1/128, fe80::/10 } tcp dport 53 accept
- ip6 saddr { ::1/128, fe80::/10 } udp dport 53 accept
+ ip6 saddr { ::1/128, fe80::/10, fd7a:115c:a1e0::/48 } tcp dport 53 accept
+ ip6 saddr { ::1/128, fe80::/10, fd7a:115c:a1e0::/48 } udp dport 53 accept
  
  # mDNS für lokale Auflösung
  ip saddr ${lanCidr} udp dport 5353 accept
- ip6 saddr { ::1/128, fe80::/10 } udp dport 5353 accept
+ ip6 saddr { ::1/128, fe80::/10, fd7a:115c:a1e0::/48 } udp dport 5353 accept
  
  # ICMP (Ping)
  ip protocol icmp accept
