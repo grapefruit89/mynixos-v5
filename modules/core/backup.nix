@@ -51,14 +51,14 @@ in {
 
  # 🛡️ PRE-FLIGHT CHECK (SRE-Standard)
  backupPrepareCommand = ''
- DATA_SIZE=$(${pkgs.coreutils}/bin/du -sb /data/state /etc/nixos | ${pkgs.gawk}/bin/awk '{sum+=$1} END {print sum}')
+ # Validierung aller Pfade inkl. /persist und /var/lib/pocket-id
+ DATA_SIZE=$(${pkgs.coreutils}/bin/du -sb /data/state /etc/nixos /persist /var/lib/pocket-id | ${pkgs.gawk}/bin/awk '{sum+=$1} END {print sum}')
  LIMIT=$(( ${toString maxSizeGB} * 1024 * 1024 * 1024 ))
  if [ "$DATA_SIZE" -gt "$LIMIT" ]; then
  echo "🚨 BACKUP ABGEBROCHEN: Datenmenge ($DATA_SIZE) > Limit ($LIMIT)!"
  exit 1
  fi
  '';
-
  # ☁️ CLOUD SYNC (Fragment 748 Fix: Atomarer Post-Stop)
  backupCleanupCommand = ''
  echo "📤 Starte Cloud-Sync..."
