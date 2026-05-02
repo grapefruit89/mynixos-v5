@@ -19,6 +19,7 @@
   # SSoT Integration
   sshPort = config.my.ports.ssh;
   lanCidr = config.my.configs.network.lanCidr;
+  lanCidrV6 = config.my.configs.network.lanCidrV6;
 in {
   options.my.meta.firewall = lib.mkOption {
     type = lib.types.attrs;
@@ -65,9 +66,12 @@ in {
         # DNS Support für das LAN (AdGuard)
         ip saddr ${lanCidr} tcp dport 53 accept
         ip saddr ${lanCidr} udp dport 53 accept
+        ip6 saddr ${lanCidrV6} tcp dport 53 accept
+        ip6 saddr ${lanCidrV6} udp dport 53 accept
         
         # mDNS für lokale Auflösung
         ip saddr ${lanCidr} udp dport 5353 accept
+        ip6 saddr ${lanCidrV6} udp dport 5353 accept
         
         # ICMP (Ping)
         ip protocol icmp accept
