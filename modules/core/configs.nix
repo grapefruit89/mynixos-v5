@@ -51,6 +51,11 @@
         default = [ "100.64.0.0/10" ];
         description = "Tailscale network range";
       });
+      lanCidrV6 = myLib.mkTracedOption "SRC-SPEC-FIREWALL" (lib.mkOption {
+        type = lib.types.str;
+        default = "fd7a:115c:a1e0::/48";
+        description = "Trusted local IPv6 range (Tailscale/ULA)";
+      });
     };
 
     locale = {
