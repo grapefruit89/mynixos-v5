@@ -65,13 +65,13 @@ in {
  actions = [
  {
  title = "SOPS: Neues Secret";
- shell = "sudo ${sopsScript} '{{ secret_key }}' '{{ secret_value }}'";
+ shell = "sudo ${sopsScript} \"$secret_key\" \"$secret_value\"";
  icon = "&#128272;";
  arguments = [ { name = "secret_key"; type = "ascii"; } { name = "secret_value"; type = "ascii"; } ];
  }
  {
  title = "mTLS: Client Zertifikat erstellen";
- shell = "sudo ${mtlsGenScript} '{{ client_name }}'";
+ shell = "sudo ${mtlsGenScript} \"$client_name\"";
  icon = "🔑";
  arguments = [ { name = "client_name"; type = "ascii"; } ];
  }

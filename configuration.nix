@@ -58,6 +58,7 @@ in
  caddy.enable = true;
  postgresql.enable = true;
  linkding.enable = true;
+ olivetin.enable = false;
  };
 
  my.media.storagePool.enable = true;

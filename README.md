@@ -1,58 +1,55 @@
 # NixHome
 
-NixOS-basierte Homelab-Konfiguration (v5.0) mit horizontaler Modulstruktur, fokussiert auf Daten-Tiering und Identitätsmanagement.
+NixOS-based homelab configuration utilizing a **Horizontal Responsibility (v5.0)** architecture. This repository provides a modular, reproducible, and hardened infrastructure for personal services and data management.
 
-## 💾 Storage-Architektur (ABC-Tiering)
+## Key Features
 
-Das System verteilt Daten basierend auf Latenz- und Haltbarkeitsanforderungen über drei Ebenen:
+- **Horizontal Responsibility (v5.0):** Strict separation of concerns across hardware, users, and service modules.
+- **Impermanence:** Root filesystem reset on every boot using `impermanence` and ZFS snapshots (or Btrfs subvolumes).
+- **Hardened Security:** 
+  - Restrictive systemd sandboxing for all services.
+  - Titanium-hardened kernel configurations and sysctls.
+  - OIDC/SSO integration via **Pocket-ID** for unified identity management.
+- **Secret Management:** Secure handling of credentials via **sops-nix** with age-based encryption.
+- **ABC-Tiering Storage:** Automated data movement across NVMe (Hot), SSD (Warm), and HDD (Cold) tiers with WAL-safe migration scripts.
+- **Single Source of Truth (SSoT):** Centralized port registry (`ports.nix`) and domain/hardware configuration (`configs.nix`).
 
-| Tier | Hardware | Mountpoint | Nutzung | Besonderheiten |
-| :--- | :--- | :--- | :--- | :--- |
-| **A** | NVMe | `/persist` | OS, DBs, `/data/state` | Persistent via Impermanence |
-| **B** | SATA SSD | `/mnt/cache` | Incomplete Downloads, Transcodes | Schonung der NVMe-Zyklen |
-| **C** | HDD Mirror | `/mnt/hdd_pool` | Bulk Media, Backups | Spindown nach 10 Min. |
+## Repository Structure
 
-### Smart Mover
-Ein systemd-Service überwacht Tier B. Bei Unterschreitung von 20GB freiem Speicher werden die ältesten Dateien via `rsync --remove-source-files` nach Tier C verschoben. 
-- **Sicherheitsregeln:** Datenbank-Dateien (`.wal`, `.db`, `.sqlite`) sind von der Verschiebung ausgeschlossen.
-- **Zustandsprüfung:** Verschiebung erfolgt primär, wenn die HDDs bereits aktiv sind, um unnötige Spin-ups zu vermeiden.
+```text
+.
+├── hardware/           # Machine-specific hardware configurations
+├── modules/            # Reusable NixOS modules
+│   ├── apps/           # High-level applications (Vaultwarden, Linkding, etc.)
+│   ├── core/           # SSoT configs (ports, networking, lib-helpers)
+│   ├── security/       # Kernel hardening, SOPS, and SSO modules
+│   ├── services/       # Infrastructure services (Caddy, Pocket-ID, etc.)
+│   └── storage/        # Storage management and mover scripts
+├── profiles/           # High-level system profiles (Server, Workstation)
+└── users/              # User-specific home-manager and system configurations
+```
 
-## 🌐 Dienste & Netzwerkzugriff
+## Getting Started
 
-Die Dienste sind in zwei Zonen unterteilt. Der Zugriff erfolgt über Caddy als Edge-Proxy.
+### 1. Prerequisites
+- A running NixOS system with Flakes enabled.
+- `age` or `gpg` keys configured for SOPS.
 
-### Frontend (Öffentlich via Cloudflare/Caddy)
-- **Media:** Jellyfin, Audiobookshelf, Navidrome
-- **Requests:** Jellyseerr
-- **Smart Home:** Home Assistant
+### 2. Secret Population
+Initialize your secrets by creating a `secrets.yaml` file based on the provided template:
+```bash
+cp secrets.yaml.example secrets/secrets.yaml
+sops secrets/secrets.yaml
+```
 
-### Backend (Nur Tailscale / Lokales LAN)
-- **Download:** Radarr, Sonarr, Prowlarr, Lidarr, Readarr, SABnzbd
-- **Automation:** n8n, Semaphore
-- **Produktivität:** Paperless-ngx, Vaultwarden, Linkding, Monica, Readeck
-- **Infrastruktur:** AdGuard Home, Netdata, Scrutiny, Cockpit, Filebrowser
+### 3. Deployment
+Apply the configuration to your local machine:
+```bash
+nixos-rebuild switch --flake .#your-hostname
+```
 
-## 🔐 Authentifizierung & Sicherheit
+## Maintenance
 
-- **SSO:** Pocket-ID (OIDC) ist für alle Web-Dienste verpflichtend.
-- **Keine Bypässe:** IP-basierte Ausnahmen für LAN oder Tailscale wurden entfernt; jeder Zugriff erfordert einen gültigen Token.
-- **Impermanence:** Das Root-Dateisystem ist ein `tmpfs`. Nur explizit unter `/persist` gelistete Pfade überdauern einen Neustart.
-- **Runtime Guard:** Ein Watchdog prüft periodisch den Status der nftables-Regelsätze und des Kernel-Lockdowns.
-- **Fail2ban:** Schützt SSH (Port 22) und die SSH-Rescue-Instanz (Port 2222).
-
-## 🛠️ Entwicklung & Installation
-
-### Struktur
-- `modules/core/`: Systemgrundlagen (Netzwerk, Dateisysteme, Sops).
-- `modules/security/`: Security-Policies und Runtime-Monitoring.
-- `modules/apps/`: Applikations-Module (nutzen zentrale Service-Factories).
-- `modules/services/`: Infrastruktur-Dienste (Caddy, Tailscale, SSO).
-
-### Container-Management
-Das System verzichtet auf die automatische Erstellung von Docker-Containern. Sofern Docker genutzt wird, erfolgt die Pflege der Container manuell außerhalb der Nix-Konfiguration.
-
-## ⚠️ Bekannte Einschränkungen
-
-- **Transcoding:** Jellyfin nutzt Tier B (SSD) für temporäre Daten, um RAM-Überläufe (`/dev/shm`) bei hochbitratigen 4K-Streams zu verhindern.
-- **MergerFS:** `cache.files` ist auf `off` gesetzt, um Inkonsistenzen bei parallelen Schreibvorgängen durch den Mover zu vermeiden.
-- **Sops-Deadlock:** Bei Totalausfall von Tier A (NVMe) fehlen die SSH-Hostkeys zur Entschlüsselung der Secrets. Ein physischer Emergency-Key (USB) wird als Fallback empfohlen.
+- **Update Modules:** `nix flake update`
+- **Storage Management:** The storage mover runs periodically to balance data across tiers while respecting WAL/SHM file locks.
+- **Security Audits:** Check `modules/security/security-assertions.nix` for policy compliance reports.

@@ -4,6 +4,7 @@
 
 ### ✅ Completed (Architecture & Hardening)
 - **v5.0 Core:** Horizontal Responsibility Design implemented.
+- **Security Assertions:** Non-blocking warnings (Soft-Mode) implemented to avoid development friction.
 - **Identity:** Strict SSO (Pocket-ID) for all services, no IP-bypasses.
 - **Storage:** ABC-Tiering with Smart Mover (SSD → HDD) and transactional safety.
 - **Networking:** nftables Geoblock (DE/AT/LT) and 3-Stage DDoS Shield in Caddy.
@@ -11,9 +12,9 @@
 - **Resilience:** Sops-Fallback for Tier A failure prepared on Tier B.
 - **Apps (P6):** Linkding implemented, Vaultwarden active.
 
-### 🚫 Excluded / Deferred
+### 🚫 Excluded / Removed
 - **Semaphore:** Removed from current implementation plan.
-- **RAG / Knowledge Pipeline:** Priority 7 canceled/deferred per user request.
+- **RAG / Knowledge Pipeline:** Permanently canceled and removed from scope.
 
 ---
 
@@ -36,6 +37,24 @@
 - [x] **API Compatibility:** Exceptions for native apps (/api, /Users, /jellyfin).
 - [x] **Isolation:** Closed port 80 and SSH (53844) for public WAN.
 - [x] **Integrity:** `cache.files=off` in MergerFS to prevent metadata drift.
+
+---
+
+## 🛠️ Next Sortie: Residual Todo List (Current Audit Results)
+
+### 🔴 CRITICAL (Deployment Blocker)
+- [ ] **Manual Secret Population:** `secrets/secrets.yaml` befüllen (`user_password`, `freund_password`, `restic_password`, `backblaze_keys`).
+
+### 🟠 HIGH (Security & Reliability)
+- [ ] **IPv6 LAN Parity:** `firewall.nix` um `ip6 saddr` Regeln für DNS (53) und mDNS (5353) erweitern.
+- [ ] **Backup Validation:** `backupPrepareCommand` in `backup.nix` um `/persist` und `/var/lib/pocket-id` erweitern.
+
+### 🟡 MEDIUM (Optimization)
+- [ ] **Vector Log-Rotation:** Placeholder in `vector-hdd.nix` durch echte Logik ersetzen.
+- [ ] **Gatus Hardening:** Bind-Adresse von `0.0.0.0` auf `127.0.0.1` ändern.
+- [ ] **Jellyfin Config:** `encoding.xml` Management verbessern (Pre-Start Script durch stabilere Lösung ersetzen).
+
+---
 
 ### 🧩 System Maintenance & Cleanup
 - [x] **WORKSPACE_MAP.md:** Central index for faster navigation created.
