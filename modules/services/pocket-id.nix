@@ -18,7 +18,7 @@
   cfg = config.my.services.pocketId;
   domain = config.my.configs.identity.domain;
   subdomain = config.my.configs.identity.subdomain;
-  port = config.my.ports.pocketId;
+  port = config.my.ports."pocket-id";
 in {
   # 🧬 Audit-Compliance: Metadaten als echtes Nix-Attribut
   options.my.meta.pocketId = lib.mkOption {

@@ -210,7 +210,8 @@ in {
             not remote_ip 127.0.0.1
             not header_regexp host ^auth\.
           }
-          forward_auth @needs_auth localhost:${toString config.my.ports.pocketId} {
+          # FW-NEW-01 FIX: Use Unix Socket for forward_auth if available
+          forward_auth @needs_auth unix//run/pocket-id/pocket-id.sock {
             uri /api/auth/verify
             copy_headers X-Forwarded-User
           }
@@ -277,7 +278,7 @@ in {
         
         # Holy State Persistence
         StateDirectory = "caddy"; 
-        ReadWritePaths = [ "/var/lib/caddy" "/var/log/caddy" ];
+        ReadWritePaths = [ "/var/lib/caddy" "/var/log/caddy" "/run/pocket-id" "/run/ca-server" ];
         
         # Hardening Shield
         ProtectSystem = "strict";

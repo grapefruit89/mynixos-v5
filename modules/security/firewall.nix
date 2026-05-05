@@ -44,9 +44,10 @@ in {
             # 1. Allow established/related (Standard)
             ct state established,related accept
 
-            # 2. Allow Loopback & Admin Zone (127.0.0.2)
-            # FW-01 FIX: Bound to Caddy UID (assuming 'caddy' user)
-            iif "lo" accept
+            # 2. Allow Loopback (except Admin Zone 127.0.0.2 which needs UID check)
+            iif "lo" ip daddr != 127.0.0.2 accept
+            
+            # FW-01 FIX: Admin Zone (127.0.0.2) bound to Caddy UID
             ip daddr 127.0.0.2 meta skuid caddy accept
 
             # 3. Allow ICMP (Ping)
@@ -59,11 +60,11 @@ in {
             tcp dport { 80, 443 } ip saddr != @allowed_countries counter drop
             tcp dport { 80, 443 } ip6 saddr != @allowed_countries_v6 counter drop
 
-            # 4b. TOR-BLOCKING (FW-04 FIX)
-            ip saddr @tor_exit_nodes counter drop
+            # 4b. TOR-BLOCKING (FW-03/04 FIX)
+            ${lib.optionalString cfg.blockTor "ip saddr @tor_exit_nodes counter drop"}
 
             # 5. Global SSH Protection (Tailscale Only)
-            iifname "tailscale0" tcp dport 22 accept
+            iifname "tailscale0" tcp dport ${toString config.my.ports.ssh} accept
             
             # 6. Log & Drop anything else
             counter log prefix "NFT_DROP: " drop

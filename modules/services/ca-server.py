@@ -6,7 +6,8 @@ import shutil
 import json
 import re
 from pathlib import Path
-from flask import Flask, request, render_template_string, send_file, redirect, url_for
+import secrets
+from flask import Flask, request, render_template_string, send_file, redirect, url_for, session
 
 # Configuration
 # CA-01 FIX: Use .resolve() for absolute path stability
@@ -18,6 +19,7 @@ CA_CERT = "/etc/caddy/ca.crt"
 CA_KEY  = "/run/secrets/ca.key"  # Decrypted by sops-nix
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", secrets.token_hex(32))
 
 HTML_TEMPLATE = """
 <!doctype html>
@@ -49,6 +51,7 @@ HTML_TEMPLATE = """
         <h2>🛡️ Neues TPM-Zertifikat signieren (CSR)</h2>
         <p class="hint">Lade hier den auf deinem Admin-Laptop erzeugten CSR hoch.</p>
         <form method="post" action="/sign" enctype="multipart/form-data">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <input type="text" name="name" placeholder="Gerätename (z.B. Admin-Laptop)" required>
           <input type="file" name="csr" required>
           <button type="submit">Signieren & Download</button>
@@ -70,7 +73,12 @@ HTML_TEMPLATE = """
                 <tr>
                     <td><strong>{{ cert.name }}</strong></td>
                     <td>{{ cert.created }}</td>
-                    <td><a href="/delete/{{ cert.id }}" class="btn-delete" onclick="return confirm('Zertifikat wirklich löschen?')">Löschen</a></td>
+                    <td>
+                        <form method="post" action="/delete/{{ cert.id }}" style="display:inline;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="btn-delete" style="background:none;border:none;padding:0;font:inherit;cursor:pointer;" onclick="return confirm('Zertifikat wirklich löschen?')">Löschen</button>
+                        </form>
+                    </td>
                 </tr>
                 {% endfor %}
                 {% if not certs %}
@@ -84,6 +92,11 @@ HTML_TEMPLATE = """
 </body>
 </html>
 """
+
+@app.before_request
+def generate_csrf_token():
+    if "csrf_token" not in session:
+        session["csrf_token"] = secrets.token_hex(16)
 
 @app.route("/")
 def index():
@@ -102,10 +115,14 @@ def index():
                         })
                     except:
                         pass
-    return render_template_string(HTML_TEMPLATE, certs=certs)
+    return render_template_string(HTML_TEMPLATE, certs=certs, csrf_token=session.get("csrf_token"))
 
 @app.route("/sign", methods=["POST"])
 def sign():
+    # CA-03 FIX: CSRF Validation
+    if request.form.get("csrf_token") != session.get("csrf_token"):
+        return "CSRF Token missing or invalid", 403
+
     # CA-02 FIX: Sanitize input name strictly (Whitelist regex)
     raw_name = request.form.get("name", "Unknown").strip()
     name = re.sub(r'[^a-zA-Z0-9_-]', '', raw_name)[:64]
@@ -160,8 +177,12 @@ def sign():
 
     return send_file(crt_path, as_attachment=True, download_name=f"{name}.crt")
 
-@app.route("/delete/<dirname>")
+@app.route("/delete/<dirname>", methods=["POST"])
 def delete(dirname):
+    # CA-03 FIX: CSRF Validation
+    if request.form.get("csrf_token") != session.get("csrf_token"):
+        return "CSRF Token missing or invalid", 403
+
     # CA-01 FIX: Resolve path and check parents correctly to prevent traversal
     dir_to_delete = (CERT_DIR / dirname).resolve()
     if dir_to_delete.is_dir() and (CERT_DIR.resolve() in dir_to_delete.parents):

@@ -46,6 +46,24 @@ in
           exit 1
         fi
 
+        # 4. Check Admin-Zone Alias (127.0.0.2)
+        if ! ${pkgs.iproute2}/bin/ip addr show lo | grep -q "127.0.0.2"; then
+          echo "🛑 SECURITY ALERT: Admin-mTLS Alias 127.0.0.2 is MISSING!"
+          exit 1
+        fi
+
+        # 5. Check SOPS Canary Secret (Cloudflare Token)
+        if [ ! -s /run/secrets/cloudflare_token ]; then
+          echo "🛑 SECURITY ALERT: SOPS secret 'cloudflare_token' is missing or empty!"
+          exit 1
+        fi
+
+        # 6. Check Caddy Ingress (Port 443)
+        if ! ${pkgs.iproute2}/bin/ss -tlnp | grep -q ":443"; then
+          echo "🛑 SECURITY ALERT: Caddy is NOT listening on Port 443!"
+          exit 1
+        fi
+
         echo "✅ Runtime Security Check passed."
       '';
     };
