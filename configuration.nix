@@ -22,6 +22,7 @@ in
     inputs.impermanence.nixosModules.impermanence
     
     # 🛠️ 2. SHARED SYSTEM LOGIC (CORE)
+    ./services-spec.nix
     ./modules/core/configs.nix
     ./modules/core/ports.nix
     ./modules/core/registry.nix

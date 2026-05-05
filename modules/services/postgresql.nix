@@ -30,6 +30,12 @@ in
       ensureUsers = [ { name = "miniflux"; ensureDBOwnership = true; } { name = "paperless"; ensureDBOwnership = true; } { name = "n8n"; ensureDBOwnership = true; } ];
       enableJIT = true;
       settings = {
+        # 🛡️ AVIATION HARDENING: Disable TCP, use Unix Sockets only
+        listen_addresses = "";
+        port = 0;
+        unix_socket_directories = "/run/postgresql";
+        unix_socket_permissions = "0770"; # Owner (postgres) + Group (postgres) access
+
         shared_buffers = "512MB"; effective_cache_size = "4GB"; maintenance_work_mem = "128MB"; checkpoint_completion_target = 0.9;
         wal_buffers = "16MB"; default_statistics_target = 100; random_page_cost = 1.1; effective_io_concurrency = 200;
         work_mem = "8MB"; min_wal_size = "512MB"; max_wal_size = "2GB"; huge_pages = "try";
@@ -37,7 +43,18 @@ in
       };
     };
     services.postgresqlBackup = { enable = true; databases = [ "miniflux" "paperless" "n8n" ]; location = "/data/state/backups/postgresql"; startAt = "01:30"; };
-    systemd.services.postgresql.serviceConfig = { ProtectSystem = "strict"; ProtectHome = true; PrivateTmp = true; PrivateDevices = true; NoNewPrivileges = true; SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" ]; OOMScoreAdjust = -900; };
+    systemd.services.postgresql.serviceConfig = { 
+      ProtectSystem = "strict"; 
+      ProtectHome = true; 
+      PrivateTmp = true; 
+      PrivateDevices = true; 
+      NoNewPrivileges = true; 
+      # 🛡️ KERNEL-LEVEL ISOLATION: No network access needed for local sockets
+      PrivateNetwork = true;
+      RestrictAddressFamilies = [ "AF_UNIX" ];
+      SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" ]; 
+      OOMScoreAdjust = -900; 
+    };
     systemd.services.miniflux.after = [ "postgresql.service" ];
     systemd.services.n8n.after = [ "postgresql.service" ];
     systemd.services.paperless-web.after = [ "postgresql.service" ];

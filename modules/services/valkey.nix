@@ -24,16 +24,25 @@ in
   config = lib.mkIf config.my.services.valkey.enable {
     services.redis.package = pkgs.valkey;
     services.redis.servers.valkey = {
-      enable = true; bind = "127.0.0.1"; port = 6379; openFirewall = false;
+      # 🛡️ AVIATION HARDENING: Disable TCP, use Unix Sockets only
+      enable = true; 
+      bind = ""; 
+      port = 0; 
+      openFirewall = false;
       settings = {
         maxmemory = "512mb"; maxmemory-policy = "allkeys-lru";
         save = [ "900 1" "300 10" "60 10000" ];
-        unixsocket = "/run/redis-valkey/redis.sock"; unixsocketperm = lib.mkForce "770";
+        unixsocket = "/run/redis-valkey/redis.sock"; 
+        unixsocketperm = "770";
       };
     };
     systemd.services.redis-valkey.serviceConfig = {
       ProtectSystem = "strict"; ProtectHome = true; PrivateTmp = true; PrivateDevices = true; NoNewPrivileges = true;
-      MemoryDenyWriteExecute = true; RestrictAddressFamilies = [ "AF_INET" "AF_UNIX" ]; OOMScoreAdjust = -500;
+      # 🛡️ KERNEL-LEVEL ISOLATION: No network access needed for local sockets
+      PrivateNetwork = true;
+      MemoryDenyWriteExecute = true; 
+      RestrictAddressFamilies = [ "AF_UNIX" ]; 
+      OOMScoreAdjust = -500;
     };
   };
 }

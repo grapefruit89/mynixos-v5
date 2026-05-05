@@ -56,6 +56,11 @@
         default = "fd7a:115c:a1e0::/48";
         description = "Trusted local IPv6 range (Tailscale/ULA)";
       });
+      linkLocalV6 = lib.mkOption {
+        type = lib.types.str;
+        default = "fe80::/10";
+        description = "IPv6 Link-Local range";
+      };
     };
 
     locale = {

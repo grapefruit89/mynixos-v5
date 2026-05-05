@@ -18,6 +18,7 @@
     
     # Standard Services
     ../modules/services/caddy.nix
+    ../modules/services/ca-server.nix
     ../modules/services/postgresql.nix
     ../modules/services/tailscale.nix
     ../modules/monitoring/gatus.nix

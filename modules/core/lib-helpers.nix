@@ -215,7 +215,13 @@ in {
         package = pkgs.valkey;
         port = 0;
         unixSocket = "/run/redis-${name}/redis.sock";
-        unixSocketPerm = 660;
+        unixSocketPerm = 770; # Access for app and potential backup tools
+      };
+      systemd.services."redis-${name}".serviceConfig = {
+        RuntimeDirectory = "redis-${name}";
+        RuntimeDirectoryMode = "0770";
+        PrivateNetwork = true;
+        RestrictAddressFamilies = [ "AF_UNIX" ];
       };
       systemd.tmpfiles.rules = [
         "d ${stateDir} 0750 ${name} media -"

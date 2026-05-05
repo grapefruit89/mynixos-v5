@@ -37,7 +37,7 @@ in {
     services.vaultwarden = {
       enable = true;
       config = {
-        ROCKET_ADDRESS = "127.0.0.1";
+        ROCKET_ADDRESS = "127.0.0.1"; # We keep this for compatibility but primarily use the socket
         ROCKET_PORT = port;
         SIGNUPS_ALLOWED = false;
         INVITATIONS_ALLOWED = true;
@@ -47,10 +47,16 @@ in {
       environmentFile = secretEnv;
     };
 
+    # 🚀 AVIATION HARDENING: Switch to Unix Socket for reverse proxy
     systemd.sockets.vaultwarden = {
-      description = "Vaultwarden Socket";
+      description = "Vaultwarden Unix Socket";
       wantedBy = ["sockets.target"];
-      listenStreams = [(toString port)];
+      listenStreams = [ "/run/vaultwarden/vaultwarden.sock" ];
+      socketConfig = {
+        SocketUser = "caddy"; # Allow Caddy to connect
+        SocketGroup = "vaultwarden";
+        SocketMode = "0660";
+      };
     };
 
     systemd.services.vaultwarden = {
@@ -67,8 +73,16 @@ in {
         PrivateDevices = lib.mkForce true;
         PrivateTmp = lib.mkForce true;
         OOMScoreAdjust = 200;
+        RuntimeDirectory = "vaultwarden";
       };
     };
+
+    # Update Caddy to use the unix socket
+    services.caddy.virtualHosts."vault.${config.my.configs.identity.subdomain}.${config.my.configs.identity.domain}".extraConfig = lib.mkForce ''
+      import mtls_auth
+      import hardened_headers
+      reverse_proxy unix//run/vaultwarden/vaultwarden.sock
+    '';
   };
 }
 /**
@@ -77,4 +91,3 @@ in {
  *   checksum: sha256:10236f4c9d6f8efdb21ef6861bedb38de3d36660e1ae3010fd9ae61566bc3abf
  *   eof_marker: NIXHOME_VALID_EOF* ---
 */
-

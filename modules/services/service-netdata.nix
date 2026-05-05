@@ -4,7 +4,7 @@ let
   nms = {
     id = "NIXH-80-MON-002";
     title = "Netdata (SRE Exhausted)";
-    description = "Real-time performance monitoring with high-retention dbengine and strict sandboxing.";
+    description = "Real-time performance monitoring with high-retention dbengine and Unix Sockets.";
     layer = 80;
     nixpkgs.category = "services/monitoring";
     capabilities = [ "monitoring/real-time" "observability/metrics" ];
@@ -12,7 +12,6 @@ let
     audit.complexity = 2;
   };
 
-  port = config.my.ports.netdata;
   domain = config.my.configs.identity.domain;
 in
 {
@@ -29,16 +28,37 @@ in
       enable = true;
       config = {
         global = { "memory mode" = "dbengine"; "page cache size" = "256"; "dbengine disk space" = "4096"; "history" = 86400; };
-        web = { "allow connections from" = "localhost 127.0.0.1"; "default port" = toString port; "mode" = "static-threaded"; };
+        web = { 
+          "bind to" = "unix:/run/netdata/netdata.sock";
+          "allow connections from" = "localhost 127.0.0.1"; # Keep for internal health checks if any
+          "mode" = "static-threaded"; 
+        };
         db = { "dbengine tier 1 retention days" = 30; };
         health.enabled = "yes";
       };
     };
-    services.caddy.virtualHosts."netdata.${domain}" = { extraConfig = "import sso_auth\nreverse_proxy 127.0.0.1:${toString port}"; };
+
     systemd.services.netdata.serviceConfig = {
-      ProtectSystem = lib.mkForce "full"; ProtectHome = lib.mkForce true; PrivateTmp = lib.mkForce true; PrivateDevices = lib.mkForce true;
-      NoNewPrivileges = true; CapabilityBoundingSet = [ "CAP_DAC_READ_SEARCH" "CAP_SYS_PTRACE" "CAP_NET_RAW" ]; AmbientCapabilities = [ "CAP_DAC_READ_SEARCH" "CAP_SYS_PTRACE" "CAP_NET_RAW" ];
-      MemoryMax = "1G"; CPUWeight = 50; OOMScoreAdjust = 1000;
+      ProtectSystem = lib.mkForce "full"; 
+      ProtectHome = lib.mkForce true; 
+      PrivateTmp = lib.mkForce true; 
+      PrivateDevices = lib.mkForce true;
+      NoNewPrivileges = true; 
+      CapabilityBoundingSet = [ "CAP_DAC_READ_SEARCH" "CAP_SYS_PTRACE" "CAP_NET_RAW" ]; 
+      AmbientCapabilities = [ "CAP_DAC_READ_SEARCH" "CAP_SYS_PTRACE" "CAP_NET_RAW" ];
+      MemoryMax = "1G"; 
+      CPUWeight = 50; 
+      OOMScoreAdjust = 1000;
+      # Allow socket access
+      RuntimeDirectory = "netdata";
+      RuntimeDirectoryMode = "0770";
     };
+
+    # Update Caddy to use the unix socket
+    services.caddy.virtualHosts."netdata.${config.my.configs.identity.subdomain}.${domain}".extraConfig = lib.mkForce ''
+      import mtls_auth
+      import hardened_headers
+      reverse_proxy unix//run/netdata/netdata.sock
+    '';
   };
 }

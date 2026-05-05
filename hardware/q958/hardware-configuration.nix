@@ -31,6 +31,7 @@ in {
     # 🦾 PHYSICAL BOARD DRIVERS
     boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" "nvme"];
     boot.initrd.kernelModules = [];
+    boot.initrd.systemd.enable = true; # Required for TPM2-LUKS enrollment
     
     # Sensors: Fujitsu Esprimo Q958 uses Nuvoton NCT6775
     # Source: https://github.com/nix-community/nixos-hardware/
@@ -48,8 +49,15 @@ in {
     boot.extraModulePackages = [];
 
     # 📂 DISK LAYOUT (Static UUIDs for Q958)
+    boot.initrd.luks.devices."cryptroot" = {
+      device = "/dev/disk/by-uuid/CHANGE_ME_TO_PARTITION_UUID"; # Die UUID der physischen Partition
+      preLVM = true;
+      # TPM2 support is handled via systemd-cryptenroll manually, 
+      # but Nix needs to know it's a LUKS device.
+    };
+
     fileSystems."/" = {
-      device = "/dev/disk/by-uuid/8d1d5128-6413-4b5b-bd96-e55851ae5dc2";
+      device = "/dev/mapper/cryptroot";
       fsType = "ext4";
     };
 

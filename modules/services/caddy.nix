@@ -29,6 +29,13 @@ let
   );
 
 in {
+  options.my.services.caddy = {
+    enable = lib.mkEnableOption "Caddy Edge Proxy";
+    mtls = {
+      enable = lib.mkEnableOption "Global mTLS enforcement (requires client certificates)";
+    };
+  };
+
   options.my.meta.caddy = lib.mkOption {
     type = lib.types.attrs;
     default = nms;
@@ -49,7 +56,7 @@ in {
       
       # 🛠️ GLOBAL OPTIONS (Source: Fragment 2526 / Performance Kick)
       globalConfig = ''
-        admin localhost:2019
+        admin unix//run/caddy/admin.sock
         
         # 🧩 Performance & Resources
         servers {
@@ -163,6 +170,27 @@ in {
           }
         }
 
+        # --- mTLS AUTH (Mutual TLS) ---
+        (mtls_auth) {
+          tls {
+            client_auth {
+              mode require
+              trusted_ca_cert_file /etc/caddy/ca.crt
+            }
+          }
+        }
+
+        # --- CA BOOTSTRAP AUTH (BasicAuth for CA Manager) ---
+        (ca_bootstrap_auth) {
+          # Only used for the CA manager itself until mTLS is ready
+          basicauth {
+            admin {$CA_ADMIN_PASSWORD_HASH}
+          }
+          import hardened_headers
+          import honeypot
+          import compression
+        }
+
         # --- SSO AUTH (Pocket-ID) ---
         (sso_auth) {
           import ddos_shield
@@ -255,6 +283,38 @@ in {
 
     # 🧱 AUTOMATIC FIREWALL EXPOSURE
     networking.firewall.allowedTCPPorts = [ 80 443 ];
+
+    # 🚀 AUTOMATED VHOST GENERATION (from services-spec.nix)
+    services.caddy.virtualHosts = let
+      cfgSpec = config.my.services.spec;
+      identity = config.my.configs.identity;
+      
+      # Helper to build the FQDN
+      mkFQDN = svc: "${svc.domain}.${identity.subdomain}.${identity.domain}";
+      
+      # Filter for services that need an ingress proxy
+      ingressServices = lib.filterAttrs (_: svc: svc.domain != null) cfgSpec;
+      
+      # Generate virtual host config per service
+      genVHost = name: svc: {
+        name = mkFQDN svc;
+        value = {
+          extraConfig = if name == "ca-server" then ''
+              import ca_bootstrap_auth
+              reverse_proxy 127.0.0.2:${toString svc.port}
+            ''
+            else if svc.zone == "admin-mtls" then ''
+              import mtls_auth
+              import hardened_headers
+              reverse_proxy 127.0.0.2:${toString svc.port}
+            ''
+            else ''
+              import sso_auth
+              reverse_proxy 127.0.0.1:${toString svc.port}
+            '';
+        };
+      };
+    in lib.listToAttrs (lib.mapAttrsToList genVHost ingressServices);
 
     # 💾 IMPERMANENCE (Cert Cache & Logs)
     environment.persistence."/persist" = {

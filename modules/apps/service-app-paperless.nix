@@ -81,7 +81,7 @@ in
           PAPERLESS_DBNAME = "paperless";
           PAPERLESS_DBUSER = "paperless";
           # Paperless spricht mit Valkey über den Unix-Socket des fabrik-eigenen Servers
-          PAPERLESS_REDIS = "unix://${config.services.redis.servers.paperless.unixSocket}";
+          PAPERLESS_REDIS = "unix:///run/redis-paperless/redis.sock";
         };
         
         serviceConfig.EnvironmentFile = lib.optional (cfg.secretFile != null) cfg.secretFile;

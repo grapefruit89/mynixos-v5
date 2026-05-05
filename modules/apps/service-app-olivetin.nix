@@ -24,9 +24,10 @@
   };
 
   port = config.my.ports.olivetin;
-  mtlsGenScript = "/etc/nixos/00-core/scripts/mtls-generator.sh";
-  sopsScript = "/etc/nixos/00-core/scripts/add-sops-secret.sh";
-in {
+  scriptDir = "/etc/nixos/modules/core/scripts";
+  mtlsGenScript = "${scriptDir}/mtls-generator.sh";
+  sopsScript = "${scriptDir}/add-sops-secret.sh";
+  in {
   options.my.meta.olivetin = lib.mkOption {
     type = lib.types.attrs;
     default = nms;
@@ -53,22 +54,23 @@ in {
         ListenAddressSingleHTTPFrontend = "127.0.0.1:${toString port}";
         actions = [
           {
-            title = "SOPS: Neues Secret";
-            shell = "sudo ${sopsScript} '{{ secret_key }}' '{{ secret_value }}'";
-            icon = "&#128272;";
+            title = "mTLS: CSR signieren (Hardware-Key)";
+            shell = "sudo ${mtlsGenScript} sign-csr '{{ client_name }}' '{{ csr_path }}'";
+            icon = "🛡️";
             arguments = [
               {
-                name = "secret_key";
+                name = "client_name";
                 type = "ascii";
               }
               {
-                name = "secret_value";
+                name = "csr_path";
                 type = "ascii";
+                description = "Pfad zum hochgeladenen .csr File";
               }
             ];
           }
           {
-            title = "mTLS: Client Zertifikat erstellen";
+            title = "mTLS: Client Zertifikat erstellen (Legacy)";
             shell = "sudo ${mtlsGenScript} '{{ client_name }}'";
             icon = "🔑";
             arguments = [
@@ -81,7 +83,7 @@ in {
           {
             title = "System Update";
             shell = "sudo ${pkgs.nixos-rebuild}/bin/nixos-rebuild switch 2>&1 | ${pkgs.nix-output-monitor}/bin/nom";
-            icon = "&#128259;";
+            icon = "🔄";
           }
         ];
       };

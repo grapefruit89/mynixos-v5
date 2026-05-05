@@ -1,10 +1,31 @@
-# NixHome
+# 🚀 NixHome v5.0 "Horizontal Responsibility"
 
-NixOS-basierte Homelab-Konfiguration (v5.0) mit horizontaler Modulstruktur, fokussiert auf Daten-Tiering und Identitätsmanagement.
+NixOS-basierte Homelab-Konfiguration (v5.0/v6 Standard) mit horizontaler Modulstruktur, fokussiert auf Daten-Tiering, Identitätsmanagement und **Aviation-Grade Hardening**.
+
+## 📖 Key Documentation
+- **Core Hardening:** [modules/core/HARDENING.md](./modules/core/HARDENING.md) (Networking, IPC, East-West Isolation)
+- **Database & Sockets:** [modules/services/SOCKET_HARDENING.md](./modules/services/SOCKET_HARDENING.md) (Unix Sockets, TCP-Zero)
+- **Services Registry:** [modules/core/SERVICES_GUIDE.md](./modules/core/SERVICES_GUIDE.md) (SSoT Logic & Trust Zones)
+- **Security Blueprint:** [docs/V6_BLUEPRINT.md](./docs/V6_BLUEPRINT.md) (Trust Zones, mTLS, TPM)
+
+## 🏗️ Architektur: Das Three-Zone Trust Modell
+Das System erzwingt eine strikte Trennung zwischen Frontend, Backend und internen Daten:
+
+1. **Zone 1: Loopback (Unix-IPC)**
+   - Datenbanken (PostgreSQL, Valkey) kommunizieren **ausschließlich** via Unix Sockets.
+   - TCP ist deaktiviert (`port = 0`).
+   - `PrivateNetwork = true` isoliert die DBs vom Netzwerkstack.
+
+2. **Zone 2: Admin-mTLS (Loopback Alias `127.0.0.2`)**
+   - Backend-Dienste (Portainer, Netdata, *arr Suite) binden an den isolierten Alias.
+   - Zugriff **nur** via Caddy mit hardwaregebundenem mTLS (Laptop TPM2.0).
+   - `nftables` blockiert jeden Zugriff auf `127.0.0.2`, der nicht von Caddy (UID 978) stammt.
+
+3. **Zone 3: Family-PocketID (`127.0.0.1`)**
+   - Frontend-Dienste (Jellyfin, Nextcloud, Immich) binden an Standard-Loopback.
+   - Zugriff via PocketID SSO (OIDC) / Forward-Auth.
 
 ## 💾 Storage-Architektur (ABC-Tiering)
-
-Das System verteilt Daten basierend auf Latenz- und Haltbarkeitsanforderungen über drei Ebenen:
 
 | Tier | Hardware | Mountpoint | Nutzung | Besonderheiten |
 | :--- | :--- | :--- | :--- | :--- |
@@ -13,46 +34,19 @@ Das System verteilt Daten basierend auf Latenz- und Haltbarkeitsanforderungen ü
 | **C** | HDD Mirror | `/mnt/hdd_pool` | Bulk Media, Backups | Spindown nach 10 Min. |
 
 ### Smart Mover
-Ein systemd-Service überwacht Tier B. Bei Unterschreitung von 20GB freiem Speicher werden die ältesten Dateien via `rsync --remove-source-files` nach Tier C verschoben. 
-- **Sicherheitsregeln:** Datenbank-Dateien (`.wal`, `.db`, `.sqlite`) sind von der Verschiebung ausgeschlossen.
-- **Zustandsprüfung:** Verschiebung erfolgt primär, wenn die HDDs bereits aktiv sind, um unnötige Spin-ups zu vermeiden.
+Ein systemd-Service überwacht Tier B und verschiebt Daten nach Tier C, sobald der Platz knapp wird oder die HDDs bereits aktiv sind. Datenbanken sind via Exception-List geschützt.
 
-## 🌐 Dienste & Netzwerkzugriff
+## 🔐 Sicherheit & Compliance
 
-Die Dienste sind in zwei Zonen unterteilt. Der Zugriff erfolgt über Caddy als Edge-Proxy.
+- **Impermanence:** Root-Dateisystem auf `tmpfs`.
+- **SRE-Factories:** Dienste werden über gehärtete Nix-Funktionen (`mkService`, `mkDocumentApp`) erstellt.
+- **Kernel Hardening:** Titanium-Hardened Kernel & Systemd Sandboxing für alle Apps.
 
-### Frontend (Öffentlich via Cloudflare/Caddy)
-- **Media:** Jellyfin, Audiobookshelf, Navidrome
-- **Requests:** Jellyseerr
-- **Smart Home:** Home Assistant
+## 🛠️ Quick Start
+```bash
+# Konfiguration anwenden
+sudo nixos-rebuild switch --flake .#default
 
-### Backend (Nur Tailscale / Lokales LAN)
-- **Download:** Radarr, Sonarr, Prowlarr, Lidarr, Readarr, SABnzbd
-- **Automation:** n8n, Semaphore
-- **Produktivität:** Paperless-ngx, Vaultwarden, Linkding, Monica, Readeck
-- **Infrastruktur:** AdGuard Home, Netdata, Scrutiny, Cockpit, Filebrowser
-
-## 🔐 Authentifizierung & Sicherheit
-
-- **SSO:** Pocket-ID (OIDC) ist für alle Web-Dienste verpflichtend.
-- **Keine Bypässe:** IP-basierte Ausnahmen für LAN oder Tailscale wurden entfernt; jeder Zugriff erfordert einen gültigen Token.
-- **Impermanence:** Das Root-Dateisystem ist ein `tmpfs`. Nur explizit unter `/persist` gelistete Pfade überdauern einen Neustart.
-- **Runtime Guard:** Ein Watchdog prüft periodisch den Status der nftables-Regelsätze und des Kernel-Lockdowns.
-- **Fail2ban:** Schützt SSH (Port 22) und die SSH-Rescue-Instanz (Port 2222).
-
-## 🛠️ Entwicklung & Installation
-
-### Struktur
-- `modules/core/`: Systemgrundlagen (Netzwerk, Dateisysteme, Sops).
-- `modules/security/`: Security-Policies und Runtime-Monitoring.
-- `modules/apps/`: Applikations-Module (nutzen zentrale Service-Factories).
-- `modules/services/`: Infrastruktur-Dienste (Caddy, Tailscale, SSO).
-
-### Container-Management
-Das System verzichtet auf die automatische Erstellung von Docker-Containern. Sofern Docker genutzt wird, erfolgt die Pflege der Container manuell außerhalb der Nix-Konfiguration.
-
-## ⚠️ Bekannte Einschränkungen
-
-- **Transcoding:** Jellyfin nutzt Tier B (SSD) für temporäre Daten, um RAM-Überläufe (`/dev/shm`) bei hochbitratigen 4K-Streams zu verhindern.
-- **MergerFS:** `cache.files` ist auf `off` gesetzt, um Inkonsistenzen bei parallelen Schreibvorgängen durch den Mover zu vermeiden.
-- **Sops-Deadlock:** Bei Totalausfall von Tier A (NVMe) fehlen die SSH-Hostkeys zur Entschlüsselung der Secrets. Ein physischer Emergency-Key (USB) wird als Fallback empfohlen.
+# Dienst-Status prüfen
+systemctl list-units "app-*"
+```

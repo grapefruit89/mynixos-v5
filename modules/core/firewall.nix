@@ -20,6 +20,7 @@
   sshPort = config.my.ports.ssh;
   lanCidr = config.my.configs.network.lanCidr;
   lanCidrV6 = config.my.configs.network.lanCidrV6;
+  linkLocalV6 = config.my.configs.network.linkLocalV6;
 in {
   options.my.meta.firewall = lib.mkOption {
     type = lib.types.attrs;
@@ -29,6 +30,12 @@ in {
   };
 
   config = {
+    # 🛰️ LOOPBACK ALIAS (Zone: Admin)
+    networking.interfaces.lo.ipv4.addresses = [
+      { address = "127.0.0.1"; prefixLength = 8; }
+      { address = "127.0.0.2"; prefixLength = 32; }
+    ];
+
     networking.nftables.enable = true;
     networking.firewall = {
       enable = true; # Aviation-Grade: Firewall ALWAYS active.
@@ -54,6 +61,16 @@ in {
           }
         }
 
+        # 🛡️ EAST-WEST ISOLATION (Zone: Admin Loopback)
+        # Only Caddy is allowed to talk to the Admin Loopback Alias (127.0.0.2)
+        # This prevents lateral movement from compromised apps (Nextcloud, etc.)
+        ip daddr 127.0.0.2 meta skuid != caddy counter drop
+
+        # 🛡️ DATABASE ISOLATION (Loopback Protection)
+        # Block all local TCP access to Postgres/Valkey unless authorized.
+        # Authorized: Caddy (Proxy), Postgres (Self), Redis (Self)
+        tcp dport { 5432, 6379 } meta skuid != { caddy, postgres, redis } counter drop
+
         # Block everything NOT from allowed countries on public port 443
         tcp dport 443 ip saddr != @allowed_countries counter drop
 
@@ -66,12 +83,12 @@ in {
         # DNS Support für das LAN (AdGuard)
         ip saddr ${lanCidr} tcp dport 53 accept
         ip saddr ${lanCidr} udp dport 53 accept
-        ip6 saddr ${lanCidrV6} tcp dport 53 accept
-        ip6 saddr ${lanCidrV6} udp dport 53 accept
+        ip6 saddr { ${lanCidrV6}, ${linkLocalV6} } tcp dport 53 accept
+        ip6 saddr { ${lanCidrV6}, ${linkLocalV6} } udp dport 53 accept
         
         # mDNS für lokale Auflösung
         ip saddr ${lanCidr} udp dport 5353 accept
-        ip6 saddr ${lanCidrV6} udp dport 5353 accept
+        ip6 saddr { ${lanCidrV6}, ${linkLocalV6} } udp dport 5353 accept
         
         # ICMP (Ping)
         ip protocol icmp accept

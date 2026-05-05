@@ -27,23 +27,23 @@
 | 🟢 **P4** | **Core Hardening (Kernel/Systemd)** | Low | Medium | **[DONE]** |
 | 🔵 **P5** | **Gatus / Healthchecks** | Low | Medium | **[DONE]** |
 | ⚪ **P6** | **Extra Apps (Vaultwarden, etc.)** | Low | Low | **[DONE]** |
-| 🟣 **P7** | **Knowledge Pipeline (Obsidian)** | High | Low | **[IN PROGRESS]** |
+| 🟣 **P7** | **Knowledge Pipeline (Obsidian)** | High | Low | **[REMOVED]** |
 
 ---
 
 ## 📋 Detailed Task Breakdown
-
-### 🟣 Priority 7: Knowledge Pipeline (Obsidian Sync)
-- **Objective:** Bridge Nix metadata to Obsidian without "cluttering".
-- **Implementation:** `meta_to_obsidian.py` script active.
-- **Status:** Initial Dossiers generated in `docs/obsidian_export/`.
-- **Next Step:** Import to main Obsidian Vault.
 
 ### ✅ Completed: High-Intensity Hardening (The "Steroids" Update)
 - [x] **nftables-Geoblock:** DE, AT, LT restricted for port 443 (Kernel-Level).
 - [x] **Caddy DDoS Shield:** 3-Stage defense (Unknown, Human, Auth) with JS-Challenge.
 - [x] **API Compatibility:** Exceptions for native apps (/api, /Users, /jellyfin).
 - [x] **Isolation:** Closed port 80 and SSH (53844) for public WAN.
+- [x] **Integrity:** `cache.files=off` in MergerFS to prevent metadata drift.
+
+### 🧩 System Maintenance & Cleanup
+- [x] **TECHNICAL_DEBT.md:** Documentation of known risks and future tasks.
+- [x] **README.md:** Clean, factual project documentation created.
+port 80 and SSH (53844) for public WAN.
 - [x] **Integrity:** `cache.files=off` in MergerFS to prevent metadata drift.
 
 ### 🧩 System Maintenance & Cleanup
