@@ -66,6 +66,16 @@ in {
           max_header_size 16kb
         }
         
+        # 🔄 DYNAMIC DNS (Source: Caddy-on-Steroids)
+        dynamic_dns {
+          provider cloudflare {env.CLOUDFLARE_API_TOKEN}
+          domains {
+            ${sreConfig.identity.domain} @
+            ${sreConfig.identity.subdomain}.${sreConfig.identity.domain} *
+          }
+          check_interval 5m
+        }
+
         # ACME DNS-01 Challenge (Cloudflare)
         acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
       '';
