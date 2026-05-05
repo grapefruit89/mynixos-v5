@@ -21,7 +21,8 @@ command -v cryptsetup >/dev/null 2>&1 || { echo "❌ cryptsetup fehlt!"; exit 1;
 # 2. SCHRITT: HEADER-BACKUP (DER LEBENSRETTER)
 echo "📦 Schritt 1: Erstelle LUKS Header Backup..."
 mkdir -p "$BACKUP_DIR"
-cryptsetup luksHeaderBackup "$DEVICE" --header-backup-file "$BACKUP_DIR/luks_header_$HOSTNAME_$DATE.bin"
+# FW-05 FIX: Correct variable interpolation
+cryptsetup luksHeaderBackup "$DEVICE" --header-backup-file "$BACKUP_DIR/luks_header_${HOSTNAME}_${DATE}.bin"
 echo "✅ Header Backup erstellt unter: $BACKUP_DIR"
 echo "⚠️  WICHTIG: Kopiere diese Datei auf einen externen USB-Stick!"
 
@@ -35,16 +36,30 @@ echo "⚠️  WICHTIG: Schreibe diesen Key auf Papier oder speichere ihn in Bitw
 
 # 4. SCHRITT: TPM2 ENROLLMENT (DIE HARDWARE-BINDUNG)
 echo ""
-echo "🔒 Schritt 3: Binde Festplatte an TPM 2.0 (PCR 0,1,2,3)..."
-echo "   PCR 0-3: Bindung an BIOS, Mainboard, CPU und Firmware-Konfiguration."
+# HW-02 FIX: Upgraded PCR selection to include 4 (Bootloader) and 9 (Kernel/Cmdline)
+echo "🔒 Schritt 3: Binde Festplatte an TPM 2.0 (PCR 0,1,2,3,4,9)..."
+echo "   PCR 0-3: BIOS, Mainboard, CPU und Firmware."
+echo "   PCR 4: EFI Bootloader (systemd-boot)."
+echo "   PCR 9: Kernel, Initrd und Kernel-Commandline."
 echo "   PCR 7 (Secure Boot) wird weggelassen, da du es deaktiviert hast."
-systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=0+1+2+3 "$DEVICE"
+echo ""
+echo "💡 EMPFEHLUNG: Nutze einen TPM-PIN für Zwei-Faktor-Authentifizierung (HW-03)."
+echo "   Möchtest du einen PIN setzen? (y/N)"
+read -r -n 1 use_pin
+echo ""
+
+if [[ "$use_pin" =~ ^[Yy]$ ]]; then
+    systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=0+1+2+3+4+9 --tpm2-with-pin=yes "$DEVICE"
+else
+    systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=0+1+2+3+4+9 "$DEVICE"
+fi
 
 echo ""
-echo "🎉 ERFOLG: Dein Fujitsu Q958 ist jetzt Hardware-verschlüsselt."
+echo "🎉 ERFOLG: Dein Fujitsu Q958 ist jetzt Hardware-verschlüsselt (Aviation-Grade)."
 echo "---------------------------------------------------------"
 echo "FINALER CHECKLISTE:"
 echo "1. [ ] Recovery-Key in Bitwarden gesichert?"
 echo "2. [ ] Header-Backup (.bin Datei) auf USB-Stick kopiert?"
 echo "3. [ ] configuration.nix angepasst? (boot.initrd.systemd.enable = true)"
+echo "4. [ ] Test-Reboot durchgeführt?"
 echo "---------------------------------------------------------"

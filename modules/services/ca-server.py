@@ -4,12 +4,14 @@ import subprocess
 import datetime
 import shutil
 import json
+import re
 from pathlib import Path
 from flask import Flask, request, render_template_string, send_file, redirect, url_for
 
 # Configuration
-BASE_DIR = Path("/var/lib/ca-server")
-CERT_DIR = BASE_DIR / "certs"
+# CA-01 FIX: Use .resolve() for absolute path stability
+BASE_DIR = Path("/var/lib/ca-server").resolve()
+CERT_DIR = (BASE_DIR / "certs").resolve()
 CERT_DIR.mkdir(parents=True, exist_ok=True)
 
 CA_CERT = "/etc/caddy/ca.crt"
@@ -104,15 +106,29 @@ def index():
 
 @app.route("/sign", methods=["POST"])
 def sign():
-    name = request.form.get("name", "Unknown").strip().replace(" ", "_")
+    # CA-02 FIX: Sanitize input name strictly (Whitelist regex)
+    raw_name = request.form.get("name", "Unknown").strip()
+    name = re.sub(r'[^a-zA-Z0-9_-]', '', raw_name)[:64]
+    
     csr_file = request.files.get("csr")
     
     if not csr_file or not name:
-        return "Name and CSR file required", 400
+        return "Valid Name and CSR file required", 400
+
+    # CA-04 FIX: Basic CSR Validation (check content)
+    csr_content = csr_file.read()
+    if b"-----BEGIN CERTIFICATE REQUEST-----" not in csr_content:
+        return "Invalid CSR format", 400
+    csr_file.seek(0) # Reset file pointer for saving
 
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     dir_name = f"{name}_{timestamp}"
-    dir_path = CERT_DIR / dir_name
+    dir_path = (CERT_DIR / dir_name).resolve()
+    
+    # Safety Check: Ensure dir_path is still inside CERT_DIR
+    if CERT_DIR not in dir_path.parents:
+        return "Invalid directory path", 400
+        
     dir_path.mkdir(parents=True, exist_ok=True)
 
     csr_path = dir_path / "client.csr"
@@ -146,8 +162,9 @@ def sign():
 
 @app.route("/delete/<dirname>")
 def delete(dirname):
-    dir_to_delete = CERT_DIR / dirname
-    if dir_to_delete.is_dir() and (CERT_DIR in dir_to_delete.parents):
+    # CA-01 FIX: Resolve path and check parents correctly to prevent traversal
+    dir_to_delete = (CERT_DIR / dirname).resolve()
+    if dir_to_delete.is_dir() and (CERT_DIR.resolve() in dir_to_delete.parents):
         shutil.rmtree(dir_to_delete)
     return redirect(url_for("index"))
 

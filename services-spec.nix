@@ -25,16 +25,16 @@
   in {
     # --- ZONE: LOOPBACK (Internal only, no Caddy Proxy) ---
     postgresql = { port = p.postgres; zone = "loopback"; description = "Primary Database Cluster"; };
-    valkey = { port = 6379; zone = "loopback"; description = "High-performance Cache"; };
+    valkey = { port = p.valkey; zone = "loopback"; description = "High-performance Cache"; };
     ollama = { port = p.ollama; zone = "loopback"; description = "LLM Engine"; };
 
     # --- ZONE: ADMIN-mTLS (LAN/WAN, TPM-bound mTLS required) ---
     # Infrastructure & Monitoring
-    ca-server = { port = 5000; zone = "admin-mtls"; domain = "ca"; description = "Minimalist CA Manager"; };
+    ca-server = { port = p.ca-server; zone = "admin-mtls"; domain = "ca"; description = "Minimalist CA Manager"; };
     netdata = { port = p.netdata; zone = "admin-mtls"; domain = "netdata"; description = "Real-time Monitoring"; };
     scrutiny = { port = p.scrutiny; zone = "admin-mtls"; domain = "scrutiny"; description = "HDD S.M.A.R.T. Dashboards"; };
     uptime-kuma = { port = p.uptime-kuma; zone = "admin-mtls"; domain = "status"; description = "Uptime Monitoring"; };
-    cockpit = { port = 9090; zone = "admin-mtls"; domain = "admin"; description = "System Management"; };
+    cockpit = { port = p.cockpit; zone = "admin-mtls"; domain = "admin"; description = "System Management"; };
     adguard = { port = p.adguard; zone = "admin-mtls"; domain = "dns"; description = "DNS Sinkhole"; };
     
     # Media Backend (Arr-Stack)
@@ -42,7 +42,7 @@
     radarr = { port = p.radarr; zone = "admin-mtls"; domain = "radarr"; description = "Movie Management"; };
     prowlarr = { port = p.prowlarr; zone = "admin-mtls"; domain = "prowlarr"; description = "Indexer Manager"; };
     lidarr = { port = p.lidarr; zone = "admin-mtls"; domain = "lidarr"; description = "Music Management"; };
-    readarr = { port = 8787; zone = "admin-mtls"; domain = "readarr"; description = "Book Management"; };
+    readarr = { port = p.readarr; zone = "admin-mtls"; domain = "readarr"; description = "Book Management"; };
     sabnzbd = { port = p.sabnzbd; zone = "admin-mtls"; domain = "sabnzbd"; description = "Usenet Downloader"; };
     
     # Internal Apps
@@ -50,17 +50,17 @@
     vaultwarden = { port = p.vaultwarden; zone = "admin-mtls"; domain = "vault"; description = "Password Manager"; };
     n8n = { port = p.n8n; zone = "admin-mtls"; domain = "n8n"; description = "Workflow Automation"; };
     paperless = { port = p.paperless; zone = "admin-mtls"; domain = "paperless"; description = "Document Management"; };
-    filebrowser = { port = 8080; zone = "admin-mtls"; domain = "files"; description = "File Manager"; };
+    filebrowser = { port = p.filebrowser; zone = "admin-mtls"; domain = "files"; description = "File Manager"; };
 
     # --- ZONE: FAMILY-POCKETID (LAN/WAN, PocketID Forward Auth) ---
     pocketid = { port = p.pocket-id; zone = "family-pocketid"; domain = "auth"; description = "Identity Provider"; };
     jellyfin = { port = p.jellyfin; zone = "family-pocketid"; domain = "media"; description = "Media Streaming"; };
-    jellyseerr = { port = 5055; zone = "family-pocketid"; domain = "requests"; description = "Media Requests"; };
+    jellyseerr = { port = p.jellyseerr; zone = "family-pocketid"; domain = "requests"; description = "Media Requests"; };
     audiobookshelf = { port = p.audiobookshelf; zone = "family-pocketid"; domain = "audiobooks"; description = "Audiobooks & Podcasts"; };
     navidrome = { port = p.navidrome; zone = "family-pocketid"; domain = "music"; description = "Music Streaming"; };
     homeassistant = { port = p.home-assistant; zone = "family-pocketid"; domain = "home"; description = "Smart Home"; };
     
     # Dashboard (Entry point)
-    homepage = { port = 3000; zone = "family-pocketid"; domain = "dash"; description = "Service Dashboard"; };
+    homepage = { port = p.homepage; zone = "family-pocketid"; domain = "dash"; description = "Service Dashboard"; };
   };
 }

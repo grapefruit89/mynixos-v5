@@ -258,10 +258,12 @@ in {
             dns cloudflare {env.CLOUDFLARE_API_TOKEN}
           }
           
-          # Zertifikat-Download (für OliveTin mTLS Generator)
+          # CA-08 FIX: Restricted certificate landing zone (no browsing)
           handle /certs/* {
             root * /var/www/landing-zone
-            file_server browse
+            file_server {
+              hide .git
+            }
           }
         }
       '';
