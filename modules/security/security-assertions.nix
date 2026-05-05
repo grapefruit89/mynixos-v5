@@ -3,21 +3,15 @@ let
   # 🚀 NMS v4.2 Metadaten (Security Policy Guard - Warning Edition)
   nms = {
     id = "NIXH-90-POL-001";
-    title = "Aviation Security Policy Guard";
-    description = "Monitors system integrity. Currently configured for non-blocking warnings.";
+    title = "Security Policy Guard";
+    description = "Monitors system integrity. Configured for non-blocking warnings by default.";
     layer = 90;
-    audit.last_reviewed = "2026-04-28";
+    audit.last_reviewed = "2026-05-05";
     audit.complexity = 2;
   };
 
-  # Helper: Transform list of checks into either assertions or warnings
-  # Current instruction: Primary use is 'warnings' (Soft Mode)
-  mkChecks = checks: map (c: {
-    assertion = c.cond;
-    message = c.msg;
-  }) checks;
-
   # Master List of Security Rules
+  # cond = true means the check passes.
   securityChecks = [
     {
       cond = config.networking.firewall.enable;
@@ -25,7 +19,7 @@ let
     }
     {
       cond = config.networking.nftables.enable;
-      msg = "⚠️ [SEC-NET-002]: NFTables is disabled! Using legacy iptables is not Aviation-Grade.";
+      msg = "⚠️ [SEC-NET-002]: NFTables is disabled! Using legacy iptables is not hardened.";
     }
     {
       cond = config.services.openssh.settings.PermitRootLogin == "no";
@@ -33,7 +27,7 @@ let
     }
     {
       cond = config.my.security.hardened.enable;
-      msg = "⚠️ [SEC-COR-001]: Titanium Hardened Core module is missing or disabled!";
+      msg = "⚠️ [SEC-COR-001]: Hardened Core module is missing or disabled!";
     }
     {
       cond = config.my.configs.bastelmodus || (config.my.security.hardened.lockdownMode == "strict");
@@ -50,7 +44,7 @@ in
   options.my.security.policy = {
     mode = lib.mkOption {
       type = lib.types.enum [ "warn" "strict" ];
-      default = "strict";
+      default = "warn";
       description = "Policy enforcement mode: 'warn' (non-blocking) or 'strict' (fail build).";
     };
   };
@@ -60,7 +54,14 @@ in
     my.meta.security_assertions = nms;
 
     # 🛡️ Dynamic Enforcement
-    warnings = lib.mkIf (config.my.security.policy.mode == "warn") (mkChecks securityChecks);
-    assertions = lib.mkIf (config.my.security.policy.mode == "strict") (mkChecks securityChecks);
+    # Warnings expect a list of strings
+    warnings = lib.mkIf (config.my.security.policy.mode == "warn") (
+      map (c: c.msg) (builtins.filter (c: !c.cond) securityChecks)
+    );
+
+    # Assertions expect a list of attribute sets { assertion, message }
+    assertions = lib.mkIf (config.my.security.policy.mode == "strict") (
+      map (c: { assertion = c.cond; message = c.msg; }) securityChecks
+    );
   };
 }
