@@ -74,11 +74,6 @@ in
       };
     };
 
-    # Update Caddy to use the unix socket
-    services.caddy.virtualHosts."miniflux.${config.my.configs.identity.subdomain}.${config.my.configs.identity.domain}".extraConfig = lib.mkForce ''
-      import mtls_auth
-      import hardened_headers
-      reverse_proxy unix//run/miniflux/miniflux.sock
-    '';
+    # Note: Caddy config is now auto-generated from services-spec.nix
   };
 }

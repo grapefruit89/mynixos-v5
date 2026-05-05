@@ -304,6 +304,13 @@ in {
       # Helper to build the FQDN
       mkFQDN = svc: "${svc.domain}.${identity.subdomain}.${identity.domain}";
       
+      # Helper to build the upstream address (Socket > IP:Port)
+      mkUpstream = name: svc: if svc.socket != null 
+        then "unix/${svc.socket}" 
+        else if svc.zone == "admin-mtls" || name == "ca-server"
+        then "127.0.0.2:${toString svc.port}"
+        else "127.0.0.1:${toString svc.port}";
+
       # Filter for services that need an ingress proxy
       ingressServices = lib.filterAttrs (_: svc: svc.domain != null) cfgSpec;
       
@@ -313,16 +320,16 @@ in {
         value = {
           extraConfig = if name == "ca-server" then ''
               import ca_bootstrap_auth
-              reverse_proxy 127.0.0.2:${toString svc.port}
+              reverse_proxy ${mkUpstream name svc}
             ''
             else if svc.zone == "admin-mtls" then ''
               import mtls_auth
               import hardened_headers
-              reverse_proxy 127.0.0.2:${toString svc.port}
+              reverse_proxy ${mkUpstream name svc}
             ''
             else ''
               import sso_auth
-              reverse_proxy 127.0.0.1:${toString svc.port}
+              reverse_proxy ${mkUpstream name svc}
             '';
         };
       };

@@ -61,8 +61,8 @@ in
       services.paperless = {
         enable = true;
         user = "paperless";
-        address = "127.0.0.1";
-        port = config.my.ports.paperless or 20981;
+        address = "/run/paperless/paperless.sock";
+        port = 0; # Use Unix Socket
       };
 
       systemd.services.paperless-web = {
@@ -84,7 +84,11 @@ in
           PAPERLESS_REDIS = "unix:///run/redis-paperless/redis.sock";
         };
         
-        serviceConfig.EnvironmentFile = lib.optional (cfg.secretFile != null) cfg.secretFile;
+        serviceConfig = {
+          EnvironmentFile = lib.optional (cfg.secretFile != null) cfg.secretFile;
+          RuntimeDirectory = "paperless";
+          RuntimeDirectoryMode = "0770";
+        };
       };
 
       # Mirror environment to worker for processing

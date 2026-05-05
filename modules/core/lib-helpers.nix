@@ -16,7 +16,7 @@ in {
   mkService = {
     config,
     name,
-    port,
+    port ? null, # Now optional
     description ? "Aviation-Grade Service",
     useSSO ? true,
     useVPN ? false, # 🔥 Neu: VPN-Namespace Support
@@ -24,11 +24,26 @@ in {
     isStream ? false,
     readWritePaths ? [],
     persist ? true,
-    socket ? false,
+    socket ? null,  # Can be explicitly provided path or boolean (legacy)
     extraServiceConfig ? {},
   }: let
     hostName = getDomain config name;
-    targetUrl = if socket then "unix//run/service-sockets/${name}.sock" else "localhost:${toString port}";
+    
+    # Resolve from SSoT registry if available
+    svcRegistry = config.my.services.spec.${name} or {};
+    registrySocket = svcRegistry.socket or null;
+    registryPort = svcRegistry.port or port;
+
+    # Determine final upstream (Socket > Explicit Path > Boolean Legacy > Registry Port > Port)
+    finalSocket = if (lib.isString socket) then socket 
+                  else if registrySocket != null then registrySocket
+                  else if socket == true then "/run/service-sockets/${name}.sock"
+                  else null;
+
+    targetUrl = if finalSocket != null 
+                then "unix/${finalSocket}" 
+                else "localhost:${toString registryPort}";
+
     srePaths = config.my.configs.paths;
     
     # 🚀 NEW: ABC-Tiering Path Distribution
@@ -90,6 +105,9 @@ in {
       layer = 60;
       audit.last_reviewed = "2026-04-27";
     };
+
+    # 🛡️ 5. SOCKET PERMISSIONS: Give Caddy access to the service group
+    users.users.caddy.extraGroups = lib.optional (finalSocket != null) name;
   };
 
   # 🎬 AVIATION-GRADE STREAMER FACTORY

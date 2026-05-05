@@ -53,14 +53,14 @@ in {
       wantedBy = ["sockets.target"];
       listenStreams = [ "/run/vaultwarden/vaultwarden.sock" ];
       socketConfig = {
-        SocketUser = "caddy"; # Allow Caddy to connect
+        SocketUser = "caddy";
         SocketGroup = "vaultwarden";
         SocketMode = "0660";
       };
     };
 
     systemd.services.vaultwarden = {
-      wantedBy = lib.mkForce [];
+      wantedBy = lib.mkForce []; # Only via socket
       requires = ["vaultwarden.socket"];
       after = ["vaultwarden.socket"];
       serviceConfig = {
@@ -77,12 +77,7 @@ in {
       };
     };
 
-    # Update Caddy to use the unix socket
-    services.caddy.virtualHosts."vault.${config.my.configs.identity.subdomain}.${config.my.configs.identity.domain}".extraConfig = lib.mkForce ''
-      import mtls_auth
-      import hardened_headers
-      reverse_proxy unix//run/vaultwarden/vaultwarden.sock
-    '';
+    # Note: Caddy config is now auto-generated from services-spec.nix
   };
 }
 /**

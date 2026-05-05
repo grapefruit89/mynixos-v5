@@ -43,6 +43,9 @@ in {
         issuer = lib.mkForce "https://auth.${subdomain}.${domain}";
         title = "NixHome Identity";
         public_registration = false;
+        # Socket-First Ingress
+        UNIX_SOCKET = "/run/pocket-id/pocket-id.sock";
+        UNIX_SOCKET_MODE = "0660";
       };
     };
 
@@ -54,11 +57,14 @@ in {
       Restart = "always";
       RestartSec = "5s";
       OOMScoreAdjust = -100;
+      RuntimeDirectory = "pocket-id"; # Creates /run/pocket-id
+      RuntimeDirectoryMode = "0770";
     };
 
-    services.caddy.virtualHosts."auth.${subdomain}.${domain}" = {
-      extraConfig = "reverse_proxy 127.0.0.1:${toString port}";
-    };
+    # Give Caddy access to the pocket-id group to read the socket
+    users.users.caddy.extraGroups = [ "pocket-id" ];
+
+    # Note: Caddy config is now auto-generated from services-spec.nix
   };
 }
 /**

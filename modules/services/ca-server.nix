@@ -11,16 +11,23 @@
       User = "ca-server";
       Group = "ca-server";
       WorkingDirectory = "/var/lib/ca-server";
-      ExecStart = "${pkgs.python3.withPackages (ps: [ ps.flask ])}/bin/python ${./ca-server.py}";
+      # 🚀 SOCKET-FIRST INGRESS via Gunicorn
+      ExecStart = "${pkgs.python3.withPackages (ps: [ ps.flask ps.gunicorn ])}/bin/gunicorn --bind unix:/run/ca-server/ca.sock ca-server:app";
       Restart = "always";
       StateDirectory = "ca-server";
+      RuntimeDirectory = "ca-server";
+      RuntimeDirectoryMode = "0770";
       PrivateTmp = true;
       ProtectSystem = "strict";
       ReadWritePaths = "/var/lib/ca-server";
       # The CA Cert and Key are needed. Key is decrypted to /run/secrets/ca.key
       ReadOnlyPaths = [ "/etc/caddy/ca.crt" "/run/secrets/ca.key" ];
     };
+    environment.variables.PYTHONPATH = "${./.}";
   };
+
+  # Give Caddy access to the ca-server group to read the socket
+  users.users.caddy.extraGroups = [ "ca-server" ];
 
   # Dependency for signing
   environment.systemPackages = [ pkgs.openssl ];

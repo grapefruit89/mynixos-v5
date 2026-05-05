@@ -33,12 +33,13 @@
 
 ## 📋 Detailed Task Breakdown
 
-### ✅ Completed: High-Intensity Hardening (The "Steroids" Update)
-- [x] **nftables-Geoblock:** DE, AT, LT restricted for port 443 (Kernel-Level).
-- [x] **Caddy DDoS Shield:** 3-Stage defense (Unknown, Human, Auth) with JS-Challenge.
-- [x] **API Compatibility:** Exceptions for native apps (/api, /Users, /jellyfin).
-- [x] **Isolation:** Closed port 80 and SSH (53844) for public WAN.
-- [x] **Integrity:** `cache.files=off` in MergerFS to prevent metadata drift.
+### ✅ Completed: High-Intensity Hardening (The "Audit Fixes" Update)
+- [x] **External Security Audit:** Claude Senior SRE Audit completed with zero-day finding.
+- [x] **nftables-Hardening:** Atomic updates, HTTPS sources, and UID-based Admin-Fortress protection.
+- [x] **CA-Server Hardening:** Path traversal protection and strict CSR sanitization implemented.
+- [x] **Aviation-Grade LUKS:** Hardware-bound encryption upgraded to PCR 0+1+2+3+4+9.
+- [x] **Port SSoT:** Resolved all port collisions and hardcoded ports in services-spec.nix.
+- [x] **Tor Blocking:** Kernel-level blocking of Tor exit nodes active.
 
 ### 🧩 System Maintenance & Cleanup
 - [x] **TECHNICAL_DEBT.md:** Documentation of known risks and future tasks.
