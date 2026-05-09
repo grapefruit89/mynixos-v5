@@ -323,15 +323,15 @@ let
     touch merged.txt
     for cc in de at lt; do
       echo "Fetching $cc..."
-      # Fetch and clean: just the CIDR, no extra fluff to ensure nftables compatibility
       ${pkgs.curl}/bin/curl -sSf "https://www.ipdeny.com/ipblocks/data/countries/$cc.zone" >> merged.txt
     done
     
-    # Format for nftables elements: comma-separated
-    ${pkgs.gnused}/bin/sed -i 's/$/,/' merged.txt
+    # Format for nftables elements: comma-separated list on a single line or with trailing commas
+    # We join all lines with a comma and space for maximum compatibility.
+    ${pkgs.gawk}/bin/awk '{printf "%s, ", $0}' merged.txt > geoip-allowed.txt
     
     # Atomic replacement
-    mv merged.txt /var/lib/nftables/geoip-allowed.txt
+    mv geoip-allowed.txt /var/lib/nftables/geoip-allowed.txt
     echo "Geo-IP allowlist updated successfully."
   '';
 in {
