@@ -32,6 +32,11 @@
 ---
 
 ### ✅ Completed: High-Intensity Hardening (The "Steroids" Update)
+- [x] **Geo-IP Seeding:** ~1200 CIDR ranges (DE, AT, LT) pre-seeded for first-boot protection.
+- [x] **CA-Server Hardening:** Deep CSR validation (OpenSSL), AF_UNIX restriction, and DDoS protection.
+- [x] **Pocket-ID Integration:** Native NixOS module with Unix socket ingress.
+- [x] **Forbidden Tech Policy:** Soft-Mode warnings for Docker, Tailscale, etc. (No build blockers).
+- [x] **Logging Strategy:** Switched to RAM-buffered SSD chunking via Vector.
 - [x] **nftables-Geoblock:** DE, AT, LT restricted for port 443 (Kernel-Level).
 - [x] **Caddy DDoS Shield:** 3-Stage defense (Unknown, Human, Auth) with JS-Challenge.
 - [x] **API Compatibility:** Exceptions for native apps (/api, /Users, /jellyfin).
@@ -44,13 +49,13 @@
 
 ### 🔴 CRITICAL (Deployment Blocker)
 - [ ] **Manual Secret Population:** `secrets/secrets.yaml` befüllen (`user_password`, `freund_password`, `restic_password`, `backblaze_keys`).
+- [ ] **Hardware Identity:** Configuration of **Hermetic** for TPM-bound SSH keys.
 
 ### 🟠 HIGH (Security & Reliability)
-- [ ] **IPv6 LAN Parity:** `firewall.nix` um `ip6 saddr` Regeln für DNS (53) und mDNS (5353) erweitern.
+- [ ] **S3 Log Sync:** Implementation of hourly encrypted log-syncing to S3.
 - [ ] **Backup Validation:** `backupPrepareCommand` in `backup.nix` um `/persist` und `/var/lib/pocket-id` erweitern.
 
 ### 🟡 MEDIUM (Optimization)
-- [ ] **Vector Log-Rotation:** Placeholder in `vector-hdd.nix` durch echte Logik ersetzen.
 - [ ] **Gatus Hardening:** Bind-Adresse von `0.0.0.0` auf `127.0.0.1` ändern.
 - [ ] **Jellyfin Config:** `encoding.xml` Management verbessern (Pre-Start Script durch stabilere Lösung ersetzen).
 
