@@ -96,6 +96,7 @@ in
  PrivateTmp = true;
  NoNewPrivileges = true;
  ReadWritePaths = [ "/var/lib/mosquitto" ];
+ OOMScoreAdjust = -100;
  };
 
  # 🐝 3. ZIGBEE2MQTT

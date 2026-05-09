@@ -29,6 +29,15 @@ in
  enable = true;
  environment = { LISTENING_ADDRESS = ":${toString port}"; PERIOD = "10m"; };
  };
+ 
+ systemd.services.ddns-updater.serviceConfig = {
+   OOMScoreAdjust = -500;
+   ProtectSystem = "strict";
+   ProtectHome = true;
+   PrivateTmp = true;
+   NoNewPrivileges = true;
+ };
+
  services.caddy.virtualHosts."nix-ddns.${domain}" = {
  extraConfig = "import sso_auth\nreverse_proxy 127.0.0.1:${toString port}";
  };
