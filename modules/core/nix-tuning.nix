@@ -37,9 +37,9 @@ in {
 
  # 🚫 BINARY ONLY ENFORCEMENT (Fragment 748)
  # Verhindert lokale Builds (Saves SSD & CPU)
- max-jobs = lib.mkForce 0;
+ max-jobs = lib.mkDefault 0;
  builders-use-substitutes = true;
- fallback = false;
+ fallback = lib.mkDefault false;
 
  # 🏎️ STORE OPTIMIZATION
  auto-optimise-store = true;

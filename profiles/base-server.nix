@@ -7,6 +7,7 @@
  ../modules/core/impermanence.nix
  ../modules/core/nix-tuning.nix
  ../modules/core/network.nix
+ ../modules/core/locale.nix
  ../modules/core/ssh.nix
  ../modules/core/firewall.nix
  ../modules/security/geoip-update.nix

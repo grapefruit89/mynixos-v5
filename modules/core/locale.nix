@@ -8,7 +8,7 @@ let
  layer = 0;
  nixpkgs.category = "system/localization";
  capabilities = ["system/localization" "ssot/locale"];
- audit.last_reviewed = "2026-04-27";
+ audit.last_reviewed = "2026-05-09";
  audit.complexity = 1;
  };
 
@@ -39,12 +39,5 @@ in {
  "2.de.pool.ntp.org"
  "3.de.pool.ntp.org"
  ];
-
- services.resolved = {
- enable = true;
- dnssec = "true";
- dnsovertls = "opportunistic";
- domains = [ "~." ];
- };
  };
 }

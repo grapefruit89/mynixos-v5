@@ -12,7 +12,7 @@
  layer = 0;
  nixpkgs.category = "system/networking";
  capabilities = ["network/systemd-networkd" "performance/tcp-bbr" "security/dns-over-tls"];
- audit.last_reviewed = "2026-04-27";
+ audit.last_reviewed = "2026-05-09";
  audit.complexity = 2;
  };
  cfg = config.my.profiles.networking.systemd-networkd;
@@ -48,6 +48,7 @@ in {
  wait-online.anyInterface = true;
  };
 
+ # 🛡️ DNS HARDENING (DNS-over-TLS)
  services.resolved = {
  enable = true;
  dnssec = lib.mkForce "allow-downgrade";
@@ -81,10 +82,3 @@ in {
  };
  };
 }
-/**
-* ---
- * technical_integrity:
- * checksum: sha256:3bef6134357968f31eefaea79f506af578649dd44f8bc1ffa2a35924d84112cc
- * eof_marker: NIXHOME_VALID_EOF* ---
-*/
-

@@ -43,6 +43,7 @@ in {
  "/var/lib/tailscale"
  "/var/lib/bluetooth"
  "/var/lib/pocket-id"
+ "/var/lib/acme"
  "/var/log"
  ];
  files = [
@@ -58,11 +59,23 @@ in {
  enable = lib.mkForce true;
  configurationLimit = lib.mkForce 15;
  editor = false;
+ consoleMode = "max";
  };
  efi.canTouchEfiVariables = lib.mkForce true;
  grub.enable = lib.mkForce false;
  timeout = lib.mkForce 3;
  };
+
+ boot.kernelParams = [
+ "quiet"
+ "loglevel=3"
+ "systemd.show_status=auto"
+ "rd.udev.log_level=3"
+ ];
+
+ # Schnelles Booten & Cleanup
+ boot.tmp.cleanOnBoot = true;
+ boot.initrd.verbose = false;
 
  boot.kernel.sysctl = {
  "net.ipv4.conf.all.rp_filter" = lib.mkForce 1;

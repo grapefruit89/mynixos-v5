@@ -21,9 +21,16 @@ in {
  options.my = {
  profiles = {
  hardware.q958.enable = lib.mkOption { type = lib.types.bool; default = true; };
- networking.reverseProxy = lib.mkOption {
+ networking = {
+ reverseProxy = lib.mkOption {
  type = lib.types.enum ["caddy" "none"];
  default = "caddy";
+ };
+ systemd-networkd.enable = lib.mkOption {
+ type = lib.types.bool;
+ default = true;
+ description = "Use systemd-networkd for optimized networking.";
+ };
  };
  };
 
