@@ -24,12 +24,25 @@ in {
  };
 
  config = {
- # 🐕 HARDWARE WATCHDOG (Fragment 958)
- # Rebootet das System automatisch bei Totalausfall (Hang)
- systemd.watchdog.runtimeTime = "30s";
- systemd.watchdog.rebootTime = "10min";
+  # 🐕 HARDWARE WATCHDOG (Fragment 958)
+  # Rebootet das System automatisch bei Totalausfall (Hang)
+  # NixOS uses systemd.extraConfig for global systemd settings
+  systemd.extraConfig = ''
+    RuntimeWatchdogSec=30s
+    RebootWatchdogSec=10min
+    ShutdownWatchdogSec=10min
+    CtrlAltDelBurstAction=reboot-force
+  '';
 
- # 🏎️ KERNEL PANIC HANDLING
+  # 🚀 OOMD (Out-Of-Memory Daemon)
+  # Proaktives Management von Speicherengpässen (Besonders wichtig für AI/Ollama)
+  systemd.oomd = {
+    enable = true;
+    enableUserSlices = true;
+    enableSystemSlice = true;
+  };
+
+  # 🏎️ KERNEL PANIC HANDLING
  boot.kernel.sysctl = {
  "kernel.panic" = 10; # Reboot nach 10 Sek bei Panic
  "kernel.panic_on_oops" = 1;

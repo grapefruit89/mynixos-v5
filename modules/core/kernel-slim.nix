@@ -45,7 +45,7 @@ in {
  "bluetooth" "btusb" "btrtl" "btbcm" "btintel" "bnep" "rfcomm"
  "iwlwifi" "ath9k" "ath10k_core" "ath10k_pci" "rtl8192ce" 
  "rtl8192cu" "rtl8192de" "rtl8188ee" "mt76" "brcmfmac" "brcmutil"
- "nouveau" "radeon" "amdgpu" "mgag200" "ast" "pcspkr" "iTCO_wdt"
+ "nouveau" "radeon" "amdgpu" "mgag200" "ast" "pcspkr"
  "thunderbolt"
  ];
 
