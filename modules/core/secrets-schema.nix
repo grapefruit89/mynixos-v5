@@ -22,13 +22,10 @@ let
     # Infrastructure
     cloudflare_token = "";
     github_token = "";
-    tailscale_token = "";
-    unraid_root_password = "";
     
     # Automation & Apps
-    n8n_enc_key = "";
-    vaultwarden_env = "";
     paperless_secret_key = "";
+    vaultwarden_env = "";
     
     # Media Stack
     sonarr_api_key = "";

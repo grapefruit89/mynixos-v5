@@ -11,6 +11,21 @@ cp secrets/secrets.yaml.example secrets/secrets.yaml
 ## 2. Fill the Values
 Open `secrets/secrets.yaml` in an editor and fill in your actual credentials.
 
+**Required Secret Keys:**
+The following keys MUST be present in your `secrets.yaml`:
+- `user_password` (Hashed)
+- `freund_password` (Hashed)
+- `cloudflare_token`
+- `github_token`
+- `restic_password`
+- `backblaze_access_key`
+- `backblaze_secret_key`
+- `paperless_secret_key`
+- `vaultwarden_env`
+- `sonarr_api_key`
+- `radarr_api_key`
+- `readarr_api_key`
+
 **Password Hashing:**
 For `user_password` and `freund_password`, generate hashes using:
 ```bash

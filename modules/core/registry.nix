@@ -55,6 +55,11 @@ in {
  uptimeKuma.enable = lib.mkEnableOption "Uptime Kuma";
  scrutiny.enable = lib.mkEnableOption "Scrutiny";
 
+ # 90-Logging
+ logging = {
+ s3Sync.enable = lib.mkEnableOption "S3 Log Sync";
+ };
+
  # Core Features
  backup.enable = lib.mkEnableOption "Restic Backup";
  kernelSlim.enable = lib.mkEnableOption "Kernel Slim";

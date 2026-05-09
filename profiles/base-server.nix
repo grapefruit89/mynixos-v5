@@ -13,6 +13,7 @@
  ../modules/core/fail2ban.nix
  ../modules/core/zram-swap.nix
  ../modules/logging/vector-ram.nix
+ ../modules/logging/s3-sync.nix
  ../modules/core/shell-premium.nix ../modules/core/system-stability.nix
  ../modules/core/principles.nix 
  # Standard Services
@@ -26,6 +27,7 @@
 
  # Persistent Vector Logging
  my.logging.vector.enable = true;
+ my.logging.s3Sync.enable = true;
  my.monitoring.gatus.enable = true;
  my.services.pocketId.enable = true;
  my.services.caServer.enable = true;
