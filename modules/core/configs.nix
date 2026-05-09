@@ -86,6 +86,11 @@
  
  mediaLibrary = lib.mkOption { type = lib.types.str; default = "/mnt/hdd_pool/media"; };
  storagePool = lib.mkOption { type = lib.types.str; default = "/mnt/hdd_pool"; };
+ physicalHdds = lib.mkOption {
+   type = lib.types.listOf lib.types.str;
+   default = [ "/dev/sda" "/dev/sdb" ];
+   description = "List of physical HDD device paths for power state monitoring.";
+ };
  };
 
  # 🚩 SAFETY TOGGLES

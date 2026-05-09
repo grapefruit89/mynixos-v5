@@ -11,12 +11,17 @@ let
  LOW_THRESHOLD_GB=${toString cfg.lowSpaceThresholdGB}
  TARGET_FREE_GB=${toString cfg.targetFreeGB}
  DRY_RUN=${if cfg.dryRun then "1" else "0"}
+ PHYSICAL_HDDS=(${lib.concatStringsSep " " srePaths.physicalHdds})
 
  echo "--- 📦 Starting Capacity-Based Smart Mover ---"
 
- # Check if HDD is active
- # Assuming /dev/sda and /dev/sdb are your HDDs (Tier C)
- IS_AWAKE=$(${pkgs.hdparm}/bin/hdparm -C /dev/sd[a-z] | grep -c "active/idle" || true)
+ # Check if HDD is active via declarative list
+ IS_AWAKE=0
+ for dev in "''${PHYSICAL_HDDS[@]}"; do
+   if ${pkgs.hdparm}/bin/hdparm -C "$dev" 2>/dev/null | grep -q "active/idle"; then
+     IS_AWAKE=$((IS_AWAKE + 1))
+   fi
+ done
  
  # Space Check
  FREE_SPACE=$(${pkgs.coreutils}/bin/df --output=avail "$SOURCE_DIR" | tail -1)
@@ -28,12 +33,12 @@ let
  # 3. Else -> Exit.
  
  if [ "$FREE_GB" -lt 10 ]; then
- echo "🚀 SPACE CRITICAL ($FREE_GB GB). Forcing move regardless of HDD state."
+   echo "🚀 SPACE CRITICAL ($FREE_GB GB). Forcing move regardless of HDD state."
  elif [ "$FREE_GB" -lt 20 ] && [ "$IS_AWAKE" -gt 0 ]; then
- echo "⚖️ LOW SPACE ($FREE_GB GB) and HDD is AWAKE ($IS_AWAKE active). Starting move."
+   echo "⚖️ LOW SPACE ($FREE_GB GB) and HDD is AWAKE ($IS_AWAKE active). Starting move."
  else
- echo "💤 Conditions not met for move (Free: $FREE_GB GB, HDD Awake: $IS_AWAKE). Skipping to avoid spin-up."
- exit 0
+   echo "💤 Conditions not met for move (Free: $FREE_GB GB, HDD Awake: $IS_AWAKE). Skipping to avoid spin-up."
+   exit 0
  fi
 
  echo "📊 Current free space on Tier B ($SOURCE_DIR): ''${FREE_GB} GB"
@@ -43,49 +48,53 @@ let
  COUNT=0
 
  while [ "$FREE_GB" -lt "$TARGET_FREE_GB" ] && [ "$COUNT" -lt "$MAX_ITERATIONS" ]; do
- COUNT=$((COUNT + 1))
+   COUNT=$((COUNT + 1))
 
- # 🛡️ Find oldest file, excluding critical database patterns
- OLDEST=$(find "$SOURCE_DIR" -type f \
- ! -name "*.wal" ! -name "*.db" ! -name "*.sqlite" ! -name "*.db-journal" \
- ! -name "*.db-shm" ! -name "*.db-wal" ! -name "*.sqlite-shm" ! -name "*.sqlite-wal" \
- -printf '%T@ %p\n' | sort -n | head -1 | cut -d' ' -f2-)
+   # 🛡️ Find oldest file, excluding critical database patterns (Null-terminated for safety)
+   OLDEST_INFO=$(find "$SOURCE_DIR" -type f \
+     ! -name "*.wal" ! -name "*.db" ! -name "*.sqlite" ! -name "*.db-journal" \
+     ! -name "*.db-shm" ! -name "*.db-wal" ! -name "*.sqlite-shm" ! -name "*.sqlite-wal" \
+     -printf '%T@ %p\0' | sort -zn | head -z -n 1)
 
- if [ -z "$OLDEST" ]; then
- echo "ℹ️ No more safe files found to move."
- break
- fi
+   if [ -z "$OLDEST_INFO" ]; then
+     echo "ℹ️ No more safe files found to move."
+     break
+   fi
 
- if ${pkgs.lsof}/bin/lsof "$OLDEST" > /dev/null 2>&1; then
- echo "⏭️ Skipping active file: $OLDEST (touching to defer)"
- touch "$OLDEST"
- continue
- fi
+   # Extract path from info (which starts with timestamp and space)
+   OLDEST=$(echo -n "$OLDEST_INFO" | cut -zd' ' -f2-)
 
- REL_PATH=''${OLDEST#"$SOURCE_DIR/"}
- DEST_DIR=$(dirname "$TARGET_DIR/$REL_PATH")
+   if ${pkgs.lsof}/bin/lsof -- "$OLDEST" > /dev/null 2>&1; then
+     echo "⏭️ Skipping active file: $OLDEST (touching to defer)"
+     touch -- "$OLDEST"
+     continue
+   fi
 
- if [ "$DRY_RUN" -eq 1 ]; then
- echo "[DRY-RUN] Would move: $REL_PATH"
- FREE_GB=$((FREE_GB + 5)) # Estimate move
- else
- echo "🚚 Moving: $REL_PATH"
- mkdir -p "$DEST_DIR"
- # 🛡️ TRANSACTIONAL MOVE: Copy -> Verify -> Delete
- ${pkgs.rsync}/bin/rsync -a --remove-source-files "$OLDEST" "$TARGET_DIR/$REL_PATH"
+   REL_PATH="''${OLDEST#"$SOURCE_DIR/"}"
+   DEST_DIR=$(dirname -- "$TARGET_DIR/$REL_PATH")
 
- FREE_SPACE=$(${pkgs.coreutils}/bin/df --output=avail "$SOURCE_DIR" | tail -1)
- FREE_GB=$((FREE_SPACE / 1024 / 1024))
- fi
+   if [ "$DRY_RUN" -eq 1 ]; then
+     echo "[DRY-RUN] Would move: $REL_PATH"
+     FREE_GB=$((FREE_GB + 5)) # Estimate move
+   else
+     echo "🚚 Moving: $REL_PATH"
+     mkdir -p -- "$DEST_DIR"
+     # 🛡️ TRANSACTIONAL MOVE: Copy -> Verify -> Delete
+     ${pkgs.rsync}/bin/rsync -a --remove-source-files -- "$OLDEST" "$TARGET_DIR/$REL_PATH"
+
+     FREE_SPACE=$(${pkgs.coreutils}/bin/df --output=avail "$SOURCE_DIR" | tail -1)
+     FREE_GB=$((FREE_SPACE / 1024 / 1024))
+   fi
  done
 
  if [ "$COUNT" -ge "$MAX_ITERATIONS" ]; then
- echo "⚠️ Mover reached MAX_ITERATIONS ($MAX_ITERATIONS). Stopping for safety."
+   echo "⚠️ Mover reached MAX_ITERATIONS ($MAX_ITERATIONS). Stopping for safety."
  fi
 
  if [ "$DRY_RUN" -eq 0 ]; then
- find "$SOURCE_DIR" -type d -empty -delete
- echo "🧹 Cleaned up empty directories."
+   # Preserve base directory with mindepth 1
+   find "$SOURCE_DIR" -mindepth 1 -type d -empty -delete
+   echo "🧹 Cleaned up empty directories."
  fi
 
  echo "--- ✅ Mover finished. Current free space: ''${FREE_GB} GB ---"
