@@ -87,11 +87,22 @@ in {
  # 🚨 C-03: AUTOMATED KEY BACKUP (Anti-Deadlock)
  systemd.services.sops-key-sync = {
  description = "Sync SSH host key to Tier B fallback";
- after = [ "persist.mount" ];
+ # Correct logic: only run if the fallback directory is available
+ unitConfig.ConditionPathExists = config.my.configs.paths.tierB;
  wantedBy = [ "multi-user.target" ];
  serviceConfig = {
  Type = "oneshot";
- ExecStart = "${pkgs.bash}/bin/bash /etc/nixos/modules/core/scripts/sync-sops-keys.sh";
+ ExecStart = pkgs.writeShellScript "sops-key-sync" ''
+   set -euo pipefail
+   KEY="/etc/ssh/ssh_host_ed25519_key"
+   DEST="${config.my.configs.paths.tierB}/secrets/emergency_age_key.txt"
+   if [ -f "$KEY" ]; then
+     mkdir -p "$(dirname "$DEST")"
+     cp -f "$KEY" "$DEST"
+     chmod 600 "$DEST"
+     logger -t sops-sync "Backup of SSH host key to Tier B successful."
+   fi
+ '';
  RemainAfterExit = true;
  };
  };

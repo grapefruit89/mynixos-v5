@@ -106,7 +106,7 @@ in {
 
  # 🛡️ SYSTEMD SANDBOXING
  systemd.services.fail2ban.serviceConfig = {
- OOMScoreAdjust = 500;
+ OOMScoreAdjust = -1000;
  ProtectSystem = "strict";
  ReadWritePaths = ["/var/lib/fail2ban" "/var/run/fail2ban"];
  PrivateTmp = true;

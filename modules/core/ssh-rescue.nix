@@ -30,12 +30,14 @@ in {
   # 🚨 RESCUE INSTANCE CONFIG
   systemd.services.sshd-rescue = {
     description = "Emergency SSH Service (Password Auth)";
-    # Autoterminate after 15 minutes of inactivity to prevent long-term exposure
+    # hardened: stop the whole unit after 15 minutes to minimize exposure
+    runtimeMaxSec = "15min";
     after = [ "network.target" ];
     serviceConfig = {
       ExecStart = "${pkgs.openssh}/bin/sshd -D -o \"ClientAliveInterval 300\" -o \"ClientAliveCountMax 0\" -f ${pkgs.writeText "sshd-rescue-config" ''
         Port ${toString rescuePort}
-        ListenAddress 100.64.0.0/10 # Target: Tailscale only
+        ListenAddress ${config.my.configs.network.lanIP}
+        ListenAddress 100.64.0.0/10
         PasswordAuthentication yes
         PermitRootLogin no
         AllowUsers ${user}
