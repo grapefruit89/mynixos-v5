@@ -19,7 +19,6 @@
 ---
 
 ## 🧭 Prioritized Action Plan
-
 | Priority | Task | Complexity | Impact | Status |
 | :--- | :--- | :--- | :--- | :--- |
 | 🔴 **P1** | **Persistent Logs (Vector)** | Low | High | **[DONE]** |
@@ -27,33 +26,37 @@
 | 🟡 **P3** | **Storage Tiering Mover** | Medium | Medium | **[DONE]** |
 | 🟢 **P4** | **Core Hardening (Kernel/Systemd)** | Low | Medium | **[DONE]** |
 | 🔵 **P5** | **Gatus / Healthchecks** | Low | Medium | **[DONE]** |
-| ⚪ **P6** | **Extra Apps (Linkding, etc.)** | Low | Low | **[DONE]** |
+| ⚪ **P6** | **Extra Apps (Vaultwarden, etc.)** | Low | Low | **[DONE]** |
+| 🟣 **P7** | **S3 Log Sync (rclone)** | Low | High | **[DONE]** |
 
 ---
+
+## 📋 Detailed Task Breakdown
 
 ### ✅ Completed: High-Intensity Hardening (The "Steroids" Update)
 - [x] **Geo-IP Seeding:** ~1200 CIDR ranges (DE, AT, LT) pre-seeded for first-boot protection.
 - [x] **CA-Server Hardening:** Deep CSR validation (OpenSSL), AF_UNIX restriction, and DDoS protection.
 - [x] **Pocket-ID Integration:** Native NixOS module with Unix socket ingress.
 - [x] **Forbidden Tech Policy:** Soft-Mode warnings for Docker, Tailscale, etc. (No build blockers).
+- [x] **Hermetic Identity:** TPM-bound SSH keys (sk-ssh-ed25519) active.
+- [x] **Immutable Secret Schema:** Centralized, read-only SSoT for all SOPS keys.
+- [x] **S3 Log Sync:** Hourly off-site persistence via rclone to Backblaze.
 - [x] **Logging Strategy:** Switched to RAM-buffered SSD chunking via Vector.
-- [x] **nftables-Geoblock:** DE, AT, LT restricted for port 443 (Kernel-Level).
+- [x] **nftables-Geoblock:** DE, AT, LT restricted for port 443 (Kernel-Level, syntaktisch korrigiert).
 - [x] **Caddy DDoS Shield:** 3-Stage defense (Unknown, Human, Auth) with JS-Challenge.
-- [x] **API Compatibility:** Exceptions for native apps (/api, /Users, /jellyfin).
-- [x] **Isolation:** Closed port 80 and SSH (53844) for public WAN.
+- [x] **Port SSoT:** Full camelCase consistency and collision resolution (8081 fixed).
 - [x] **Integrity:** `cache.files=off` in MergerFS to prevent metadata drift.
 
----
 
-## 🛠️ Next Sortie: Residual Todo List (Current Audit Results)
+## 🛠️ Next Sortie: Residual Todo List (Operational)
 
-### 🔴 CRITICAL (Deployment Blocker)
-- [ ] **Manual Secret Population:** `secrets/secrets.yaml` befüllen (`user_password`, `freund_password`, `restic_password`, `backblaze_keys`).
-- [ ] **Hardware Identity:** Configuration of **Hermetic** for TPM-bound SSH keys.
+### 🔴 CRITICAL (Deployment)
+- [ ] **Manual Secret Population:** `secrets/secrets.yaml` befüllen (siehe `INJECTION_GUIDE.md`).
+- [ ] **First Boot Identity:** TPM-Bindung nach dem ersten `rebuild` verifizieren.
 
-### 🟠 HIGH (Security & Reliability)
-- [ ] **S3 Log Sync:** Implementation of hourly encrypted log-syncing to S3.
+### 🟠 HIGH (Validation)
 - [ ] **Backup Validation:** `backupPrepareCommand` in `backup.nix` um `/persist` und `/var/lib/pocket-id` erweitern.
+- [ ] **S3 Verification:** Ersten erfolgreichen Log-Sync im Backblaze-Bucket prüfen.
 
 ### 🟡 MEDIUM (Optimization)
 - [ ] **Gatus Hardening:** Bind-Adresse von `0.0.0.0` auf `127.0.0.1` ändern.
