@@ -96,18 +96,20 @@ in
         ExecStart = pkgs.writeShellScript "rotate-vector-logs" ''
           set -euo pipefail
           # 1. Age-based deletion
-          find ${logDir} -name "*.log.gz" -type f -mtime +${toString cfg.retentionDays} -delete
+          ${pkgs.findutils}/bin/find "${logDir}" -name "*.log.gz" -type f -mtime +${toString cfg.retentionDays} -delete
 
           # 2. Size-based deletion (Target: ${toString maxTotalSizeMB}MB)
-          CURRENT_SIZE=$(du -sm ${logDir} | cut -f1)
-          if [ "$CURRENT_SIZE" -gt ${toString maxTotalSizeMB} ]; then
-            echo "Log directory size ($CURRENT_SIZE MB) exceeds limit (${toString maxTotalSizeMB} MB). Cleaning up..."
-            # Delete oldest files first until under limit
-            ls -tr ${logDir}/*.gz | while read -r file; do
-              rm "$file"
-              CURRENT_SIZE=$(du -sm ${logDir} | cut -f1)
-              [ "$CURRENT_SIZE" -le ${toString maxTotalSizeMB} ] && break
-            done
+          if [ -d "${logDir}" ]; then
+            CURRENT_SIZE=$(${pkgs.coreutils}/bin/du -sm "${logDir}" | ${pkgs.coreutils}/bin/cut -f1)
+            if [ "$CURRENT_SIZE" -gt ${toString maxTotalSizeMB} ]; then
+              echo "Log directory size ($CURRENT_SIZE MB) exceeds limit (${toString maxTotalSizeMB} MB). Cleaning up..."
+              # Delete oldest files first until under limit
+              ${pkgs.coreutils}/bin/ls -tr "${logDir}"/*.gz 2>/dev/null | while read -r file; do
+                rm -f -- "$file"
+                CURRENT_SIZE=$(${pkgs.coreutils}/bin/du -sm "${logDir}" | ${pkgs.coreutils}/bin/cut -f1)
+                [ "$CURRENT_SIZE" -le ${toString maxTotalSizeMB} ] && break
+              done
+            fi
           fi
         '';
       };

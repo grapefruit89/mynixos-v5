@@ -108,9 +108,9 @@ in {
  useSSO = true;
  persist = true;
  description = "Gatus Health Dashboard";
- extraServiceConfig = {
- ExecStart = lib.mkForce "${pkgs.gatus}/bin/gatus --config ${gatusConfig}";
- };
+     extraServiceConfig = {
+        ExecStart = lib.mkForce "${pkgs.gatus}/bin/gatus --config \"${gatusConfig}\"";
+      };
  })
 
  # 🔧 2. GATUS SPECIFICS
