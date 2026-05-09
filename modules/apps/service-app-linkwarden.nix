@@ -24,8 +24,8 @@
 
  port = config.my.ports.linkwarden or 3000;
  domain = config.my.configs.identity.domain;
- # 🔑 SOPS Secret Identifier: linkwarden_env (Needs to be added to secrets.nix)
- # secretEnv = config.sops.secrets.linkwarden_env.path;
+ # 🔑 SOPS Secret Identifier: linkwarden_env
+ secretEnv = config.sops.secrets.linkwarden_env.path;
 in {
  options.my.meta.linkwarden = lib.mkOption {
  type = lib.types.attrs;
@@ -41,6 +41,7 @@ in {
  config = lib.mkIf config.my.services.linkwarden.enable {
  services.linkwarden = {
  enable = true;
+ environmentFile = secretEnv;
  environment = {
  NEXTAUTH_URL = "https://links.${domain}/api/v1/auth";
  };
@@ -52,6 +53,7 @@ in {
 
  # 🛡️ SYSTEMD SANDBOXING
  systemd.services.linkwarden = {
+ after = [ "postgresql.service" ];
  serviceConfig = {
  DynamicUser = true;
  ProtectSystem = "strict";

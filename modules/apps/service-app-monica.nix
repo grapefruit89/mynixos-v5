@@ -15,9 +15,25 @@ in
 {
  options.my.meta.monica = lib.mkOption { type = lib.types.attrs; default = nms; readOnly = true; };
  config = lib.mkIf config.my.services.monica.enable {
- services.monica = { enable = true; hostname = "monica.${domain}"; appURL = "https://monica.${domain}"; inherit appKeyFile; nginx.listen = [ { addr = "127.0.0.1"; port = port; ssl = false; } ]; database.createLocally = true; };
+ services.monica = { 
+   enable = true; 
+   hostname = "monica.${domain}"; 
+   appURL = "https://monica.${domain}"; 
+   appKeyFile = "${config.my.configs.paths.stateDir}/monica/app-key"; 
+   nginx.listen = [ { addr = "127.0.0.1"; port = port; ssl = false; } ]; 
+   database.createLocally = true; 
+ };
  services.caddy.virtualHosts."monica.${domain}" = { extraConfig = "import sso_auth\nreverse_proxy 127.0.0.1:${toString port}"; };
- system.activationScripts.monicaAppKeyFile.text = "install -d -m 0750 -o monica -g monica /var/lib/monica; if [ ! -s ${appKeyFile} ]; then head -c 32 /dev/urandom | base64 > ${appKeyFile}; fi";
- systemd.services.phpfpm-monica.serviceConfig = { ProtectSystem = lib.mkForce "strict"; ProtectHome = true; PrivateTmp = true; PrivateDevices = true; ReadWritePaths = [ "/var/lib/monica" ]; };
+ system.activationScripts.monicaAppKeyFile.text = "install -d -m 0750 -o monica -g monica ${config.my.configs.paths.stateDir}/monica; if [ ! -s ${config.my.services.monica.appKeyFile} ]; then head -c 32 /dev/urandom | base64 > ${config.my.services.monica.appKeyFile}; fi";
+ systemd.services.phpfpm-monica = {
+   after = [ "postgresql.service" ];
+   serviceConfig = { 
+     ProtectSystem = lib.mkForce "strict"; 
+     ProtectHome = true; 
+     PrivateTmp = true; 
+     PrivateDevices = true; 
+     ReadWritePaths = [ "${config.my.configs.paths.stateDir}/monica" ]; 
+   };
+ };
  };
 }

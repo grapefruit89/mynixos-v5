@@ -34,6 +34,15 @@ in
  config = lib.mkIf config.my.services.readeck.enable {
  services.readeck = { enable = true; settings = { server.host = "127.0.0.1"; server.port = port; log.level = "info"; }; environmentFile = config.sops.secrets.readeck_env.path; };
  services.caddy.virtualHosts."read.${domain}" = { extraConfig = "import sso_auth\nreverse_proxy 127.0.0.1:${toString port}"; };
- systemd.services.readeck.serviceConfig = { DynamicUser = true; ProtectSystem = "full"; ProtectHome = true; PrivateTmp = true; PrivateDevices = true; SystemCallFilter = [ "@system-service" "~@privileged" ]; OOMScoreAdjust = 300; };
+ systemd.services.readeck.serviceConfig = { 
+   DynamicUser = true; 
+   StateDirectory = "readeck";
+   ProtectSystem = "strict"; 
+   ProtectHome = true; 
+   PrivateTmp = true; 
+   PrivateDevices = true; 
+   SystemCallFilter = [ "@system-service" "~@privileged" ]; 
+   OOMScoreAdjust = 300; 
+ };
  };
 }

@@ -54,21 +54,22 @@ in {
  };
 
  systemd.services.vaultwarden = {
- wantedBy = lib.mkForce [];
- requires = ["vaultwarden.socket"];
- after = ["vaultwarden.socket"];
- serviceConfig = {
- ProtectSystem = lib.mkForce "strict";
- ReadWritePaths = ["/var/lib/vaultwarden"];
- MemoryDenyWriteExecute = lib.mkForce true;
- RestrictAddressFamilies = lib.mkForce ["AF_INET" "AF_UNIX"];
- SystemCallFilter = lib.mkForce ["@system-service" "~@privileged" "~@resources"];
- NoNewPrivileges = lib.mkForce true;
- PrivateDevices = lib.mkForce true;
- PrivateTmp = lib.mkForce true;
- OOMScoreAdjust = 200;
- };
- };
+    wantedBy = lib.mkForce [];
+    requires = ["vaultwarden.socket"];
+    after = ["vaultwarden.socket"];
+    serviceConfig = {
+      ProtectSystem = lib.mkForce "strict";
+      ProtectHome = true;
+      ReadWritePaths = ["${config.my.configs.paths.stateDir}/vaultwarden"];
+      MemoryDenyWriteExecute = lib.mkForce true;
+      RestrictAddressFamilies = lib.mkForce ["AF_INET" "AF_UNIX"];
+      SystemCallFilter = lib.mkForce ["@system-service" "~@privileged" "~@resources"];
+      NoNewPrivileges = lib.mkForce true;
+      PrivateDevices = lib.mkForce true;
+      PrivateTmp = lib.mkForce true;
+      OOMScoreAdjust = 300;
+    };
+  };
  };
 }
 /**

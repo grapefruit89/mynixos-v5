@@ -38,8 +38,19 @@ in
  };
  systemd.sockets.miniflux = { description = "Miniflux Socket"; wantedBy = [ "sockets.target" ]; listenStreams = [ (toString port) ]; };
  systemd.services.miniflux = {
- wantedBy = lib.mkForce [ ]; requires = [ "miniflux.socket" ]; after = [ "miniflux.socket" ];
- serviceConfig = { DynamicUser = true; ProtectSystem = "strict"; ProtectHome = true; PrivateTmp = true; PrivateDevices = true; SystemCallFilter = [ "@system-service" "~@privileged" ]; OOMScoreAdjust = 500; };
- };
+    wantedBy = lib.mkForce [ ];
+    requires = [ "miniflux.socket" ];
+    after = [ "miniflux.socket" "postgresql.service" ];
+    serviceConfig = {
+      DynamicUser = true;
+      StateDirectory = "miniflux";
+      ProtectSystem = "strict";
+      ProtectHome = true;
+      PrivateTmp = true;
+      PrivateDevices = true;
+      SystemCallFilter = [ "@system-service" "~@privileged" ];
+      OOMScoreAdjust = 500;
+    };
+  };
  };
 }

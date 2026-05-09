@@ -43,6 +43,7 @@
       # 50-Apps
       vaultwarden = 8222;
       monica = 8082;
+      readeck = 8072;
       karakeep = 20003;
       couchdb = 5984;
       filebrowser = 8071;

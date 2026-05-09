@@ -8,13 +8,20 @@
  environment.persistence."/persist" = {
  hideMounts = true;
  directories = [
- "/var/log"
- "/var/lib/nixos"
- "/var/lib/systemd"
- "/var/lib/sops-nix"
- "/var/lib/bluetooth"
- "/etc/NetworkManager/system-connections"
+   "/var/log"
+   "/var/lib/nixos"
+   "/var/lib/systemd"
+   "/var/lib/sops-nix"
+   "/var/lib/bluetooth"
+   "/var/lib/vaultwarden"
+   "/var/lib/miniflux"
+   "/var/lib/linkwarden"
+   "/var/lib/filebrowser"
+   "/var/lib/readeck"
+   "/var/lib/monica"
+   "/etc/NetworkManager/system-connections"
  ];
+
  files = [
  "/etc/machine-id"
  "/etc/ssh/ssh_host_ed25519_key"

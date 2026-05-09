@@ -25,8 +25,24 @@ in
 
 
  config = lib.mkIf config.my.services.filebrowser.enable {
- services.filebrowser = { enable = true; settings = { port = port; address = "127.0.0.1"; root = "/mnt/storage"; }; };
+ services.filebrowser = { 
+   enable = true; 
+   settings = { 
+     port = port; 
+     address = "127.0.0.1"; 
+     root = config.my.configs.paths.storagePool; 
+   }; 
+ };
  services.caddy.virtualHosts."files.${domain}" = { extraConfig = "import sso_auth\nreverse_proxy 127.0.0.1:${toString port}"; };
- systemd.services.filebrowser.serviceConfig = { ProtectSystem = "strict"; ProtectHome = true; PrivateTmp = true; PrivateDevices = true; ReadWritePaths = [ "/var/lib/filebrowser" "/mnt/storage" ]; NoNewPrivileges = true; SystemCallFilter = [ "@system-service" "~@privileged" ]; };
+ systemd.services.filebrowser.serviceConfig = { 
+   ProtectSystem = "strict"; 
+   ProtectHome = true; 
+   PrivateTmp = true; 
+   PrivateDevices = true; 
+   ReadWritePaths = [ "${config.my.configs.paths.stateDir}/filebrowser" config.my.configs.paths.storagePool ]; 
+   NoNewPrivileges = true; 
+   SystemCallFilter = [ "@system-service" "~@privileged" ]; 
+   OOMScoreAdjust = 500;
+ };
  };
 }
