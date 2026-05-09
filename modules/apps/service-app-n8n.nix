@@ -36,42 +36,42 @@ in
  readOnly = true;
  };
 
- options.my.apps.n8n = {
- enable = lib.mkEnableOption "n8n Workflow Automation";
- user = lib.mkOption { type = lib.types.str; default = "n8n"; };
- group = lib.mkOption { type = lib.types.str; default = "n8n"; };
- port = lib.mkOption { type = lib.types.port; default = config.my.ports.n8n or 5678; }; 
- # 💾 PATH STRATEGY (ABC-Tiering)
- stateDir = lib.mkOption { 
- type = lib.types.str; 
- default = "${srePaths.stateDir}/n8n"; 
- description = "Database and binary state (Tier A/Persist)";
- };
- cacheDir = lib.mkOption {
- type = lib.types.str;
- default = "${srePaths.tierB}/cache/n8n";
- description = "Workflow execution cache (Tier B)";
- };
+  options.my.apps.n8n = {
+    enable = lib.mkEnableOption "n8n Workflow Automation";
+    user = lib.mkOption { type = lib.types.str; default = "n8n"; };
+    group = lib.mkOption { type = lib.types.str; default = "n8n"; };
+    port = lib.mkOption { type = lib.types.port; default = config.my.ports.n8n or 5678; }; 
+    # 💾 PATH STRATEGY (ABC-Tiering)
+    stateDir = lib.mkOption { 
+      type = lib.types.str; 
+      default = "${srePaths.stateDir}/n8n"; 
+      description = "Database and binary state (Tier A/Persist)";
+    };
+    cacheDir = lib.mkOption {
+      type = lib.types.str; 
+      default = "${srePaths.tierB}/cache/n8n";
+      description = "Workflow execution cache (Tier B)";
+    };
 
- # 🗄️ DATABASE
- database = {
- type = lib.mkOption { 
- type = lib.types.enum [ "sqlite" "postgres" ]; 
- default = "postgres"; 
- description = "Backend database engine";
- };
- };
+    # 🗄️ DATABASE
+    database = {
+      type = lib.mkOption { 
+        type = lib.types.enum [ "sqlite" "postgres" ]; 
+        default = "postgres"; 
+        description = "Backend database engine";
+      };
+    };
 
- # 🔑 SECRETS
- encryptionKeyFile = lib.mkOption {
- type = lib.types.nullOr lib.types.path;
- default = null;
- description = "Path to n8n Encryption Key (via Sops)";
- };
+    # 🔑 SECRETS
+    encryptionKeyFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = config.sops.secrets.n8n_enc_key.path;
+      description = "Path to n8n Encryption Key (via Sops)";
+    };
 
- # 🏎️ RESOURCES
- memoryMax = lib.mkOption { type = lib.types.str; default = "2G"; };
- };
+    # 🏎️ RESOURCES
+    memoryMax = lib.mkOption { type = lib.types.str; default = "2G"; };
+  };
 
  config = lib.mkIf cfg.enable (lib.mkMerge [
  # 🏆 Use the hardened Service Factory

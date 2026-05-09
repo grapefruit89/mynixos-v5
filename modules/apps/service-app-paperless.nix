@@ -33,14 +33,14 @@ in
  readOnly = true;
  };
 
- options.my.apps.paperless = {
- enable = lib.mkEnableOption "Paperless-ngx Document Management";
- secretFile = lib.mkOption {
- type = lib.types.nullOr lib.types.path;
- default = null;
- description = "Path to Paperless Secret Key (via Sops)";
- };
- };
+  options.my.apps.paperless = {
+    enable = lib.mkEnableOption "Paperless-ngx Document Management";
+    secretFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = config.sops.secrets.paperless_secret_key.path;
+      description = "Path to Paperless Secret Key (via Sops)";
+    };
+  };
 
  config = lib.mkIf cfg.enable (lib.mkMerge [
  
