@@ -86,7 +86,6 @@ in
  config = lib.mkIf cfg.enable {
  systemd.services.process-delete-queue = {
  description = "Process Deferred Deletion Queue";
- after = [ "network.target" ];
  serviceConfig = {
  Type = "oneshot";
  ExecStart = processScript;

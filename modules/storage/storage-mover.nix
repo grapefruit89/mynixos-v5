@@ -114,7 +114,6 @@ in
  config = lib.mkIf cfg.enable {
  systemd.services.storage-mover = {
  description = "Capacity-Based Smart Mover (SSD -> HDD)";
- after = [ "network.target" ];
  serviceConfig = {
  Type = "oneshot";
  ExecStart = moverScript;
