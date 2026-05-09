@@ -34,9 +34,6 @@ in {
  RemainAfterExit = true;
  StandardOutput = "tty";
  TTYPath = "/dev/tty1";
- # 🛡️ hardened Hardening
- Restart = "always";
- RestartSec = "10s";
  OOMScoreAdjust = -1000;
  };
  script = ''

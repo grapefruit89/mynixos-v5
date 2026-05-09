@@ -9,7 +9,7 @@ let
  QUEUE_DIR="${cfg.queueDir}"
  MAX_AGE_DAYS=${toString cfg.maxAgeDays}
  HDD_POOL="${srePaths.tierC}"
- PHYSICAL_HDDS=(${lib.concatStringsSep " " srePaths.physicalHdds})
+ PHYSICAL_HDDS=(${lib.concatStringsSep " " config.my.storage.devices})
 
  echo "--- 🗑️ Starting Deferred Deletion Processor ---"
  
@@ -25,6 +25,25 @@ let
  done
 
  echo "📈 Pool Status: ANY_ACTIVE=$ANY_ACTIVE"
+
+ # 🚀 EARLY EXIT: If HDD is asleep, check if we MUST delete anything
+ if [ "$ANY_ACTIVE" = false ]; then
+   # Check if any file in the queue is older than MAX_AGE_DAYS
+   # Using find to get the age of the oldest file
+   OLDEST_AGE=$(${pkgs.findutils}/bin/find "$QUEUE_DIR" -type f -printf '%T@\n' | sort -n | head -1 || echo "")
+   if [ -n "$OLDEST_AGE" ]; then
+     MAX_AGE_SECONDS=$((MAX_AGE_DAYS * 86400))
+     CURRENT_TIME=$(date +%s)
+     OLDEST_AGE_INT=''${OLDEST_AGE%.*}
+     if [ $((CURRENT_TIME - OLDEST_AGE_INT)) -lt "$MAX_AGE_SECONDS" ]; then
+       echo "😴 HDD is standby and no entries exceed MAX_AGE_DAYS ($MAX_AGE_DAYS). Early exit."
+       exit 0
+     fi
+   else
+     echo "ℹ️ Queue is empty. Nothing to do."
+     exit 0
+   fi
+ fi
 
  # Process queue
  shopt -s nullglob

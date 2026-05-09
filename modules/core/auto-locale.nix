@@ -27,7 +27,7 @@
  
  # Fallback to ipapi.co if needed
  if [ -z "$COUNTRY" ] || [ "$COUNTRY" == "null" ]; then
- COUNTRY=$(${pkgs.curl}/bin/curl -sf --max-time 5 "https://ipapi.co/country_name/" 2>/dev/null || echo "Germany")
+ COUNTRY=$(${pkgs.curl}/bin/curl -sf --max-time 5 "https://ipapi.co/country/" 2>/dev/null || echo "Germany")
  [[ "$COUNTRY" == "Germany" ]] && COUNTRY="DE"
  fi
 
@@ -46,6 +46,10 @@ in {
  # 🏁 Standard-Locale (Wird durch Rebuild/State aktualisiert)
  time.timeZone = lib.mkDefault "Europe/Berlin";
  i18n.defaultLocale = lib.mkDefault "de_DE.UTF-8";
+
+ systemd.tmpfiles.rules = [
+   "d /var/lib/auto-locale 0755 root root -"
+ ];
 
  systemd.services.auto-locale-sync = {
  description = "Auto-Locale: Sync System State with Geolocation";

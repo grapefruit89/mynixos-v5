@@ -86,11 +86,6 @@
  
  mediaLibrary = lib.mkOption { type = lib.types.str; default = "/mnt/hdd_pool/media"; };
  storagePool = lib.mkOption { type = lib.types.str; default = "/mnt/hdd_pool"; };
- physicalHdds = lib.mkOption {
-   type = lib.types.listOf lib.types.str;
-   default = [ "/dev/sda" "/dev/sdb" ];
-   description = "List of physical HDD device paths for power state monitoring.";
- };
  };
 
  # 🚩 SAFETY TOGGLES
@@ -111,5 +106,13 @@
  resourceLimits = {
  maxMediaRamMB = lib.mkOption { type = lib.types.int; default = 4096; };
  };
+ };
+
+ options.my.storage = {
+  devices = lib.mkOption {
+    type = lib.types.listOf lib.types.str;
+    default = [ "/dev/sda" "/dev/sdb" ];
+    description = "List of physical HDD device paths for power state monitoring.";
+  };
  };
 }

@@ -57,7 +57,7 @@ in
  description = "NMS metadata for shell-premium module";
  };
 
- config = lib.mkIf (config.my.shell.premium.enable && user == "moritz") {
+ config = lib.mkIf (config.my.shell.premium.enable && config.my.configs.identity.user != "") {
  # 🏎️ Essential Aliases (The Workflow)
  programs.bash.shellAliases = {
  # Nix-Rebuild shortcuts

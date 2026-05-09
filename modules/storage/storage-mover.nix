@@ -11,7 +11,7 @@ let
  LOW_THRESHOLD_GB=${toString cfg.lowSpaceThresholdGB}
  TARGET_FREE_GB=${toString cfg.targetFreeGB}
  DRY_RUN=${if cfg.dryRun then "1" else "0"}
- PHYSICAL_HDDS=(${lib.concatStringsSep " " srePaths.physicalHdds})
+ PHYSICAL_HDDS=(${lib.concatStringsSep " " config.my.storage.devices})
 
  echo "--- 📦 Starting Capacity-Based Smart Mover ---"
 
