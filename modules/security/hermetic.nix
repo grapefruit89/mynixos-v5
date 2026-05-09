@@ -43,6 +43,7 @@ in {
     security.tpm2 = {
       enable = true;
       pkcs11.enable = true;
+      abrmd.enable = true; # Userspace Resource Manager
       tctiEnvironment.enable = true;
     };
 

@@ -56,8 +56,8 @@ in {
  "iwlwifi" "ath9k" "ath10k_core" "ath10k_pci" "rtl8192ce" "rtl8192cu" "rtl8192de" "rtl8188ee" "mt76" "brcmfmac" "brcmutil"
  "nouveau" "radeon" "amdgpu" "mgag200" "ast"
  "ax25" "netrom" "rose"
- "ext2" "ext3" "jfs" "reiserfs" "hfs" "hfsplus" "ntfs" "vfat" "cramfs" "freevxfs" "minix" "nilfs2" "sysv" "ufs"
- "pcspkr" "iTCO_wdt"
+ "ext2" "ext3" "jfs" "reiserfs" "hfs" "hfsplus" "ntfs" "cramfs" "freevxfs" "minix" "nilfs2" "sysv" "ufs"
+ "pcspkr"
  "snd_hda_intel" "uvcvideo" "videodev" "ppp" "ip6table_filter"
  ];
  }
