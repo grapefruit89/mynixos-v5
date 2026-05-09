@@ -21,19 +21,28 @@ in
  };
 
 
- config = lib.mkIf config.my.services.valkey.enable {
+ config = lib.mkIf (config.my.services.valkey.enable or true) {
  services.redis.package = pkgs.valkey;
  services.redis.servers.valkey = {
- enable = true; bind = "127.0.0.1"; port = 6379; openFirewall = false;
+ enable = true; 
+ bind = "127.0.0.1"; 
+ # 🛡️ Socket-First: Disable TCP port
+ port = 0; 
+ openFirewall = false;
  settings = {
  maxmemory = "512mb"; maxmemory-policy = "allkeys-lru";
  save = [ "900 1" "300 10" "60 10000" ];
- unixsocket = "/run/redis-valkey/redis.sock"; unixsocketperm = lib.mkForce "770";
+ unixsocket = "/run/redis-valkey/redis.sock"; 
+ unixsocketperm = lib.mkForce "770";
  };
  };
+
+ # 💾 ABC-Tiering Persistence
+ environment.persistence."/persist".directories = [ "/var/lib/redis-valkey" ];
+
  systemd.services.redis-valkey.serviceConfig = {
  ProtectSystem = "strict"; ProtectHome = true; PrivateTmp = true; PrivateDevices = true; NoNewPrivileges = true;
- MemoryDenyWriteExecute = true; RestrictAddressFamilies = [ "AF_INET" "AF_UNIX" ]; OOMScoreAdjust = -500;
+ MemoryDenyWriteExecute = true; RestrictAddressFamilies = [ "AF_INET" "AF_UNIX" ]; OOMScoreAdjust = -1000;
  };
  };
 }
