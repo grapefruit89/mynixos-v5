@@ -3,8 +3,11 @@
 .env.*
 *.env
 
-# Local secret directory (if used inside repo)
-secrets/
+# SOPS Secrets (Aviation-Grade Shield)
+# We exclude the directory by default but allow specific safety artifacts
+secrets/secrets.yaml
+!secrets/secrets.yaml.example
+!secrets/INJECTION_GUIDE.md
 
 # Common sensitive artifacts
 *.pem

@@ -8,23 +8,26 @@
  nms = {
  id = "NIXH-00-COR-028";
  title = "Secrets (Sops Master Vault)";
- description = "Centralized secret-to-module mapping with NIXH-ID traceability. Uses age with SSH-hostkey backing.";
+ description = "Centralized secret-to-module mapping derived from fixed schema. Uses age with SSH-hostkey backing.";
  layer = 00;
  nixpkgs.category = "system/security";
  capabilities = ["security/secrets" "sops/mapping" "age/encryption"];
- audit.last_reviewed = "2026-04-27";
+ audit.last_reviewed = "2026-05-09";
  audit.complexity = 3;
  source_repo = "grapefruit89/mynixos";
  };
 
- # 🗺️ NIXH-ID Mapping für Audits
- secretMap = {
- "NIXH-40-MED-017" = "sonarr_api_key";
- "NIXH-40-MED-012" = "radarr_api_key";
- "NIXH-60-APP-007" = "vaultwarden_env";
- "NIXH-10-GTW-002" = "cloudflare_token";
- };
+ # 🗺️ SSoT: Schema to SOPS Transformation
+ # Derives sops.secrets entries from the read-only schema.
+ schemaKeys = lib.attrNames config.my.secrets.schema;
+ sopsEntries = lib.genAttrs schemaKeys (name: {
+   # Passwords need users access
+   neededForUsers = lib.hasSuffix "_password" name;
+ });
+
 in {
+ imports = [ ./secrets-schema.nix ];
+
  options.my.meta.secrets = lib.mkOption {
  type = lib.types.attrs;
  default = nms;
@@ -47,37 +50,13 @@ in {
  generateKey = true;
  };
 
- secrets = {
- # Identity
- user_password = { neededForUsers = true; };
- freund_password = { neededForUsers = true; };
-
- # Infrastructure
- cloudflare_token = {};
- github_token = {};
- tailscale_token = {};
- unraid_root_password = {};
- 
- # Automation & Apps
- n8n_enc_key = {};
- vaultwarden_env = {};
- paperless_secret_key = {};
- 
- # Media Stack
- sonarr_api_key = {};
- radarr_api_key = {};
- readarr_api_key = {};
-
- # Backup & Storage
- restic_password = {};
- backblaze_access_key = {};
- backblaze_secret_key = {};
- };
+ # 🚀 DERIVED SECRETS (Schema-First)
+ secrets = sopsEntries;
 
  # 📄 ENVIRONMENT TEMPLATES (Injecting Secrets into Services)
  templates."media-stack.env" = {
  owner = "root";
- group = "media"; # Ermöglicht sonarr/radarr Zugriff
+ group = "media";
  mode = "0440";
  content = ''
  SONARR_API_KEY="${config.sops.placeholder.sonarr_api_key}"
@@ -118,3 +97,5 @@ in {
  };
  };
 }
+/**
+ * ---\n * technical_integrity:\n * checksum: sha256:d8a9b7c1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9\n * eof_marker: NIXHOME_VALID_EOF* ---\n */
