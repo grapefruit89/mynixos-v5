@@ -12,7 +12,7 @@ in {
       serviceConfig = {
         User = "ca-server";
         Group = "ca-server";
-        WorkingDirectory = "/var/lib/ca-server";
+        WorkingDirectory = "${config.my.configs.paths.stateDir}/ca-server";
         # 🚀 SOCKET-FIRST INGRESS via Gunicorn
         ExecStart = "${pkgs.python3.withPackages (ps: [ ps.flask ps.gunicorn ])}/bin/gunicorn --bind unix:/run/ca-server/ca.sock ca-server:app";
         Restart = "always";
@@ -26,7 +26,7 @@ in {
     # 🛡️ SYSTEMD SANDBOXING (Unified Factory)
     myLib.mkHardenedService {
       name = "ca-server";
-      readWritePaths = [ "/var/lib/ca-server" ];
+      readWritePaths = [ "${config.my.configs.paths.stateDir}/ca-server" ];
       extraConfig = {
         # The CA Cert and Key are needed. Key is decrypted to /run/secrets/ca.key
         ReadOnlyPaths = [ "/etc/caddy/ca.crt" "/run/secrets/ca.key" ];
@@ -54,7 +54,14 @@ in {
       description = "Extract CA private key from sops secret";
       wantedBy = [ "ca-server.service" ];
       before = [ "ca-server.service" ];
-      serviceConfig.Type = "oneshot";
+      serviceConfig = {
+        Type = "oneshot";
+        # 🛡️ SANDBOXING
+        ProtectSystem = "strict";
+        ProtectHome = true;
+        PrivateTmp = true;
+        NoNewPrivileges = true;
+      };
       script = ''
         if [ -f /run/secrets/ca-keys.yaml ]; then
           ${pkgs.yq}/bin/yq -r '.ca' /run/secrets/ca-keys.yaml > /run/secrets/ca.key

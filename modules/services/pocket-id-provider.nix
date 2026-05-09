@@ -17,7 +17,7 @@ in {
     dataDir = mkOption {
       type = types.path;
       default = "/var/lib/pocket-id";
-      description = "Directory for state and database.";
+      description = "Directory for state and database. SRE Note: Should be overridden by config.my.configs.paths.stateDir.";
     };
 
     user = mkOption {

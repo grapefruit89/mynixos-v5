@@ -21,10 +21,15 @@ in
  description = "Pocket-ID Bootstrap";
  after = [ "pocket-id.service" ];
  wantedBy = [ "multi-user.target" ];
- unitConfig.ConditionPathExists = "!/var/lib/pocket-id/.bootstrapped";
+ unitConfig.ConditionPathExists = "!${config.services.pocket-id.dataDir}/.bootstrapped";
  serviceConfig = { 
  Type = "oneshot"; 
  RemainAfterExit = true; 
+ # 🛡️ SANDBOXING
+ ProtectSystem = "strict";
+ ProtectHome = true;
+ PrivateTmp = true;
+ NoNewPrivileges = true;
  };
  script = ''
  # H-05: Robust Healthcheck instead of sleep
@@ -32,7 +37,7 @@ in
  echo "Waiting for Pocket-ID to become ready..."
  sleep 1
  done
- touch /var/lib/pocket-id/.bootstrapped
+ touch ${config.services.pocket-id.dataDir}/.bootstrapped
  '';
  };
  };

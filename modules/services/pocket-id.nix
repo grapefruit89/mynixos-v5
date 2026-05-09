@@ -35,14 +35,14 @@ in {
     
     services.pocket-id = {
       enable = true;
-      dataDir = "/var/lib/pocket-id";
+      dataDir = "${config.my.configs.paths.stateDir}/pocket-id";
       settings = {
         PUBLIC_REGISTRATION = false;
         ISSUER = "https://auth.${subdomain}.${domain}";
         # Socket-First Ingress (Supported by Pocket-ID Go backend)
         UNIX_SOCKET = "/run/pocket-id/pocket-id.sock";
         UNIX_SOCKET_MODE = "0660";
-        BACKEND_PORT = 1411; # Fallback port
+        BACKEND_PORT = config.my.ports.pocketId;
       };
     };
 
@@ -53,6 +53,7 @@ in {
       # Additional Hardening
       MemoryDenyWriteExecute = true;
       RestrictAddressFamilies = [ "AF_UNIX" "AF_INET" "AF_INET6" ];
+      OOMScoreAdjust = -1000; # 🚀 Highest Priority for Identity
     };
 
     # Give Caddy access to the pocket-id group to read the socket
