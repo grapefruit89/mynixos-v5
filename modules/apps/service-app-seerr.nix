@@ -39,7 +39,7 @@ in
  enable = lib.mkEnableOption "Seerr Media Request Service";
  user = lib.mkOption { type = lib.types.str; default = "seerr"; };
  group = lib.mkOption { type = lib.types.str; default = "seerr"; };
- port = lib.mkOption { type = lib.types.port; default = config.my.ports.seerr or 5055; };
+ port = lib.mkOption { type = lib.types.port; default = config.my.ports.jellyseerr or 5055; };
  
  # 💾 PATH STRATEGY (ABC-Tiering)
  stateDir = lib.mkOption { 

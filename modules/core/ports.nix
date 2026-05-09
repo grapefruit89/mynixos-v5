@@ -37,13 +37,14 @@
 
       # 40-Knowledge
       paperless = 28981;
+      miniflux = 8070;
       
       # 50-Apps
       vaultwarden = 8222;
       monica = 8082;
       karakeep = 20003;
       couchdb = 5984;
-      filebrowser = 8081;
+      filebrowser = 8071;
       homepage = 3000;
       
       # 80-Monitoring

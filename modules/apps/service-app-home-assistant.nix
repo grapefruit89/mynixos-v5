@@ -43,8 +43,7 @@ in
  enable = lib.mkEnableOption "Home Assistant (IoT)";
  user = lib.mkOption { type = lib.types.str; default = "hass"; };
  group = lib.mkOption { type = lib.types.str; default = "hass"; };
- port = lib.mkOption { type = lib.types.port; default = config.my.ports.home-assistant or 8123; };
- 
+ port = lib.mkOption { type = lib.types.port; default = config.my.ports.homeAssistant or 8123; }; 
  # 💾 PATH STRATEGY (ABC-Tiering)
  stateDir = lib.mkOption { 
  type = lib.types.str; 

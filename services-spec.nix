@@ -41,7 +41,7 @@
     ca-server = { socket = "/run/ca-server/ca.sock"; zone = "admin-mtls"; domain = "ca"; description = "Minimalist CA Manager"; };
     netdata = { port = p.netdata; zone = "admin-mtls"; domain = "netdata"; description = "Real-time Monitoring"; };
     scrutiny = { port = p.scrutiny; zone = "admin-mtls"; domain = "scrutiny"; description = "HDD S.M.A.R.T. Dashboards"; };
-    uptime-kuma = { port = p.uptime-kuma; zone = "admin-mtls"; domain = "status"; description = "Uptime Monitoring"; };
+    uptime-kuma = { port = p.uptimeKuma; zone = "admin-mtls"; domain = "status"; description = "Uptime Monitoring"; };
     cockpit = { port = p.cockpit; zone = "admin-mtls"; domain = "admin"; description = "System Management"; };
     adguard = { port = p.adguard; zone = "admin-mtls"; domain = "dns"; description = "DNS Sinkhole"; };
     
@@ -67,7 +67,7 @@
     jellyseerr = { port = p.jellyseerr; zone = "family-pocketid"; domain = "requests"; description = "Media Requests"; };
     audiobookshelf = { port = p.audiobookshelf; zone = "family-pocketid"; domain = "audiobooks"; description = "Audiobooks & Podcasts"; };
     navidrome = { port = p.navidrome; zone = "family-pocketid"; domain = "music"; description = "Music Streaming"; };
-    homeassistant = { port = p.home-assistant; zone = "family-pocketid"; domain = "home"; description = "Smart Home"; };
+    homeassistant = { port = p.homeAssistant; zone = "family-pocketid"; domain = "home"; description = "Smart Home"; };
     
     # Dashboard (Entry point)
     homepage = { port = p.homepage; zone = "family-pocketid"; domain = "dash"; description = "Service Dashboard"; };

@@ -30,6 +30,7 @@ in
  ./modules/core/secrets.nix
  ./modules/core/graphics.nix
  ./modules/core/backup.nix
+ ./modules/policy/forbidden-tech.nix
  ./modules/services/pocket-id-provider.nix
  # ./modules/core/auto-locale.nix # In base-server integriert
 
