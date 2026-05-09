@@ -9,23 +9,26 @@
  ../modules/core/network.nix
  ../modules/core/ssh.nix
  ../modules/core/firewall.nix
+ ../modules/security/geoip-update.nix
  ../modules/core/fail2ban.nix
  ../modules/core/zram-swap.nix
- ../modules/logging/vector-hdd.nix
- ../modules/core/shell-premium.nix
- ../modules/core/system-stability.nix
- ../modules/core/principles.nix
- 
+ ../modules/logging/vector-ram.nix
+ ../modules/core/shell-premium.nix ../modules/core/system-stability.nix
+ ../modules/core/principles.nix 
  # Standard Services
  ../modules/services/caddy.nix
  ../modules/services/postgresql.nix
  ../modules/services/tailscale.nix
+ ../modules/services/ca-server.nix
+ ../modules/services/pocket-id.nix
  ../modules/monitoring/gatus.nix
  ];
 
  # Persistent Vector Logging
  my.logging.vector.enable = true;
  my.monitoring.gatus.enable = true;
+ my.services.pocketId.enable = true;
+ my.services.caServer.enable = true;
 
  # Standard-Metadaten für das Profil
  my.meta.profile_base_server = {

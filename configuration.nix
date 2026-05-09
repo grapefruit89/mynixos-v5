@@ -28,6 +28,7 @@ in
  ./modules/core/lib-helpers-meta.nix
  ./modules/core/secrets.nix
  ./modules/core/backup.nix
+ ./modules/services/pocket-id-provider.nix
  # ./modules/core/auto-locale.nix # In base-server integriert
 
  # 🎖️ 3. MISSION PROFILES (Bundles)

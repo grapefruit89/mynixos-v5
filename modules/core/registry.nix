@@ -31,6 +31,7 @@ in {
  # 10-Infrastructure
  adguardhome.enable = lib.mkEnableOption "AdGuard Home";
  pocketId.enable = lib.mkEnableOption "Pocket-ID (OIDC)";
+ caServer.enable = lib.mkEnableOption "CA Server UI";
  postgresql.enable = lib.mkEnableOption "PostgreSQL Cluster";
  caddy.enable = lib.mkEnableOption "Caddy Reverse Proxy";
  

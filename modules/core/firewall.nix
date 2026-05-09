@@ -41,25 +41,35 @@ in {
 
  # 📈 LAN-SPECIFIC RULES (DNS & Multicast)
  extraInputRules = ''
- # 🌍 GEOBLOCK PROTECTION (DE, AT, LT for public ports)
- set allowed_countries {
+ # 🌍 GEO-IP ALLOWLIST (DE, AT, LT)
+ # Dynamically updated via systemd timer from ipdeny.com
+ set geo_allowed {
  type ipv4_addr
  flags interval
  elements = { 
- # Deutschland, Österreich, Litauen IP-Ranges
- 2.16.0.0/13, 2.160.0.0/11, 5.0.0.0/14, 5.144.0.0/13, # DE
- 62.178.0.0/15, 77.116.0.0/14, # AT
- 78.56.0.0/13, 82.135.128.0/17 # LT
+ include "/var/lib/nftables/geoip-allowed.txt"
  }
  }
 
+ # ========================================================================
+ # RATE LIMITING – Token Bucket (Jellyfin & Audiobookshelf)
+ # ========================================================================
+ set protected_services {
+ type inet_service
+ elements = { ${toString config.my.ports.jellyfin}, ${toString config.my.ports.audiobookshelf} }
+ }
+
+ # Block aggressively if rate limit is exceeded (50/min, 20 burst)
+ tcp dport @protected_services ct state new \
+ meter burst_meter { ip saddr timeout 60s limit rate over 50/minute burst 20 packets } \
+ log prefix "RATE-LIMIT: " counter drop
+
+ # 🛡️ PUBLIC PORT PROTECTION
  # Block everything NOT from allowed countries on public port 443
- tcp dport 443 ip saddr != @allowed_countries counter drop
+ tcp dport 443 ip saddr != @geo_allowed log prefix "GEO-BLOCK: " counter drop
 
  # 🌍 IPv6 PROTECTION (WAN-Block)
  # Block all public IPv6 traffic to Port 443. 
- # Only IPv4 (with Geoblock) is allowed from WAN.
- # LAN-IPv6 and Tailscale-IPv6 are allowed.
  tcp dport 443 ip6 saddr != { ::1/128, fe80::/10, fd7a:115c:a1e0::/48 } counter drop
 
  # DNS Support für das LAN (AdGuard)

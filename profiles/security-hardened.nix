@@ -8,6 +8,7 @@
  ../modules/security/no-legacy.nix
  ../modules/security/flat-layout.nix
  ../modules/security/hardened-core.nix
+ ../modules/policy/forbidden-tech.nix
  ];
 
  # Standard-Metadaten für das Profil
