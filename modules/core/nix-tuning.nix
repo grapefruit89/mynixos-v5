@@ -63,8 +63,12 @@ in {
  };
 
  # 💾 IMPERMANENCE BASH FIX (Fragment 1084)
- # Erzwungener History-Flush vor dem Wipe
- programs.bash.interactiveShellInit = "trap 'history -a' EXIT";
+ # Erzwungener History-Flush vor dem Wipe + Size Limits
+ programs.bash.interactiveShellInit = ''
+   export HISTSIZE=10000
+   export HISTFILESIZE=20000
+   trap 'history -a' EXIT
+ '';
 
  environment.systemPackages = with pkgs; [
  cachix

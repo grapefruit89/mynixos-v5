@@ -107,7 +107,7 @@ in {
  usbutils
  ];
 
- environment.sessionVariables = {
+ environment.sessionVariables = lib.mkIf (config.my.configs.identity.user != "") {
  PATH = "/home/${config.my.configs.identity.user}/.npm-global/bin:$PATH";
  };
  };

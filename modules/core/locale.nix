@@ -27,7 +27,7 @@ in {
  i18n.defaultLocale = lib.mkForce loc;
  i18n.supportedLocales = lib.mkForce ["de_DE.UTF-8/UTF-8" "en_US.UTF-8/UTF-8"];
 
- console.keyMap = lib.mkForce "de-latin1";
+ console.useXkbConfig = true; # Unify layout
  services.xserver.xkb = {
  layout = lib.mkForce "de";
  variant = "";
