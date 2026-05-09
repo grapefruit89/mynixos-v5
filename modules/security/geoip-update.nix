@@ -314,27 +314,33 @@ let
   # DYNAMIC UPDATE SCRIPT
   # ===========================================================================
   geoipScript = pkgs.writeShellScript "update-geoip" ''
-    set -euo pipefail
-    TMPDIR=$(mktemp -d)
-    trap 'rm -rf "$TMPDIR"' EXIT
-    cd "$TMPDIR"
-    
-    echo "Updating Geo-IP allowlist..."
-    touch merged.txt
-    for cc in de at lt; do
-      echo "Fetching $cc..."
-      ${pkgs.curl}/bin/curl -sSf "https://www.ipdeny.com/ipblocks/data/countries/$cc.zone" >> merged.txt
-    done
-    
-    # Format for 'add element' (nftables command)
-    # We use awk to join all CIDRs with commas and wrap them in the command.
-    ELEMENTS=$(${pkgs.gawk}/bin/awk '{printf "%s, ", $0}' merged.txt | ${pkgs.gnused}/bin/sed 's/, $//')
-    echo "add element inet filter geo_allowed { $ELEMENTS }" > geoip-allowed.txt
-    
-    # Atomic replacement
-    mv geoip-allowed.txt /var/lib/nftables/geoip-allowed.txt
-    echo "Geo-IP allowlist updated successfully."
+   set -euo pipefail
+   TMPDIR=$(mktemp -d)
+   trap 'rm -rf -- "$TMPDIR"' EXIT
+   cd "$TMPDIR"
+
+   echo "Updating Geo-IP allowlist..."
+   touch merged.txt
+   for cc in de at lt; do
+     echo "Fetching $cc..."
+     ${pkgs.curl}/bin/curl -sSf "https://www.ipdeny.com/ipblocks/data/countries/$cc.zone" >> merged.txt
+   done
+
+   # 🛡️ SANITY CHECK: Ensure we actually got some data
+   if [ ! -s merged.txt ]; then
+     echo "🚨 ERROR: No GeoIP data fetched. Aborting update to prevent empty allowlist."
+     exit 1
+   fi
+
+   # Format for 'add element' (nftables command)
+   ELEMENTS=$(${pkgs.gawk}/bin/awk '{printf "%s, ", $0}' merged.txt | ${pkgs.gnused}/bin/sed 's/, $//')
+   echo "add element inet filter geo_allowed { $ELEMENTS }" > geoip-allowed.txt
+
+   # Atomic replacement with safety separator
+   mv -- geoip-allowed.txt /var/lib/nftables/geoip-allowed.txt
+   echo "Geo-IP allowlist updated successfully."
   '';
+
 in {
   systemd.services.nftables-geoip-update = {
     description = "Update Geo-IP allowlist (DE/AT/LT)";
