@@ -77,7 +77,7 @@ in {
 
  services.restic.backups.remote = {
  initialize = true;
- repository = "s3:https://s3.eu-central-003.backblazeb2.com/nixhome-persist";
+ repository = "s3:s3.eu-central-003.backblazeb2.com/nixhome-backup";
  passwordFile = config.sops.secrets.restic_password.path;
  environmentFile = config.sops.templates."backblaze-restic.env".path;
 
