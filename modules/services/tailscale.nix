@@ -33,12 +33,16 @@ in
  # M-06: Pass token via EnvironmentFile to keep nix-store clean of paths
  EnvironmentFile = config.sops.secrets.tailscale_token.path;
  ExecStart = pkgs.writeShellScript "tailscale-auth" ''
+ set -euo pipefail
  sleep 5
  status=$(${pkgs.tailscale}/bin/tailscale status --json | ${pkgs.jq}/bin/jq -r .BackendState)
  if [ "$status" = "NeedsLogin" ] || [ "$status" = "Stopped" ]; then
  ${pkgs.tailscale}/bin/tailscale up --authkey="$TS_AUTHKEY"
  fi
  '';
+ # Hardening
+ ProtectSystem = "strict";
+ PrivateTmp = true;
  };
  };
  systemd.services.tailscaled = { stopIfChanged = false; serviceConfig = { Restart = "always"; RestartSec = "2s"; OOMScoreAdjust = -1000; }; };

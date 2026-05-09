@@ -23,6 +23,7 @@ let
     cloudflare_token = "";
     cloudflared_tunnel_credentials = "";
     github_token = "";
+    tailscale_token = "";
     
     # Automation & Apps
     paperless_secret_key = "";
