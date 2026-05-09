@@ -8,6 +8,7 @@
  ../modules/security/no-legacy.nix
  ../modules/security/flat-layout.nix
  ../modules/security/hardened-core.nix
+ ../modules/security/hermetic.nix
  ../modules/policy/forbidden-tech.nix
  ];
 
@@ -18,6 +19,9 @@
  layer = 90;
  audit.last_reviewed = "2026-04-27";
  };
+
+ # 🛡️ Hermetic Identity (TPM-Bound SSH)
+ my.security.hermetic.enable = true;
 
  # 🛡️ hardened Core (Task 2 / Core Hardening Plan)
  my.security.hardened = {
