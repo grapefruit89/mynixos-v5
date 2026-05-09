@@ -48,7 +48,7 @@ in
  (myLib.mkDocumentApp {
  inherit config;
  name = "paperless";
- port = config.my.ports.paperless or 20981;
+ port = config.my.ports.paperless or 28981;
  description = "Paperless-ngx Document Management";
  useValkey = true; # 🔥 Nutzt die Open-Source Alternative zu Redis
  usePostgres = true;
@@ -62,7 +62,7 @@ in
  enable = true;
  user = "paperless";
  address = "127.0.0.1";
- port = config.my.ports.paperless or 20981;
+ port = config.my.ports.paperless or 28981;
  };
 
  systemd.services.paperless-web = {

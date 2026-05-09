@@ -326,9 +326,10 @@ let
       ${pkgs.curl}/bin/curl -sSf "https://www.ipdeny.com/ipblocks/data/countries/$cc.zone" >> merged.txt
     done
     
-    # Format for nftables elements: comma-separated list on a single line or with trailing commas
-    # We join all lines with a comma and space for maximum compatibility.
-    ${pkgs.gawk}/bin/awk '{printf "%s, ", $0}' merged.txt > geoip-allowed.txt
+    # Format for 'add element' (nftables command)
+    # We use awk to join all CIDRs with commas and wrap them in the command.
+    ELEMENTS=$(${pkgs.gawk}/bin/awk '{printf "%s, ", $0}' merged.txt | ${pkgs.gnused}/bin/sed 's/, $//')
+    echo "add element inet filter geo_allowed { $ELEMENTS }" > geoip-allowed.txt
     
     # Atomic replacement
     mv geoip-allowed.txt /var/lib/nftables/geoip-allowed.txt

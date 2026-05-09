@@ -43,13 +43,15 @@ in {
  extraInputRules = ''
  # 🌍 GEO-IP ALLOWLIST (DE, AT, LT)
  # Dynamically updated via systemd timer from ipdeny.com
+ # The included file uses 'add element inet filter geo_allowed { ... }'
  set geo_allowed {
  type ipv4_addr
  flags interval
  elements = { 
+ 127.0.0.1/32
+ }
+ }
  include "/var/lib/nftables/geoip-allowed.txt"
- }
- }
 
  # ========================================================================
  # RATE LIMITING – Token Bucket (Jellyfin & Audiobookshelf)

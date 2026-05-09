@@ -40,8 +40,7 @@ in
  enable = lib.mkEnableOption "n8n Workflow Automation";
  user = lib.mkOption { type = lib.types.str; default = "n8n"; };
  group = lib.mkOption { type = lib.types.str; default = "n8n"; };
- port = lib.mkOption { type = lib.types.port; default = config.my.ports.n8n or 20017; };
- 
+ port = lib.mkOption { type = lib.types.port; default = config.my.ports.n8n or 5678; }; 
  # 💾 PATH STRATEGY (ABC-Tiering)
  stateDir = lib.mkOption { 
  type = lib.types.str; 

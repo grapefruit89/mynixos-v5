@@ -38,6 +38,7 @@
       # 40-Knowledge
       paperless = 28981;
       miniflux = 8070;
+      linkwarden = 3007;
       
       # 50-Apps
       vaultwarden = 8222;
@@ -46,12 +47,15 @@
       couchdb = 5984;
       filebrowser = 8071;
       homepage = 3000;
+      matrix = 6167;
       
       # 80-Monitoring
       netdata = 19999;
       scrutiny = 8083;
       uptimeKuma = 3002;
       gatus = 8111;
+      ddnsUpdater = 8091;
+      edgeHttps = 4433;
     };
     description = "Central port registry (SSoT)";
   };

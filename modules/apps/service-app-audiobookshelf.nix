@@ -38,8 +38,7 @@ in
  enable = lib.mkEnableOption "Audiobookshelf media server";
  user = lib.mkOption { type = lib.types.str; default = "audiobookshelf"; };
  group = lib.mkOption { type = lib.types.str; default = "media"; };
- port = lib.mkOption { type = lib.types.port; default = config.my.ports.audiobookshelf or 20081; };
- 
+ port = lib.mkOption { type = lib.types.port; default = config.my.ports.audiobookshelf or 8000; }; 
  # 💾 PATH STRATEGY (ABC-Tiering)
  stateDir = lib.mkOption { 
  type = lib.types.str; 
