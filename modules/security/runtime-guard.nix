@@ -26,22 +26,21 @@ in
  set -euo pipefail
  
  # 1. Check Firewall (nftables active)
- if ! ${pkgs.nftables}/bin/nft list tables | grep -q "inet filter"; then
+ if ! ${pkgs.nftables}/bin/nft list tables | ${pkgs.gnugrep}/bin/grep -q -- "inet filter"; then
  echo "🛑 SECURITY ALERT: nftables filter table is MISSING!"
  exit 1
  fi
 
  # 2. Check Kernel Lockdown Status
  if [ -d /sys/kernel/security/lockdown ]; then
- LOCKDOWN=$(cat /sys/kernel/security/lockdown | grep -o '\[.*\]' | tr -d '[]')
+ LOCKDOWN=$(${pkgs.coreutils}/bin/cat -- /sys/kernel/security/lockdown | ${pkgs.gnugrep}/bin/grep -o '\[.*\]' | ${pkgs.gnused}/bin/sed 's/\[//;s/\]//')
  if [ "$LOCKDOWN" != "confidentiality" ] && [ "$LOCKDOWN" != "integrity" ]; then
  echo "🛑 SECURITY ALERT: Kernel Lockdown is NOT effective (Current: $LOCKDOWN)"
- # Optional: ntfy trigger
  fi
  fi
 
  # 3. Check SSH Root Login (Runtime check via sshd -T)
- if ${pkgs.openssh}/bin/sshd -T | grep -q "permitrootlogin yes"; then
+ if ${pkgs.openssh}/bin/sshd -T | ${pkgs.gnugrep}/bin/grep -q -- "permitrootlogin yes"; then
  echo "🛑 SECURITY ALERT: sshd allows root login in active config!"
  exit 1
  fi
