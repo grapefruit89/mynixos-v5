@@ -36,7 +36,7 @@ let
  serviceStatusScript = pkgs.writeShellScriptBin "check-services" ''
  #!/usr/bin/env bash
  # Services aus 10-gtw, 20-infra, 30-media
- CRITICAL_SERVICES=("sshd:SSH" "caddy:Proxy" "tailscaled:VPN" "jellyfin:Jellyfin" "postgres:Database")
+ CRITICAL_SERVICES=("sshd:SSH" "caddy:Proxy" "tailscaled:VPN" "jellyfin:Jellyfin" "postgresql:Database")
  echo -e "\n🛡️ hardened Service Status:\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
  for entry in "''${CRITICAL_SERVICES[@]}"; do
  service="''${entry%%:*}"; label="''${entry##*:}"
@@ -61,13 +61,13 @@ in
  # 🏎️ Essential Aliases (The Workflow)
  programs.bash.shellAliases = {
  # Nix-Rebuild shortcuts
- nsw = "sudo nixos-rebuild switch --flake .#default";
- ntest = "sudo nixos-rebuild test --flake .#default";
- ndry = "sudo nixos-rebuild dry-run --flake .#default";
+ nsw = "sudo nixos-rebuild switch --flake .#nixhome";
+ ntest = "sudo nixos-rebuild test --flake .#nixhome";
+ ndry = "sudo nixos-rebuild dry-run --flake .#nixhome";
  
  # Maintenance
  nup = "nix flake update";
- nclean = "sudo nix-env -p /nix/var/nix/profiles/system --delete-generations +3 && sudo nix-store --gc";
+ nclean = "sudo nix-collect-garbage --delete-older-than 14d && sudo nix-store --optimise";
  nopt = "sudo nix-store --optimise";
  nlog = "journalctl -xef";
  

@@ -71,6 +71,7 @@ in {
  backup.enable = lib.mkEnableOption "Restic Backup";
  kernelSlim.enable = lib.mkEnableOption "Kernel Slim";
  shell.premium.enable = lib.mkEnableOption "Shell Premium";
+ autoLocale.enable = lib.mkEnableOption "Auto Locale Detection";
  };
 
  media = {

@@ -35,7 +35,7 @@ in
  IP=$(hostname -I | awk '{print $1}')
  echo -e "\e[1;32mWelcome back, ${config.my.configs.identity.user}!\e[0m"
  echo -e "\e[1;34mSystem IP:\e[0m $IP"
- if timeout 0.2 systemctl is-active --quiet sshd-recovery.service 2>/dev/null; then
+ if timeout 0.2 systemctl is-active --quiet sshd-rescue.service 2>/dev/null; then
  echo -e "\e[1;31m🚨 RECOVERY WINDOW ACTIVE (Port 2222)\e[0m"
  fi
  fi
