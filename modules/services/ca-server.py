@@ -10,6 +10,7 @@ import secrets
 from flask import Flask, request, render_template_string, send_file, redirect, url_for, session
 
 # Configuration
+# CA-01 FIX: Use .resolve() for absolute path stability
 BASE_DIR = Path("/var/lib/ca-server").resolve()
 CERT_DIR = (BASE_DIR / "certs").resolve()
 CERT_DIR.mkdir(parents=True, exist_ok=True)
@@ -130,10 +131,11 @@ def index():
 
 @app.route("/sign", methods=["POST"])
 def sign():
+    # CA-03 FIX: CSRF Validation
     if request.form.get("csrf_token") != session.get("csrf_token"):
         return "CSRF Token missing or invalid", 403
 
-    # Sanitize input name strictly (Whitelist regex)
+    # CA-02 FIX: Sanitize input name strictly (Whitelist regex)
     raw_name = request.form.get("name", "Unknown").strip()
     name = re.sub(r'[^a-zA-Z0-9_-]', '', raw_name)[:64]
     
@@ -156,7 +158,7 @@ def sign():
     crt_path = dir_path / "client.crt"
     csr_file.save(str(csr_path))
 
-    # Deep CSR Validation via OpenSSL
+    # CA-04 FIX: Deep CSR Validation via OpenSSL
     if not validate_csr(csr_path):
         shutil.rmtree(dir_path)
         return "Invalid CSR content or format", 400
@@ -189,10 +191,11 @@ def sign():
 
 @app.route("/delete/<dirname>", methods=["POST"])
 def delete(dirname):
+    # CA-03 FIX: CSRF Validation
     if request.form.get("csrf_token") != session.get("csrf_token"):
         return "CSRF Token missing or invalid", 403
 
-    # Resolve path and check parents correctly to prevent traversal
+    # CA-01 FIX: Resolve path and check parents correctly to prevent traversal
     dir_to_delete = (CERT_DIR / dirname).resolve()
     if dir_to_delete.is_dir() and (CERT_DIR.resolve() in dir_to_delete.parents):
         shutil.rmtree(dir_to_delete)

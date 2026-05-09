@@ -19,3 +19,9 @@ wireguard-privado.conf
 secret-ingest-agent-key.txt
 secret-landing-zone/
 *.txt
+
+# 🚀 NixHome v5 Additions (OPSEC)
+__temp_*
+*.bat
+*.original.md
+conductor/
