@@ -25,7 +25,7 @@
  };
 
  # 🚀 ROOT-ON-RAM SETUP (Stateless Manifesto)
- fileSystems."/" = {
+ fileSystems."/" = lib.mkForce {
  device = "none";
  fsType = "tmpfs";
  options = [ "defaults" "size=4G" "mode=755" ];

@@ -53,9 +53,13 @@ in {
  system.activationScripts.cleanEfiEntries = {
  text = ''
  echo "🧹 hardened: Bereinige verwaiste EFI-Boot-Einträge..."
- ${pkgs.efibootmgr}/bin/efibootmgr | grep "Boot[0-9]" | grep -vE "systemd-boot|NixOS|Linux|USB|Hard Drive|Network" | \
- ${pkgs.gawk}/bin/awk '{print $1}' | ${pkgs.gnused}/bin/sed 's/Boot//;s/\*//' | \
- xargs -I{} ${pkgs.efibootmgr}/bin/efibootmgr -b {} -B 2>/dev/null || true
+ # 🛡️ Safety Guard: Only run if we are NOT in bastelmodus and at least one safeguard entry exists
+ if [ "${toString config.my.configs.bastelmodus}" = "false" ]; then
+   ENTRIES_TO_DELETE=$(${pkgs.efibootmgr}/bin/efibootmgr | grep "Boot[0-9]" | grep -vE "systemd-boot|NixOS|Linux|USB|Hard Drive|Network" | ${pkgs.gawk}/bin/awk '{print $1}' | ${pkgs.gnused}/bin/sed 's/Boot//;s/\*//')
+   if [ -n "$ENTRIES_TO_DELETE" ]; then
+     echo "$ENTRIES_TO_DELETE" | xargs -I{} ${pkgs.efibootmgr}/bin/efibootmgr -b {} -B 2>/dev/null || true
+   fi
+ fi
  '';
  };
 

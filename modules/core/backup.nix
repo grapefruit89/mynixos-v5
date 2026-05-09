@@ -33,8 +33,8 @@ in {
  passwordFile = config.sops.secrets.restic_password.path; # Sops Integration
 
  paths = [
- "/data/state"
- "/data/metadata"
+ config.my.configs.paths.appData
+ config.my.configs.paths.tierA
  "/etc/nixos"
  "/var/lib/pocket-id"
  "/persist" # Impermanence Support
@@ -52,7 +52,7 @@ in {
  # 🛡️ PRE-FLIGHT CHECK (SRE-Standard)
  backupPrepareCommand = ''
  # Validierung aller Pfade inkl. /persist und /var/lib/pocket-id
- DATA_SIZE=$(${pkgs.coreutils}/bin/du -sb /data/state /etc/nixos /persist /var/lib/pocket-id | ${pkgs.gawk}/bin/awk '{sum+=$1} END {print sum}')
+ DATA_SIZE=$(${pkgs.coreutils}/bin/du -sb ${config.my.configs.paths.appData} /etc/nixos /persist /var/lib/pocket-id | ${pkgs.gawk}/bin/awk '{sum+=$1} END {print sum}')
  LIMIT=$(( ${toString maxSizeGB} * 1024 * 1024 * 1024 ))
  if [ "$DATA_SIZE" -gt "$LIMIT" ]; then
  echo "🚨 BACKUP ABGEBROCHEN: Datenmenge ($DATA_SIZE) > Limit ($LIMIT)!"
