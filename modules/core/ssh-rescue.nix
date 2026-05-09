@@ -27,23 +27,24 @@ in {
  };
 
  config = lib.mkIf (config.my.services.sshRescue.enable or false) {
- # 🚨 RESCUE INSTANCE CONFIG
- systemd.services.sshd-rescue = {
- description = "Emergency SSH Service (Password Auth)";
- serviceConfig = {
- ExecStart = "${pkgs.openssh}/bin/sshd -D -f ${pkgs.writeText "sshd-rescue-config" ''
- Port ${toString rescuePort}
- ListenAddress 127.0.0.1
- ListenAddress 100.64.0.0/10 # Target: Tailscale only
- PasswordAuthentication yes
- PermitRootLogin no
- AllowUsers ${user}
- PidFile /run/sshd-rescue.pid
- ''}";
- KillMode = "process";
- Restart = "no";
- };
- };
+  # 🚨 RESCUE INSTANCE CONFIG
+  systemd.services.sshd-rescue = {
+    description = "Emergency SSH Service (Password Auth)";
+    # Autoterminate after 15 minutes of inactivity to prevent long-term exposure
+    after = [ "network.target" ];
+    serviceConfig = {
+      ExecStart = "${pkgs.openssh}/bin/sshd -D -o \"ClientAliveInterval 300\" -o \"ClientAliveCountMax 0\" -f ${pkgs.writeText "sshd-rescue-config" ''
+        Port ${toString rescuePort}
+        ListenAddress 100.64.0.0/10 # Target: Tailscale only
+        PasswordAuthentication yes
+        PermitRootLogin no
+        AllowUsers ${user}
+        PidFile /run/sshd-rescue.pid
+      ''}";
+      KillMode = "process";
+      Restart = "no";
+    };
+  };
 
  # Note: Global firewall port 2222 removal confirmed.
  # Access is managed via ListenAddress (Local/Tailscale only).
