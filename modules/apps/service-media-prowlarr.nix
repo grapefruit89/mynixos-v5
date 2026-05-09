@@ -49,7 +49,7 @@ in
  };
  metadataDir = lib.mkOption {
  type = lib.types.str;
- default = "/mnt/fast-pool/metadata/prowlarr";
+ default = "${srePaths.tierB}/metadata/prowlarr";
  description = "Fast metadata cache (Tier B)";
  };
 

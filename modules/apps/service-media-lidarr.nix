@@ -49,7 +49,7 @@ in
  };
  metadataDir = lib.mkOption {
  type = lib.types.str;
- default = "/mnt/fast-pool/metadata/lidarr";
+ default = "${srePaths.tierB}/metadata/lidarr";
  description = "Fast metadata cache (Tier B)";
  };
 

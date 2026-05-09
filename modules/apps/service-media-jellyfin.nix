@@ -89,9 +89,10 @@ in
  };
 
  # Automatischer Sync der SRE-Encoding-Policy
+ # hardened: use -- for safety
  preStart = ''
- mkdir -p ${srePaths.stateDir}/jellyfin/config
- cp -f ${encodingXml} ${srePaths.stateDir}/jellyfin/config/encoding.xml
+   mkdir -p -- "${srePaths.stateDir}/jellyfin/config"
+   cp -f -- "${encodingXml}" "${srePaths.stateDir}/jellyfin/config/encoding.xml"
  '';
 
  serviceConfig = {

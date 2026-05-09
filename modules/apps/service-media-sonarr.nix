@@ -49,7 +49,7 @@ in
  };
  metadataDir = lib.mkOption {
  type = lib.types.str;
- default = "/mnt/fast-pool/metadata/sonarr";
+ default = "${srePaths.tierB}/metadata/sonarr";
  description = "Fast metadata cache (Tier B)";
  };
 

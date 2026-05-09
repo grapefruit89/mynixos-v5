@@ -49,7 +49,7 @@ in
  };
  metadataDir = lib.mkOption {
  type = lib.types.str;
- default = "/mnt/fast-pool/metadata/radarr";
+ default = "${srePaths.tierB}/metadata/radarr";
  description = "Fast metadata cache (Tier B)";
  };
 
@@ -94,7 +94,9 @@ in
  Group = cfg.group;
  
  # Force binary path and data dir
- ExecStart = "${pkgs.radarr}/bin/Radarr -nobrowser -data='${cfg.stateDir}'";
+ ExecStart = pkgs.writeShellScript "radarr-start" ''
+   ${pkgs.radarr}/bin/Radarr -nobrowser -data="${cfg.stateDir}"
+ '';
  Restart = "on-failure";
 
  # 🔑 SECRET ISOLATION (Source: Fragment 3331)
