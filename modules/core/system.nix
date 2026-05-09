@@ -66,6 +66,8 @@ in {
  timeout = lib.mkForce 3;
  };
 
+ boot.initrd.systemd.enable = lib.mkDefault true; # 🚀 Modern initrd
+
  boot.kernelParams = [
  "quiet"
  "loglevel=3"
@@ -84,8 +86,8 @@ in {
  "kernel.unprivileged_bpf_disabled" = lib.mkForce 1;
  };
 
- nixpkgs.config.allowUnfree = true;
- programs.nix-ld.enable = true;
+ nixpkgs.config.allowUnfree = lib.mkDefault true;
+ programs.nix-ld.enable = lib.mkDefault true;
 
  # 🧹 LEAN SYSTEM
  documentation.nixos.enable = false;

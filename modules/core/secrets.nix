@@ -104,6 +104,12 @@ in {
    fi
  '';
  RemainAfterExit = true;
+ # 🛡️ SANDBOXING
+ ProtectSystem = "strict";
+ ProtectHome = true;
+ PrivateTmp = true;
+ NoNewPrivileges = true;
+ ReadWritePaths = [ config.my.configs.paths.tierB ];
  };
  };
  };
