@@ -46,7 +46,11 @@ in {
       wantedBy = [ "multi-user.target" ];
 
       environment = mapAttrs' (name: value: 
-        nameValuePair name (if isBool value then (if value then "true" else "false") else toString value)
+        let
+          # Prefix with POCKET_ID_ if not already present
+          prefixedName = if hasPrefix "POCKET_ID_" name then name else "POCKET_ID_${name}";
+        in
+        nameValuePair prefixedName (if isBool value then (if value then "true" else "false") else toString value)
       ) cfg.settings;
 
       serviceConfig = {

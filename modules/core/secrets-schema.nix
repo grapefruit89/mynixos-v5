@@ -21,6 +21,7 @@ let
 
     # Infrastructure
     cloudflare_token = "";
+    cloudflared_tunnel_credentials = "";
     github_token = "";
     
     # Automation & Apps

@@ -5,12 +5,18 @@ let
  domain = config.my.configs.identity.domain;
  pocketIdPort = config.my.ports.pocketId;
  dnsMap = import ./dns-map.nix { inherit config; };
- allUrls = (map (h: "https://${h}") (lib.attrValues dnsMap.dnsMapping)) ++ [ "https://auth.${domain}/callback" ];
+ authHost = dnsMap.dnsMapping.auth;
+ allUrls = (map (h: "https://${h}") (lib.attrValues dnsMap.dnsMapping)) ++ [ "https://${authHost}/callback" ];
 in
 {
  options.my.meta.sso = lib.mkOption { type = lib.types.attrs; default = nms; readOnly = true; };
  config = lib.mkIf cfg.enable {
- services.pocket-id.settings = { issuer = "https://auth.${domain}"; title = "m7c5 Login"; allowed_redirect_urls = lib.concatStringsSep "," allUrls; session_ttl_seconds = 86400; };
+ services.pocket-id.settings = { 
+   issuer = "https://${authHost}"; 
+   title = "m7c5 Login"; 
+   allowed_redirect_urls = lib.concatStringsSep "," allUrls; 
+   session_ttl_seconds = 86400; 
+ };
  systemd.services.pocket-id-bootstrap = {
  description = "Pocket-ID Bootstrap";
  after = [ "pocket-id.service" ];

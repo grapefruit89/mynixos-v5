@@ -242,7 +242,7 @@ in {
  }
 
  # 🧱 AUTOMATIC FIREWALL EXPOSURE
- networking.firewall.allowedTCPPorts = [ 80 443 ];
+ networking.firewall.allowedTCPPorts = [ 443 ];
 
  # 💾 IMPERMANENCE (Cert Cache & Logs)
  environment.persistence."/persist" = {
