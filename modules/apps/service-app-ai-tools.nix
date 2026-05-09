@@ -46,8 +46,6 @@ in
  # AI Integration Aliase
  if command -v inshellisense > /dev/null; then
  alias gemini-hint='inshellisense bind gemini -- gemini'
- # SRE: Automatisierte Architektur-Visualisierung
- alias p-graph='python3 /etc/nixos/scripts/generate-mermaid.py'
  fi
  '';
  };

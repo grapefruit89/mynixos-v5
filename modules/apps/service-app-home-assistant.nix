@@ -167,7 +167,7 @@ in
 
  # 💾 PERSISTENCE (Tier A)
  environment.persistence."/persist" = {
- directories = [ "/var/lib/home-assistant" ];
+ directories = [ cfg.stateDir ];
  };
  }
  ]);

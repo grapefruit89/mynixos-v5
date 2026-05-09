@@ -53,31 +53,44 @@ in {
  })
 
  # 🔧 2. OLIVETIN SPECIFICS
- {
+ let
+   # 🚀 SRE SCRIPTS (Ported to Store)
+   mtlsScript = pkgs.writeShellScriptBin "mtls-gen" (builtins.readFile ../core/scripts/mtls-generator.sh);
+   
+   # Note: sopsScript placeholder logic
+   sopsScriptBin = pkgs.writeShellScriptBin "add-secret" ''
+     set -euo pipefail
+     KEY=$1; VAL=$2
+     # 🛡️ Implementation details for adding secrets to SOPS
+     echo "Adding $KEY..."
+     # sops --set "[\"$KEY\"] \"$VAL\"" /etc/nixos/secrets/secrets.yaml
+   '';
+ in {
  services.olivetin = {
  enable = true;
  path = with pkgs; [
  bash openssl jq coreutils gnused systemd
  nixos-rebuild nix-output-monitor curl sops
+ mtlsScript sopsScriptBin
  ];
  settings = {
  ListenAddressSingleHTTPFrontend = "127.0.0.1:${toString port}";
  actions = [
  {
  title = "SOPS: Neues Secret";
- shell = "sudo ${sopsScript} \"$secret_key\" \"$secret_value\"";
+ shell = "add-secret \"$secret_key\" \"$secret_value\"";
  icon = "&#128272;";
  arguments = [ { name = "secret_key"; type = "ascii"; } { name = "secret_value"; type = "ascii"; } ];
  }
  {
  title = "mTLS: Client Zertifikat erstellen";
- shell = "sudo ${mtlsGenScript} \"$client_name\"";
+ shell = "mtls-gen \"$client_name\"";
  icon = "🔑";
  arguments = [ { name = "client_name"; type = "ascii"; } ];
  }
  {
  title = "System Update";
- shell = "sudo ${pkgs.nixos-rebuild}/bin/nixos-rebuild switch 2>&1 | ${pkgs.nix-output-monitor}/bin/nom";
+ shell = "${pkgs.nixos-rebuild}/bin/nixos-rebuild switch 2>&1 | ${pkgs.nix-output-monitor}/bin/nom";
  icon = "&#128259;";
  }
  ];
@@ -90,7 +103,7 @@ in {
  users = ["olivetin"];
  commands = [
  { command = "${pkgs.nixos-rebuild}/bin/nixos-rebuild"; options = ["NOPASSWD"]; }
- { command = mtlsGenScript; options = ["NOPASSWD"]; }
+ { command = "${mtlsScript}/bin/mtls-gen"; options = ["NOPASSWD"]; }
  ];
  }
  ];
