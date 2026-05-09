@@ -4,7 +4,6 @@
 *.env
 
 # SOPS Secrets (Aviation-Grade Shield)
-# We exclude the directory by default but allow specific safety artifacts
 secrets/secrets.yaml
 !secrets/secrets.yaml.example
 !secrets/INJECTION_GUIDE.md
