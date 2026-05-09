@@ -357,8 +357,8 @@ in {
   # Ensure the directory and initialize with the static seed
   systemd.tmpfiles.rules = [
     "d /var/lib/nftables 0755 root root -"
-    # Initialisierung der Datei mit dem statischen Seed.
+    # Initialisierung der Datei mit dem statischen Seed als gültiger nftables-Befehl.
     # Der Timer überschreibt diese Datei später mit frischen Daten.
-    "f /var/lib/nftables/geoip-allowed.txt 0644 root root - ${staticSeed}"
+    "f /var/lib/nftables/geoip-allowed.txt 0644 root root - add element inet filter geo_allowed { ${staticSeed} }"
   ];
 }
