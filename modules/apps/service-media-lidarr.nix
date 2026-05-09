@@ -67,6 +67,7 @@ in
  (myLib.mkService {
  inherit config;
  name = "lidarr";
+ netns = "media-ns";
  port = cfg.settings.server.port;
  useSSO = true;
  description = "Lidarr Music Manager";

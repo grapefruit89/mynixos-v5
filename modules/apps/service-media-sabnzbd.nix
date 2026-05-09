@@ -75,6 +75,7 @@ in
  (myLib.mkService {
  inherit config;
  name = "sabnzbd";
+ netns = "media-ns";
  port = cfg.port;
  useSSO = true;
  description = "SABnzbd Usenet Client";

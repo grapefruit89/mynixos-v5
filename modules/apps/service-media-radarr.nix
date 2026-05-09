@@ -67,6 +67,7 @@ in
  (myLib.mkService {
  inherit config;
  name = "radarr";
+ netns = "media-ns";
  port = cfg.settings.server.port;
  useSSO = true;
  description = "Radarr Movie Manager";

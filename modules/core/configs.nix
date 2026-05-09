@@ -51,6 +51,33 @@
  default = [ "100.64.0.0/10" ];
  description = "Tailscale network range";
  });
+ mediaSubnet = myLib.mkTracedOption "NIXH-NET-001" (lib.mkOption {
+   type = lib.types.str;
+   default = "10.200.0.0/24";
+   description = "Isolated subnet for media services";
+ });
+ mediaGateway = myLib.mkTracedOption "NIXH-NET-001" (lib.mkOption {
+   type = lib.types.str;
+   default = "10.200.0.1";
+   description = "Gateway IP for the media namespace";
+ });
+ mediaRegistry = lib.mkOption {
+   type = lib.types.attrsOf lib.types.str;
+   default = {
+     sonarr = "10.200.0.10";
+     radarr = "10.200.0.11";
+     prowlarr = "10.200.0.12";
+     sabnzbd = "10.200.0.13";
+     jellyfin = "10.200.0.15";
+     readarr = "10.200.0.16";
+     lidarr = "10.200.0.17";
+     audiobookshelf = "10.200.0.18";
+     navidrome = "10.200.0.19";
+     jellyseerr = "10.200.0.20";
+     transmission = "10.200.0.14";
+   };
+   description = "Static IP registry for media services";
+ };
  };
 
  locale = {

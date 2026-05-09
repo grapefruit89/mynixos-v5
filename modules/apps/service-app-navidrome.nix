@@ -33,6 +33,7 @@ in
  (myLib.mkStreamer {
  inherit config;
  name = "navidrome";
+ netns = "media-ns";
  port = cfg.port;
  useGPU = false;
  memoryMax = "1G";

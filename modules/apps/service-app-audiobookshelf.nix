@@ -63,6 +63,7 @@ in
  (myLib.mkStreamer {
  inherit config;
  name = "audiobookshelf";
+ netns = "media-ns";
  port = cfg.port;
  useGPU = false; # Audiobookshelf uses CPU for transcoding
  memoryMax = "2G";

@@ -19,8 +19,8 @@ in rec {
  port,
  description ? "hardened Service",
  useSSO ? true,
- useVPN ? false, # 🔥 Neu: VPN-Namespace Support
- netns ? null, # Expliziter Namespace-Name
+ useVPN ? false, # 🔥 VPN-Namespace Support (Legacy)
+ netns ? null, # 🔥 NEW: Explicit Network Namespace Support
  isStream ? false,
  readWritePaths ? [],
  persist ? true,
@@ -28,17 +28,23 @@ in rec {
  extraServiceConfig ? {},
  }: let
  hostName = getDomain config name;
- targetUrl = if socket then "unix//run/service-sockets/${name}.sock" else "localhost:${toString port}";
  srePaths = config.my.configs.paths;
  
+ # 🌐 NEW: Namespace Routing Logic
+ # If netns is provided, look up the IP in configs.network.mediaRegistry
+ # Otherwise use localhost
+ namespaceIp = if (netns != null && config.my.configs.network.mediaRegistry ? "${name}") 
+               then config.my.configs.network.mediaRegistry."${name}" 
+               else "localhost";
+
+ targetUrl = if socket then "unix//run/service-sockets/${name}.sock" else "${namespaceIp}:${toString port}";
+ 
  # 🚀 NEW: ABC-Tiering Path Distribution
- # Databases & State -> Tier A (NVMe)
- # Caches & Temp -> Tier B (SSD)
  appDataDir = "${srePaths.appData}/${name}";
  appCacheDir = "${srePaths.appCache}/${name}";
  
- # VPN-Logik (Source: nixarr / Maroka-chan)
- finalNetns = if useVPN then (if netns != null then netns else "vpn-${name}") else null;
+ # VPN-Logik (Fallback)
+ finalNetns = if useVPN then "vpn-${name}" else netns;
  
  in {
  # 📝 1. SYSTEMD SERVICE OVERRIDES
@@ -62,8 +68,11 @@ in rec {
  "/var/lib/${name}" 
  ] ++ readWritePaths;
  
- # 🌐 VPN CONFINEMENT
+ # 🌐 NETWORK ISOLATION
  NetworkNamespacePath = lib.mkIf (finalNetns != null) "/var/run/netns/${finalNetns}";
+ 
+ # 🛡️ SOCKET-FIRST BRIDGE: Mount DB sockets into namespace
+ BindPaths = lib.optional (finalNetns != null) "/run/postgresql";
  }
  extraServiceConfig
  ];

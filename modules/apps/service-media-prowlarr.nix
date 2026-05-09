@@ -67,6 +67,7 @@ in
  (myLib.mkService {
  inherit config;
  name = "prowlarr";
+ netns = "media-ns";
  port = cfg.settings.server.port;
  useSSO = true;
  description = "Prowlarr Indexer Manager";

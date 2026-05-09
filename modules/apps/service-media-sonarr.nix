@@ -67,6 +67,7 @@ in
  (myLib.mkService {
  inherit config;
  name = "sonarr";
+ netns = "media-ns";
  port = cfg.settings.server.port;
  useSSO = true;
  description = "Sonarr TV Manager";

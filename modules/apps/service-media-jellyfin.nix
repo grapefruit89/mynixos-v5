@@ -54,6 +54,7 @@ in
  (myLib.mkStreamer {
  inherit config;
  name = "jellyfin";
+ netns = "media-ns";
  port = config.my.ports.jellyfin;
  useGPU = true; # 🔥 QuickSync / UHD 630 Zugriff
  memoryMax = "4G";

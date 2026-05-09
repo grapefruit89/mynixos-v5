@@ -92,6 +92,31 @@ in {
  # 🔍 INTRUSION DETECTION (H-09)
  # Log refused connections for auditing (Portscans, LAN Recon)
  logRefusedConnections = true;
+
+ extraForwardRules = ''
+ # 📺 MEDIA STACK SEGMENTATION (Phase 1)
+ # 1. Allow traffic from media-ns to WAN (specific ports: 80, 443, 119, 563)
+ iifname "veth-media" ip saddr ${config.my.configs.network.mediaSubnet} ip daddr != { 192.168.2.0/24, 127.0.0.1/32 } tcp dport { 80, 443, 119, 563 } accept
+ 
+ # 2. Allow established/related traffic back to media-ns
+ oifname "veth-media" ct state { established, related } accept
+
+ # 3. Allow Inbound from Host (Caddy) to mediaSubnet
+ oifname "veth-media" accept
+
+ # 4. Explicitly drop anything else from veth-media to prevent leaks to LAN/Host
+ iifname "veth-media" drop
+ '';
+ };
+
+ networking.nftables.tables.media-nat = {
+ family = "ip";
+ content = ''
+ chain postrouting {
+ type nat hook postrouting priority 100;
+ ip saddr ${config.my.configs.network.mediaSubnet} masquerade
+ }
+ '';
  };
  };
 }

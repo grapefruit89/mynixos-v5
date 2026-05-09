@@ -19,6 +19,7 @@
  ../modules/apps/service-app-navidrome.nix
  ../modules/apps/media-stack.nix
  ../modules/core/storage.nix
+ ../modules/services/media-network.nix
  ];
 
  # Standard-Metadaten für das Profil

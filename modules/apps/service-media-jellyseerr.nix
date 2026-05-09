@@ -9,7 +9,7 @@ in
  options.my.meta.jellyseerr = lib.mkOption { type = lib.types.attrs; default = nms; readOnly = true; };
  options.my.media.jellyseerr = { enable = lib.mkEnableOption "Jellyseerr"; stateDir = lib.mkOption { type = lib.types.str; default = "${config.my.configs.paths.stateDir}/jellyseerr"; }; port = lib.mkOption { type = lib.types.port; default = config.my.ports.jellyseerr or 5055; }; user = lib.mkOption { type = lib.types.str; default = "jellyseerr"; }; group = lib.mkOption { type = lib.types.str; default = "media"; }; netns = lib.mkOption { type = lib.types.nullOr lib.types.str; default = null; }; };
  config = lib.mkIf cfg.enable (lib.mkMerge [
- (myLib.mkService { inherit config; name = "jellyseerr"; port = cfg.port; useSSO = true; description = "Jellyseerr"; netns = cfg.netns; })
+ (myLib.mkService { inherit config; name = "jellyseerr"; port = cfg.port; useSSO = true; description = "Jellyseerr"; netns = "media-ns"; })
  {
  services.jellyseerr = { enable = true; port = cfg.port; };
  systemd.services.jellyseerr = {
