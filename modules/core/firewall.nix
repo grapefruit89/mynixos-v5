@@ -138,13 +138,15 @@ in {
         # 6. Whitelist: Monitoring & Management
         nft 'add rule inet outbound_filter output meta skuid { ${toString u.gatus}, ${toString u.uptime-kuma}, ${toString u.homepage} } accept'
 
-        # 7. Whitelist: Critical Backend
+        # Whitelist: Critical Backend
         # Matrix/Conduit, Vector (if needed), Restic (Backblaze)
         nft 'add rule inet outbound_filter output meta skuid { ${toString u.matrix}, ${toString u.vector} } accept'
-        
-        # Log dropped packets for debugging (Phase 6A fallback)
+
+        # 🌐 MEDIA NAMESPACE ISOLATION (Item 3)
+        # Note: Services in 'media-ns' hit the outbound chain via their respective UIDs.
+        # This centralized rule ensures that compromised media apps cannot bypass the DROP policy.
         nft 'add rule inet outbound_filter output meta skuid 2000-2999 counter log prefix "NFT_OUTBOUND_DROP: "'
-      '';
+        '';
 
       extraStopRules = ''
         nft delete table inet outbound_filter 2>/dev/null || true

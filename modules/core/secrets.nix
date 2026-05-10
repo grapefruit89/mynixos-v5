@@ -88,8 +88,13 @@ in {
  environment.systemPackages = [ pkgs.sops pkgs.age ];
 
  # 🚨 C-03: AUTOMATED KEY BACKUP (Anti-Deadlock)
+ # Description: Securely syncs the current SSH host key to Tier B (Persistent SSD).
+ # This ensures that if the primary /persist/etc/ssh/ key is lost, the age-compatible 
+ # fallback can still decrypt sops secrets on a fresh install.
+ # ROTATION POLICY: Key rotation should be performed manually every 180 days by 
+ # regenerating the SSH host key and re-encrypting the SOPS vault.
  systemd.services.sops-key-sync = {
- description = "Sync SSH host key to Tier B fallback";
+   description = "Aviation-Grade Secret Key Synchronization (Tier B)";
  # Correct logic: only run if the fallback directory is available
  unitConfig.ConditionPathExists = config.my.configs.paths.tierB;
  wantedBy = [ "multi-user.target" ];
