@@ -26,26 +26,26 @@ in {
  readOnly = true;
  };
 
- config = lib.mkIf (config.my.services.sshRescue.enable or false) {
-  # 🚨 RESCUE INSTANCE CONFIG
-  systemd.services.sshd-rescue = {
-    description = "Emergency SSH Service (Password Auth)";
-    # hardened: stop the whole unit after 15 minutes to minimize exposure
-    runtimeMaxSec = "15min";
-    after = [ "network.target" ];
-    serviceConfig = {
-      ExecStart = "${pkgs.openssh}/bin/sshd -D -o \"ClientAliveInterval 300\" -o \"ClientAliveCountMax 0\" -f ${pkgs.writeText "sshd-rescue-config" ''
-        Port ${toString rescuePort}
-        ListenAddress ${config.my.configs.network.lanIP}
-        ListenAddress 100.64.0.0/10
-        PasswordAuthentication yes
-        PermitRootLogin no
-        AllowUsers ${user}
-        PidFile /run/sshd-rescue.pid
-      ''}";
-      KillMode = "process";
-      Restart = "no";
+  config = lib.mkIf (config.my.services.sshRescue.enable or false) {
+    # 🚨 RESCUE INSTANCE CONFIG
+    systemd.services.sshd-rescue = {
+      description = "Emergency SSH Service (Password Auth)";
+      serviceConfig = {
+        ExecStart = "${pkgs.openssh}/bin/sshd -D -f ${pkgs.writeText "sshd-rescue-config" ''
+          Port ${toString rescuePort}
+          ListenAddress 127.0.0.1
+          PasswordAuthentication yes
+          PermitRootLogin no
+          AllowUsers ${user}
+          PidFile /run/sshd-rescue.pid
+        ''}";
+        KillMode = "process";
+        Restart = "no";
+      };
     };
+
+    # Note: Global firewall port 2222 removal confirmed.
+    # Access is managed via ListenAddress (Local only).
   };
 
  # Note: Global firewall port 2222 removal confirmed.

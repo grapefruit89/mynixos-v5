@@ -6,7 +6,7 @@ Dieses Dokument listet bekannte Einschränkungen, akzeptierte Restrisiken und ge
 
 ### [C-03] SOPS-Deadlock bei Totalausfall von Tier A
 - **Problem:** SSH-Hostkeys liegen auf `/persist` (NVMe). Wenn diese Partition physisch stirbt, kann SOPS keine Secrets mehr entschlüsseln. Der Fallback-Pfad auf Tier B ist vorbereitet, aber aktuell nicht mit einem Live-Key befüllt.
-- **Risiko:** System bootet, aber alle Dienste (Cloudflare, Tailscale, DBs) schlagen fehl. Kein Remote-Access möglich.
+- **Risiko:** System bootet, aber alle Dienste (DBs, Proxy) schlagen fehl. Kein Remote-Access möglich.
 - **Lösung:** Physischen USB-Key mit Age-Fallback erstellen und in `secrets.nix` final einbinden.
 
 ## 🟠 Sicherheit & Netzwerk

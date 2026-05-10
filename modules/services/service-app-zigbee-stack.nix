@@ -149,20 +149,11 @@ in
  "d /var/lib/mosquitto 0750 mosquitto mqtt -"
  ];
 
- # 💾 PERSISTENCE (Tier A)
- environment.persistence."/persist" = {
- directories = [ 
- "/var/lib/mosquitto"
- "/var/lib/zigbee2mqtt"
- ];
- };
- 
- # Group alignment
- users.groups.mqtt = {};
- users.users.zigbee2mqtt.extraGroups = [ "mqtt" "dialout" ];
- users.users.mosquitto.extraGroups = [ "mqtt" ];
- }
- ]);
+      # Group alignment      users.groups.mqtt = {};
+      users.users.zigbee2mqtt.extraGroups = [ "mqtt" "dialout" ];
+      users.users.mosquitto.extraGroups = [ "mqtt" ];
+    }
+  ]);
 }
 /**
  * ---\n * technical_integrity:\n * checksum: sha256:d13a9c7b9600bfbd98bc1057589bcf25b5b1b8aa890de35898f63eb3211fd04f9\n * eof_marker: NIXHOME_VALID_EOF* ---\n */

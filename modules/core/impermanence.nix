@@ -3,33 +3,38 @@
  # Verwaltet die systemweiten Persistenz-Pfade für das Stateless-Root (tmpfs).
  # App-spezifische Pfade werden automatisch via mkService (lib-helpers) registriert.
 
- config = {
- # 🛡️ SYSTEM PERSISTENCE (Tier A: NVMe State)
- environment.persistence."/persist" = {
- hideMounts = true;
- directories = [
-   "/var/log"
-   "/var/lib/nixos"
-   "/var/lib/systemd"
-   "/var/lib/sops-nix"
-   "/var/lib/bluetooth"
-   "/var/lib/vaultwarden"
-   "/var/lib/miniflux"
-   "/var/lib/linkwarden"
-   "/var/lib/filebrowser"
-   "/var/lib/readeck"
-   "/var/lib/monica"
-   "/etc/NetworkManager/system-connections"
- ];
+  config = {
+    # 🛡️ SYSTEM PERSISTENCE (Tier A: NVMe State)
+    environment.persistence."/persist" = {
+      hideMounts = true;
+      directories = [
+        "/var/log"
+        "/var/lib/nixos"
+        "/var/lib/systemd/coredump"
+        "/var/lib/sops-nix"
+        "/var/lib/bluetooth"
+        "/var/lib/pocket-id"
+        "/var/lib/caddy"
+        "/var/lib/postgresql"
+        "/home/moritz"
+        "/etc/nixos"
+        "/etc/NetworkManager/system-connections"
+      ];
+      files = [
+        "/etc/machine-id"
+        "/etc/ssh/ssh_host_ed25519_key"
+        "/etc/ssh/ssh_host_ed25519_key.pub"
+        "/etc/ssh/ssh_host_rsa_key"
+        "/etc/ssh/ssh_host_rsa_key.pub"
+      ];
+    };
 
- files = [
- "/etc/machine-id"
- "/etc/ssh/ssh_host_ed25519_key"
- "/etc/ssh/ssh_host_ed25519_key.pub"
- "/etc/ssh/ssh_host_rsa_key"
- "/etc/ssh/ssh_host_rsa_key.pub"
- ];
- };
+    # 🚀 ROOT-ON-RAM SETUP (Stateless Manifesto)
+    fileSystems."/" = lib.mkForce {
+      device = "none";
+      fsType = "tmpfs";
+      options = [ "defaults" "size=4G" "mode=755" ];
+    };
 
  # 🚀 ROOT-ON-RAM SETUP (Stateless Manifesto)
  fileSystems."/" = lib.mkForce {
@@ -38,16 +43,13 @@
  options = [ "defaults" "size=4G" "mode=755" ];
  };
 
- # 🚩 SAFETY: Kein Swap auf tmpfs erlaubt
- swapDevices = [];
-
- # Metadaten für die Traceability
- my.meta.impermanence = {
- id = "NIXH-00-COR-IMP";
- title = "Impermanence Core";
- description = "System-wide persistence for stateless root-on-RAM setup.";
- layer = 0;
- audit.last_reviewed = "2026-04-27";
- };
- };
+    # Metadaten für die Traceability
+    my.meta.impermanence = {
+      id = "NIXH-00-COR-IMP";
+      title = "Impermanence Core";
+      description = "System-wide persistence for stateless root-on-RAM setup. Fixed for v6.0 (removed /nix/var).";
+      layer = 0;
+      audit.last_reviewed = "2026-05-06";
+    };
+  };
 }

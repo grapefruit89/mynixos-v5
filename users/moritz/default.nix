@@ -25,26 +25,24 @@ in {
  readOnly = true;
  };
 
- imports = [ ./locale.nix ];
+  imports = [ ./locale.nix ./identity.nix ];
 
  config = {
  # 🚫 NO IMPERATIVE CHANGES ALLOWED
  users.mutableUsers = false;
 
- users.users.${user} = {
- isNormalUser = true;
- description = "Primary Admin (${user})";
- extraGroups = ["wheel" "video" "render" "media" "networkmanager"];
- 
- # Passwort via Sops (hardened Security)
- hashedPasswordFile = config.sops.secrets.user_password.path;
- 
- openssh.authorizedKeys.keys = [
- "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJRDbyFjT4SEL8yxNwZuEBPORD82qlJJhdr2r4qz1vCX" # Main Key
- ];
- 
- shell = pkgs.bashInteractive;
- };
+    users.users.${user} = {
+      isNormalUser = true;
+      description = "Primary Admin (${user})";
+      extraGroups = ["wheel" "video" "render" "media" "networkmanager"];
+      
+      # Passwort via Sops (Aviation-Grade Security)
+      hashedPasswordFile = config.sops.secrets.user_password.path;
+      
+      openssh.authorizedKeys.keys = config.my.identity.sshKeys;
+      
+      shell = pkgs.bashInteractive;
+    };
 
  # 📁 UNIFIED MEDIA GROUP (Fragment 1035 Alignment)
  # GID 998 (NixOS Standard für Media oft niedriger, wir bleiben bei 169 für SSoT)

@@ -1,0 +1,66 @@
+{ config, lib, pkgs, ... }: 
+let
+  cfg = config.my.services.blocky;
+  lanIP = config.my.configs.network.lanIP;
+in {
+  options.my.services.blocky = {
+    enable = lib.mkEnableOption "Blocky DNS Resolver";
+  };
+
+  config = lib.mkIf cfg.enable {
+    services.blocky = {
+      enable = true;
+      settings = {
+        ports.dns = 53;
+        upstreams.groups.default = [
+          "tcp-tls:1.1.1.1:853"
+          "tcp-tls:9.9.9.9:853"
+        ];
+        bootstrapDns = "1.1.1.1";
+        
+        # 🛡️ Ad-Blocking
+        blocking = {
+          blackLists = {
+            ads = [
+              "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
+            ];
+          };
+          clientGroupsBlock = {
+            default = [ "ads" ];
+          };
+          # Conservative allowlist
+          whiteLists.ads = [
+            "api.thetvdb.com"
+            "api.themoviedb.org"
+            "api.radarr.video"
+          ];
+        };
+
+        # 🎯 Split-Horizon
+        conditional = {
+          mapping = {
+            "nix.m7c5.de" = "127.0.0.1";
+            "m7c5.de" = "127.0.0.1";
+          };
+        };
+
+        # 📊 Monitoring
+        prometheus.enable = true;
+        prometheus.path = "/metrics";
+      };
+    };
+
+    # 👤 Static UID from registry
+    users.users.blocky.uid = config.my.users.registry.blocky;
+
+    # Forward local resolver to blocky
+    services.resolved.extraConfig = ''
+      DNS=127.0.0.1
+      Domains=~.
+    '';
+
+    # Firewall
+    networking.firewall.allowedTCPPorts = [ 53 ];
+    networking.firewall.allowedUDPPorts = [ 53 ];
+  };
+}

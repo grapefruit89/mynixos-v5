@@ -44,18 +44,22 @@ in {
  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  '';
 
- settings = {
- PermitRootLogin = "no";
- PasswordAuthentication = false;
- KbdInteractiveAuthentication = false;
- PermitEmptyPasswords = false;
- AllowUsers = [ user ];
- LogLevel = "VERBOSE";
- LoginGraceTime = 20;
- MaxAuthTries = 2;
- ClientAliveInterval = 300;
- ClientAliveCountMax = 2;
- X11Forwarding = false;
+      settings = {
+        PermitRootLogin = "no";
+        PasswordAuthentication = false;
+        KbdInteractiveAuthentication = false;
+        AllowUsers = [ user ];
+        LogLevel = "VERBOSE";
+        PubkeyAcceptedAlgorithms = [
+          "ssh-ed25519-cert-v01@openssh.com"
+          "ssh-ed25519"
+          "sk-ssh-ed25519@openssh.com" # 🛡️ YubiKey Hardware Bound
+        ];
+        LoginGraceTime = 20;
+        MaxAuthTries = 2;
+        ClientAliveInterval = 300;
+        ClientAliveCountMax = 2;
+        X11Forwarding = false;
 
  # 🏎️ POST-QUANTUM CRYPTO (Aligned with SRE Standards)
  KexAlgorithms = [

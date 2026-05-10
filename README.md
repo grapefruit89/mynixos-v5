@@ -8,23 +8,24 @@
 [![Impermanence](https://img.shields.io/badge/Storage-Impermanence-blueviolet.svg?style=flat-square)](https://github.com/nix-community/impermanence)
 [![Hardened](https://img.shields.io/badge/Audit-Hardened-brightgreen.svg?style=flat-square)](https://github.com/grapefruit89/mynixos-v5)
 
-**NixHome v6.0** is a titanium-hardened, declarative NixOS configuration for high-performance home automation, media serving, and AI workloads, engineered for the **Fujitsu Esprimo Q958**.
+## 📖 Key Documentation
+- **Core Hardening:** [modules/core/HARDENING.md](./modules/core/HARDENING.md) (Networking, IPC, East-West Isolation)
+- **Database & Sockets:** [modules/services/SOCKET_HARDENING.md](./modules/services/SOCKET_HARDENING.md) (Unix Sockets, TCP-Zero)
+- **Services Registry:** [modules/core/SERVICES_GUIDE.md](./modules/core/SERVICES_GUIDE.md) (SSoT Logic & Trust Zones)
+- **Security Blueprint:** [docs/V6_BLUEPRINT.md](./docs/V6_BLUEPRINT.md) (Trust Zones, TPM)
 
 ---
 
 ## 📖 Overview
 
-This project implements the **Horizontal Responsibility v6.0** architecture, which strictly decouples hardware abstractions, user profiles, and service modules. Every component is subjected to a deep SRE audit, ensuring maximum stability and security through declarative automation.
+2. **Zone 2: Admin-Hangar (Loopback Alias `127.0.0.2`)**
+   - Backend-Dienste (Netdata, *arr Suite, Blocky) binden an den isolierten Alias.
+   - Zugriff **nur** via Caddy von vertrauenswürdigen LAN-Quellen (Kein SSO erforderlich).
+   - `nftables` blockiert jeden Zugriff auf `127.0.0.2`, der nicht von Caddy (UID 2000) stammt.
 
-### Module Hierarchy
-| Layer | Name | Responsibility |
-| :--- | :--- | :--- |
-| **00** | **Core** | SSoT configs, networking, lib-helpers, registry, and impermanence. |
-| **10** | **Gateway** | Ingress management (Caddy), Identity (Pocket-ID), and CA-Server. |
-| **20** | **Infrastructure** | Databases (PostgreSQL, Valkey) and shared logic. |
-| **30** | **Media** | Segmented media stack (arr-suite, Jellyfin) in isolated namespaces. |
-| **40** | **Tools** | Productivity apps (Vaultwarden, Paperless-ngx, n8n, Miniflux). |
-| **90** | **Policy** | Hardware-bound identity (TPM), Geo-IP updates, and tech restrictions. |
+3. **Zone 3: Family-PocketID (`127.0.0.1`)**
+   - Frontend-Dienste (Jellyfin, Home Assistant) binden an Standard-Loopback.
+   - Zugriff via PocketID SSO (OIDC) / Forward-Auth für ALLE (LAN/WAN).
 
 ### Target Hardware
 - **Model:** Fujitsu Esprimo Q958

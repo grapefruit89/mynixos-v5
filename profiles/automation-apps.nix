@@ -1,14 +1,13 @@
 { config, lib, pkgs, ... }: {
- # 🚀 hardened MISSION PROFILE: AUTOMATION APPS
- # Bündelt n8n, Home Assistant, OliveTin und Management-Tools.
+  # 🚀 AVIATION-GRADE MISSION PROFILE: AUTOMATION APPS
+  # Bündelt n8n, Home Assistant und Management-Tools.
 
- imports = [
- ../modules/apps/service-app-n8n.nix
- ../modules/apps/service-app-home-assistant.nix
- ../modules/apps/service-app-olivetin.nix
- ../modules/apps/service-app-semaphore.nix
- ../modules/services/service-app-zigbee-stack.nix
- ];
+  imports = [
+    ../modules/apps/service-app-n8n.nix
+    ../modules/apps/service-app-home-assistant.nix
+    ../modules/apps/service-app-semaphore.nix
+    ../modules/services/service-app-zigbee-stack.nix
+  ];
 
  # Standard-Metadaten für das Profil
  my.meta.profile_automation = {

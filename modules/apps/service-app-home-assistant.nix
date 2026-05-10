@@ -99,32 +99,32 @@ in
  };
  users.groups.${cfg.group} = {};
 
- services.home-assistant = {
- enable = true;
- configDir = cfg.stateDir;
- extraComponents = [ 
- "default_config" "met" "esphome" "prometheus" "mobile_app" 
- "sun" "radio_browser" "google_translate" "mqtt" 
- ];
- config = {
- homeassistant = {
- name = "NixHome";
- unit_system = "metric";
- time_zone = sreConfig.locale.timezone;
- external_url = "https://home.${sreConfig.identity.subdomain}.${sreConfig.identity.domain}";
- internal_url = "http://localhost:${toString cfg.port}";
- };
- # MQTT Auto-Wiring
- mqtt = {
- broker = "127.0.0.1";
- port = config.my.ports.mqtt or 1883;
- };
- http = {
- use_x_forwarded_for = true;
- trusted_proxies = [ "127.0.0.1" "::1" ] ++ sreConfig.network.tailnetCidrs;
- };
- };
- };
+      services.home-assistant = {
+        enable = true;
+        configDir = cfg.stateDir;
+        extraComponents = [ 
+          "default_config" "met" "esphome" "prometheus" "mobile_app" 
+          "sun" "radio_browser" "google_translate" "mqtt" 
+        ];
+        config = {
+          homeassistant = {
+            name = "NixHome";
+            unit_system = "metric";
+            time_zone = sreConfig.locale.timezone;
+            external_url = "https://home.${sreConfig.identity.subdomain}.${sreConfig.identity.domain}";
+            internal_url = "http://localhost:${toString cfg.port}";
+          };
+          # MQTT Auto-Wiring
+          mqtt = {
+            broker = "127.0.0.1";
+            port = config.my.ports.mqtt or 1883;
+          };
+          http = {
+            use_x_forwarded_for = true;
+            trusted_proxies = [ "127.0.0.1" "::1" ] ++ sreConfig.network.lanCidrs;
+          };
+        };
+      };
 
  systemd.services.home-assistant = {
  description = "Home Assistant Core (hardened)";
@@ -157,20 +157,15 @@ in
  };
  };
 
- # 📁 PERMISSION MANAGEMENT
- systemd.tmpfiles.rules = [
- "d ${cfg.stateDir} 0750 ${cfg.user} ${cfg.group} -"
- "d ${cfg.cacheDir} 0750 ${cfg.user} ${cfg.group} -"
- "d ${cfg.cacheDir}/pycache 0750 ${cfg.user} ${cfg.group} -"
- "d ${cfg.mediaDir} 0775 ${cfg.user} ${cfg.group} -"
- ];
-
- # 💾 PERSISTENCE (Tier A)
- environment.persistence."/persist" = {
- directories = [ cfg.stateDir ];
- };
- }
- ]);
+      # 📁 PERMISSION MANAGEMENT
+      systemd.tmpfiles.rules = [
+        "d ${cfg.stateDir} 0750 ${cfg.user} ${cfg.group} -"
+        "d ${cfg.cacheDir} 0750 ${cfg.user} ${cfg.group} -"
+        "d ${cfg.cacheDir}/pycache 0750 ${cfg.user} ${cfg.group} -"
+        "d ${cfg.mediaDir} 0775 ${cfg.user} ${cfg.group} -"
+      ];
+    }
+  ]);
 }
 /**
  * ---\n * technical_integrity:\n * checksum: sha256:e13a9c7b9600bfbd98bc1057589bcf25b5b1b8aa890de35898f63eb3211fd04f8\n * eof_marker: NIXHOME_VALID_EOF* ---\n */

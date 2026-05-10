@@ -68,14 +68,10 @@ in
 
  systemd.services.navidrome.serviceConfig.ReadOnlyPaths = [ cfg.musicDir ];
 
- systemd.tmpfiles.rules = [
- "d ${cfg.stateDir} 0750 ${cfg.user} ${cfg.group} -"
- "d ${cfg.cacheDir} 0750 ${cfg.user} ${cfg.group} -"
- ];
-
- environment.persistence."/persist".directories = [
- "/var/lib/navidrome"
- ];
- }
- ]);
+      systemd.tmpfiles.rules = [
+        "d ${cfg.stateDir} 0750 ${cfg.user} ${cfg.group} -"
+        "d ${cfg.cacheDir} 0750 ${cfg.user} ${cfg.group} -"
+      ];
+    }
+  ]);
 }

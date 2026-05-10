@@ -50,11 +50,11 @@ let
  while [ "$FREE_GB" -lt "$TARGET_FREE_GB" ] && [ "$COUNT" -lt "$MAX_ITERATIONS" ]; do
    COUNT=$((COUNT + 1))
 
-   # 🛡️ Find oldest file, excluding critical database patterns (Null-terminated for safety)
-   OLDEST_INFO=$(find "$SOURCE_DIR" -type f \
-     ! -name "*.wal" ! -name "*.db" ! -name "*.sqlite" ! -name "*.db-journal" \
-     ! -name "*.db-shm" ! -name "*.db-wal" ! -name "*.sqlite-shm" ! -name "*.sqlite-wal" \
-     -printf '%T@ %p\0' | sort -zn | head -z -n 1)
+      # 🛡️ Find oldest file, excluding critical database patterns
+      OLDEST=$(find "$SOURCE_DIR" -type f \
+        ! -name "*.wal" ! -name "*.db" ! -name "*.sqlite" ! -name "*.db-journal" \
+        ! -name "*.log" ! -name "*.bak" ! -path "*/database/*" \
+        -printf '%T@ %p\n' | sort -n | head -1 | cut -d' ' -f2-)
 
    if [ -z "$OLDEST_INFO" ]; then
      echo "ℹ️ No more safe files found to move."

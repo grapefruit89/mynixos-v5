@@ -89,12 +89,14 @@ in
  FFMPEG_TRANSCODING_TEMP_DIR = "/run/jellyfin-transcode";
  };
 
- # Automatischer Sync der SRE-Encoding-Policy
- # hardened: use -- for safety
- preStart = ''
-   mkdir -p -- "${srePaths.stateDir}/jellyfin/config"
-   cp -f -- "${encodingXml}" "${srePaths.stateDir}/jellyfin/config/encoding.xml"
- '';
+        serviceConfig = {
+          RuntimeDirectory = "jellyfin-transcode";
+          RuntimeDirectoryMode = "0750";
+          # Netzwerk-Schild (Ergänzend zur Factory)
+          IPAddressAllow = [ "127.0.0.1/8" "::1/128" ] 
+            ++ config.my.configs.network.lanCidrs;
+        };
+      };
 
  serviceConfig = {
  # Netzwerk-Schild (Ergänzend zur Factory)

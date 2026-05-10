@@ -11,265 +11,179 @@ let
 in rec {
  inherit mkTracedOption;
 
- # 🏆 hardened SERVICE FACTORY (mkService)
- # Standard-Wrapper für alle Dienste mit Hardening, Caddy & ABC-Tiering.
- mkService = {
- config,
- name,
- port,
- description ? "hardened Service",
- useSSO ? true,
- useVPN ? false, # 🔥 VPN-Namespace Support (Legacy)
- netns ? null, # 🔥 NEW: Explicit Network Namespace Support
- isStream ? false,
- readWritePaths ? [],
- persist ? true,
- socket ? false,
- extraServiceConfig ? {},
- }: let
- hostName = getDomain config name;
- srePaths = config.my.configs.paths;
- 
- # 🌐 NEW: Namespace Routing Logic
- # If netns is provided, look up the IP in configs.network.mediaRegistry
- # Otherwise use localhost
- namespaceIp = if (netns != null && config.my.configs.network.mediaRegistry ? "${name}") 
-               then config.my.configs.network.mediaRegistry."${name}" 
-               else "localhost";
+  # 🏆 AVIATION-GRADE SERVICE FACTORY (mkService)
+  # Standard-Wrapper für alle Dienste mit Hardening, Caddy & ABC-Tiering.
+  mkService = {
+    config,
+    name,
+    port ? null, # Now optional
+    description ? "Aviation-Grade Service",
+    useSSO ? true,
+    useVPN ? false, # 🔥 Neu: VPN-Namespace Support
+    netns ? null,   # Expliziter Namespace-Name
+    requiresPostgres ? false, # 🔥 NEW: Conditional Postgres access
+    isStream ? false,
+    readWritePaths ? [],
+    persist ? true,
+    socket ? null,  # Can be explicitly provided path or boolean (legacy)
+    extraServiceConfig ? {},
+  }: let
+    hostName = getDomain config name;
+    
+    # Resolve from SSoT registry if available
+    svcRegistry = config.my.services.spec.${name} or {};
+    registrySocket = svcRegistry.socket or null;
+    registryPort = svcRegistry.port or port;
 
- targetUrl = if socket then "unix//run/service-sockets/${name}.sock" else "${namespaceIp}:${toString port}";
- 
- # 🚀 NEW: ABC-Tiering Path Distribution
- appDataDir = "${srePaths.appData}/${name}";
- appCacheDir = "${srePaths.appCache}/${name}";
- 
- # VPN-Logik (Fallback)
- finalNetns = if useVPN then "vpn-${name}" else netns;
- 
- in {
- # 📝 1. SYSTEMD SERVICE OVERRIDES
- systemd.services."${name}" = {
- inherit description;
- after = [ "network.target" ] ++ (lib.optional (finalNetns != null) "netns-${finalNetns}.service");
- bindsTo = lib.optional (finalNetns != null) "netns-${finalNetns}.service";
- 
- serviceConfig = lib.mkMerge [
- {
- # 🛡️ hardening (ADR 001)
- ProtectSystem = "strict";
- ProtectHome = true;
- PrivateTmp = true;
- NoNewPrivileges = true;
- 
- # 💾 PERSISTENCE (Tier A vs Tier B)
- ReadWritePaths = [ 
- appDataDir 
- appCacheDir
- "/var/lib/${name}" 
- ] ++ readWritePaths;
- 
- # 🌐 NETWORK ISOLATION
- NetworkNamespacePath = lib.mkIf (finalNetns != null) "/var/run/netns/${finalNetns}";
- 
- # 🛡️ SOCKET-FIRST BRIDGE: Mount DB sockets into namespace
- BindPaths = lib.optional (finalNetns != null) "/run/postgresql";
- }
- extraServiceConfig
- ];
- };
+    # Determine final upstream (Socket > Registry Socket > Registry Port > Port)
+    # 🚀 v6.0 Strategy: Favor Unix Sockets over TCP.
+    finalSocket = if (lib.isString socket) then socket 
+                  else if registrySocket != null then registrySocket
+                  else if socket == true then "/run/service-sockets/${name}.sock"
+                  else null;
 
- # 🌐 2. CADDY REVERSE PROXY
- services.caddy.virtualHosts."${hostName}" = {
- extraConfig = let
- proxyCommand = if isStream then "import proxy_stream ${targetUrl}" else "reverse_proxy ${targetUrl}";
- in ''
- # Global-Access: Strict SSO for everyone (including LAN)
- ${lib.optionalString useSSO "import sso_auth"}
- ${proxyCommand}
- '';
- };
+    # TCP is strictly local fallback
+    targetUrl = if finalSocket != null 
+                then "unix/${finalSocket}" 
+                else "127.0.0.1:${toString registryPort}";
 
- # 💾 3. IMPERMANENCE (Tier A)
- environment.persistence."/persist" = lib.mkIf persist {
- directories = [ "/var/lib/${name}" ];
- };
+    srePaths = config.my.configs.paths;
+    
+    # 🚀 NEW: ABC-Tiering Path Distribution
+    # Databases & State -> Tier A (NVMe)
+    # Caches & Temp -> Tier B (SSD)
+    appDataDir = "${srePaths.appData}/${name}";
+    appCacheDir = "${srePaths.appCache}/${name}";
+    
+    # 👤 Static UID resolve (from users-registry.nix)
+    staticUid = config.my.users.registry.${name} or null;
+    isHardened = staticUid != null;
+    
+    # VPN-Logik (Source: nixarr / Maroka-chan)
+    finalNetns = if useVPN then (if netns != null then netns else "vpn-${name}") else null;
+    
+  in {
+    # 📝 1. SYSTEMD SERVICE OVERRIDES
+    systemd.services."${name}" = {
+      inherit description;
+      after = [ "network.target" ] ++ (lib.optional (finalNetns != null) "netns-${finalNetns}.service");
+      bindsTo = lib.optional (finalNetns != null) "netns-${finalNetns}.service";
+      
+      serviceConfig = lib.recursiveUpdate {
+        # 🛡️ TITANIUM HARDENING (ADR 001)
+        ProtectSystem = "strict";
+        ProtectHome = true;
+        PrivateTmp = true;
+        NoNewPrivileges = true;
+        
+        # 👤 IDENTITY HARDENING (ADR 005)
+        # Use static UIDs for nftables filtering; fallback to DynamicUser for low-risk apps.
+        DynamicUser = if isHardened then false else true;
+        User = if isHardened then name else null;
+        UMask = "0077"; # Aviation-Grade Default
+        
+        # 💾 PERSISTENCE (Tier A vs Tier B)
+        # Note: StateDirectory is managed by systemd, we link it via bind-mounts or explicit paths
+        ReadWritePaths = readWritePaths ++ [ 
+          appDataDir 
+          appCacheDir
+          "${srePaths.stateDir}/${name}" 
+        ];
 
- # 📂 4. DIRECTORY CREATION (ADR 044)
- systemd.tmpfiles.rules = [
- "d ${appDataDir} 0750 ${name} media -"
- "d ${appCacheDir} 0750 ${name} media -"
- ];
+        # 🐘 Conditional Postgres Access
+        BindPaths = lib.optional requiresPostgres "/run/postgresql";
+        
+        # 🌐 VPN CONFINEMENT
+        NetworkNamespacePath = lib.mkIf (finalNetns != null) "/var/run/netns/${finalNetns}";
+      } extraServiceConfig;
+    };
 
- # 📊 5. TRACEABILITY
- my.meta.${name} = {
- id = "NIXH-AUTO-${name}";
- title = description;
- layer = 60;
- audit.last_reviewed = "2026-04-27";
- };
- };
+    # 👤 6. USER/GROUP DEFINITION (if static UID)
+    users.users = lib.mkIf isHardened {
+      "${name}" = {
+        isSystemUser = true;
+        group = if (name == "postgres" || name == "caddy" || name == "valkey") then name else "media";
+        uid = staticUid;
+      };
+    };
 
- # 🎬 hardened STREAMER FACTORY
- mkStreamer = {
- config,
- name,
- port,
- useGPU ? false,
- persist ? true,
- memoryMax ? "2G",
- cpuWeight ? 80,
- oomScoreAdjust ? 400,
- description ? "Streaming Service",
- useVPN ? false,
- }: let
- srePaths = config.my.configs.paths;
- stateDir = "${srePaths.stateDir}/${name}";
- cacheDir = "${srePaths.tierB}/cache/${name}";
- mediaDir = srePaths.mediaLibrary;
- in (lib.mkMerge [
- (mkService {
- inherit config name port description persist useVPN;
- isStream = true;
- readWritePaths = [ cacheDir mediaDir ];
- extraServiceConfig = {
- ProtectSystem = "strict";
- ProtectHome = true;
- PrivateTmp = true;
- NoNewPrivileges = true;
- RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" ];
- # C-04 Safeguard: Strict memory limits for all streamers
- MemoryMax = memoryMax;
- MemoryHigh = "85%"; # Gentle throttling before hard kill
- CPUWeight = cpuWeight;
- OOMScoreAdjust = oomScoreAdjust;
- PrivateDevices = if useGPU then lib.mkForce false else true;
- DeviceAllow = if useGPU then [ "/dev/dri/renderD128 rw" ] else [];
- };
- })
- {
- systemd.tmpfiles.rules = [
- "d ${stateDir} 0750 ${name} media -"
- "d ${cacheDir} 0775 ${name} media -"
- ];
- services.${name} = lib.optionalAttrs (name == "jellyfin") {
- dataDir = stateDir;
- inherit cacheDir;
- };
- }
- ]);
+    users.groups = lib.mkIf (isHardened && (name == "postgres" || name == "caddy" || name == "valkey")) {
+      "${name}" = {};
+    };
 
- # 📄 hardened DOCUMENT APP FACTORY
- mkDocumentApp = {
- config,
- name,
- port,
- description ? "Document Management Service",
- useValkey ? false,
- usePostgres ? true,
- memoryMax ? "2G",
- cpuWeight ? 50,
- oomScoreAdjust ? 400,
- persist ? true,
- ocrLanguages ? ["deu" "eng"],
- workerCount ? 2,
- secretFile ? null,
- }: let
- srePaths = config.my.configs.paths;
- stateDir = "${srePaths.stateDir}/${name}";
- consumeDir = "${srePaths.tierC}/consume/${name}";
- mediaDir = "${srePaths.mediaLibrary}/documents/${name}";
- cacheDir = "${srePaths.tierB}/cache/${name}";
- pythonHardening = {
- MemoryDenyWriteExecute = false;
- ProtectSystem = "strict";
- ProtectHome = true;
- PrivateTmp = true;
- NoNewPrivileges = true;
- RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" ];
- };
- in (lib.mkMerge [
- (mkService {
- inherit config name port description persist;
- useSSO = true;
- readWritePaths = [ stateDir consumeDir mediaDir cacheDir ];
- extraServiceConfig = pythonHardening // {
- MemoryMax = memoryMax;
- inherit oomScoreAdjust;
- CPUWeight = cpuWeight;
- LoadCredential = lib.optional (secretFile != null) "${lib.toUpper name}_SECRET_KEY:${toString secretFile}";
- };
- })
- {
- systemd.services."${name}-worker" = {
- inherit description;
- after = [ "network.target" "redis-${name}.service" "postgresql.service" ];
- wantedBy = [ "multi-user.target" ];
- serviceConfig = lib.recursiveUpdate pythonHardening {
- User = name;
- Group = "media";
- ExecStart = "${config.services.${name}.package}/bin/celery -A ${name} worker -l info -c ${toString workerCount}";
- Restart = "always";
- ReadWritePaths = [ stateDir consumeDir mediaDir cacheDir ];
- MemoryMax = memoryMax; # 🚀 Resource limit for worker
- };
- };
- systemd.services."${name}-beat" = {
- description = "${description} Scheduler";
- after = [ "network.target" "${name}-worker.service" ];
- wantedBy = [ "multi-user.target" ];
- serviceConfig = lib.recursiveUpdate pythonHardening {
- User = name;
- Group = "media";
- ExecStart = "${config.services.${name}.package}/bin/celery -A ${name} beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler";
- Restart = "always";
- ReadWritePaths = [ stateDir ];
- MemoryMax = "256M"; # 🚀 Beat is lightweight
- };
- };
- services.postgresql = lib.mkIf usePostgres {
- ensureDatabases = [ name ];
- ensureUsers = [ { name = name; ensureDBOwnership = true; } ];
- };
- services.redis.servers.${name} = lib.mkIf useValkey {
- enable = true;
- package = pkgs.valkey;
- port = 0;
- unixSocket = "/run/redis-${name}/redis.sock";
- unixSocketPerm = 660;
- };
- systemd.tmpfiles.rules = [
- "d ${stateDir} 0750 ${name} media -"
- "d ${consumeDir} 0775 ${name} media -"
- "d ${mediaDir} 0775 ${name} media -"
- "d ${cacheDir} 0750 ${name} media -"
- ];
- }
- ]);
+    # 🌐 2. CADDY REVERSE PROXY
+    services.caddy.virtualHosts."${hostName}" = {
+      extraConfig = let
+        proxyCommand = if isStream then "import proxy_stream ${targetUrl}" else "reverse_proxy ${targetUrl}";
+      in ''
+        # Global-Access: Strict SSO for everyone (including LAN)
+        ${lib.optionalString useSSO "import family_auth"}
+        ${proxyCommand}
+      '';
+    };
 
- # 🛡️ hardened SERVICE FACTORY (mkHardenedService)
- # Ultra-secure wrapper with strict systemd sandboxing.
- mkHardenedService = { 
- name, 
- extraConfig ? {}, 
- gpuAccess ? false, 
- serialAccess ? false, 
- readWritePaths ? [] 
- }: let
- base = {
- ProtectSystem = "strict";
- ProtectHome = true;
- PrivateTmp = true;
- NoNewPrivileges = true;
- ProtectKernelTunables = true;
- ProtectKernelModules = true;
- ProtectKernelLogs = true;
- ProtectClock = true;
- ProtectControlGroups = true;
- MemoryDenyWriteExecute = true;
- RestrictRealtime = true;
- RestrictSUIDSGID = true;
- LockPersonality = true;
- RestrictNamespaces = true;
+    # 📊 4. TRACEABILITY
+    my.meta.${name} = {
+      id = "NIXH-AUTO-${name}";
+      title = description;
+      layer = 60;
+      audit.last_reviewed = "2026-04-27";
+    };
+
+    # 🛡️ 5. SOCKET PERMISSIONS: Give Caddy access to the service group
+    users.users.caddy.extraGroups = lib.optional (finalSocket != null) name;
+
+    systemd.tmpfiles.rules = lib.optional (finalSocket != null) "d /run/service-sockets 0775 root media -";
+  };
+
+  # 🎬 AVIATION-GRADE STREAMER FACTORY
+  mkStreamer = {
+    config,
+    name,
+    port,
+    useGPU ? false,
+    persist ? true,
+    memoryMax ? "2G",
+    cpuWeight ? 80,
+    oomScoreAdjust ? 400,
+    description ? "Streaming Service",
+    useVPN ? false,
+  }: let
+    srePaths = config.my.configs.paths;
+    stateDir = "${srePaths.stateDir}/${name}";
+    cacheDir = "${srePaths.tierB}/cache/${name}";
+    mediaDir = srePaths.mediaLibrary;
+  in (lib.mkMerge [
+    (config.myLib.mkService {
+      inherit config name port description persist useVPN;
+      isStream = true;
+      readWritePaths = [ cacheDir mediaDir ];
+      extraServiceConfig = {
+        ProtectSystem = "strict";
+        ProtectHome = true;
+        PrivateTmp = true;
+        NoNewPrivileges = true;
+        RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" ];
+        # C-04 Safeguard: Strict memory limits for all streamers
+        MemoryMax = memoryMax;
+        MemoryHigh = "75%"; # Gentle throttling before hard kill
+        CPUWeight = cpuWeight;
+        OOMScoreAdjust = oomScoreAdjust;
+        PrivateDevices = if useGPU then lib.mkForce false else true;
+        DeviceAllow = if useGPU then [ "/dev/dri/renderD128 rw" ] else [];
+      };
+    })
+    {
+      systemd.tmpfiles.rules = [
+        "d ${stateDir} 0750 ${name} media -"
+        "d ${cacheDir} 0775 ${name} media -"
+      ];
+      services.${name} = lib.optionalAttrs (name == "jellyfin") {
+        dataDir = stateDir;
+        inherit cacheDir;
+      };
+    }
+  ]);
 
  SystemCallFilter = [
  "@system-service"
@@ -293,4 +207,29 @@ in rec {
  extraConfig
  ];
  };
+}
+      systemd.tmpfiles.rules = [
+        "d ${stateDir} 0750 ${name} media -"
+        "d ${consumeDir} 0775 ${name} media -"
+        "d ${mediaDir} 0775 ${name} media -"
+        "d ${cacheDir} 0750 ${name} media -"
+      ];
+    }
+  ]);
+}
+ 0775 ${name} media -"
+        "d ${mediaDir} 0775 ${name} media -"
+        "d ${cacheDir} 0750 ${name} media -"
+      ];
+    }
+  ]);
+}
+      systemd.tmpfiles.rules = [
+        "d ${stateDir} 0750 ${name} media -"
+        "d ${consumeDir} 0775 ${name} media -"
+        "d ${mediaDir} 0775 ${name} media -"
+        "d ${cacheDir} 0750 ${name} media -"
+      ];
+    }
+  ]);
 }

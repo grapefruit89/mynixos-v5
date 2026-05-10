@@ -116,19 +116,14 @@ in
  };
  };
 
- # 📁 PERMISSION MANAGEMENT
- systemd.tmpfiles.rules = [
- "d ${cfg.stateDir} 0700 ${cfg.user} ${cfg.group} -"
- "d ${cfg.metadataDir} 0775 ${cfg.user} ${cfg.group} -"
- "d ${srePaths.mediaLibrary}/music 0775 ${cfg.user} ${cfg.group} -"
- ];
-
- # 💾 PERSISTENCE (Tier A)
- environment.persistence."/persist" = {
- directories = [ "/var/lib/lidarr" ];
- };
- }
- ]);
+      # 📁 PERMISSION MANAGEMENT
+      systemd.tmpfiles.rules = [
+        "d ${cfg.stateDir} 0700 ${cfg.user} ${cfg.group} -"
+        "d ${cfg.metadataDir} 0775 ${cfg.user} ${cfg.group} -"
+        "d ${srePaths.mediaLibrary}/music 0775 ${cfg.user} ${cfg.group} -"
+      ];
+    }
+  ]);
 }
 /**
  * ---\n * technical_integrity:\n * checksum: sha256:d13e9a7b9600bfbd98bc1057589bcf25b5b1b8aa890de35898f63eb3211fd04f5\n * eof_marker: NIXHOME_VALID_EOF* ---\n */

@@ -2,29 +2,27 @@
  # 🚀 hardened MISSION PROFILE: BASE SERVER
  # Bündelt alle Core-Systeme für ein stabiles Fundament.
 
- imports = [
- ../modules/core/system.nix
- ../modules/core/impermanence.nix
- ../modules/core/nix-tuning.nix
- ../modules/core/network.nix
- ../modules/core/locale.nix
- ../modules/core/ssh.nix
- ../modules/core/firewall.nix
- ../modules/security/geoip-update.nix
- ../modules/core/fail2ban.nix
- ../modules/core/zram-swap.nix
- ../modules/logging/vector-ram.nix
- ../modules/logging/s3-sync.nix
- ../modules/core/shell-premium.nix ../modules/core/system-stability.nix
- ../modules/core/principles.nix 
- # Standard Services
- ../modules/services/caddy.nix
- ../modules/services/postgresql.nix
- ../modules/services/tailscale.nix
- ../modules/services/ca-server.nix
- ../modules/services/pocket-id.nix
- ../modules/monitoring/gatus.nix
- ];
+  imports = [
+    ../modules/core/system.nix
+    ../modules/core/impermanence.nix
+    ../modules/core/nix-tuning.nix
+    ../modules/core/network.nix
+    ../modules/core/ssh.nix
+    ../modules/core/firewall.nix
+    ../modules/core/fail2ban.nix
+    ../modules/core/zram-swap.nix
+    ../modules/logging/vector-hdd.nix
+    ../modules/core/shell-premium.nix
+    ../modules/core/system-stability.nix
+    ../modules/core/principles.nix
+    
+    # Standard Services
+    ../modules/services/caddy.nix
+    ../modules/services/blocky.nix
+    ../modules/services/postgresql.nix
+    ../modules/monitoring/gatus.nix
+    ../modules/core/boot-watchdog.nix
+  ];
 
  # Persistent Vector Logging
  my.logging.vector.enable = true;

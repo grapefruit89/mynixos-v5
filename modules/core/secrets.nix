@@ -34,21 +34,24 @@ in {
  readOnly = true;
  };
 
- config = {
- sops = {
- defaultSopsFile = ../../secrets/secrets.yaml;
- defaultSopsFormat = "yaml";
- 
- age = {
- sshKeyPaths = [ 
- "/etc/ssh/ssh_host_ed25519_key"
- "/persist/etc/ssh/ssh_host_ed25519_key"
- # 🚨 C-03: EMERGENCY FALLBACK (Non-NVMe Path)
- "${config.my.configs.paths.tierB}/secrets/emergency_age_key.txt" 
- ];
- keyFile = "/var/lib/sops-nix/key.txt";
- generateKey = true;
- };
+      secrets = {
+        # Infrastructure
+        cloudflare_token = {};
+        github_token = {};
+        unraid_root_password = {};
+        
+        # Automation & Apps
+        n8n_enc_key = {};
+        vaultwarden_env = {};
+        paperless_secret_key = {};
+        miniflux_admin_password = {};
+        readeck_env = {};
+        linkwarden_env = {};
+        
+        # Media Stack
+        sonarr_api_key = {};
+        radarr_api_key = {};
+        readarr_api_key = {};
 
  # 🚀 DERIVED SECRETS (Schema-First)
  secrets = sopsEntries;

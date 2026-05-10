@@ -45,9 +45,11 @@ in
  exit 1
  fi
 
- echo "✅ Runtime Security Check passed."
- '';
- };
+        # 4. Check Admin-Zone Alias (127.0.0.2)
+        if ! ${pkgs.iproute2}/bin/ip addr show lo | grep -q "127.0.0.2"; then
+          echo "🛑 SECURITY ALERT: Admin-Hangar Alias 127.0.0.2 is MISSING!"
+          exit 1
+        fi
 
  systemd.timers.security-watchdog = {
  wantedBy = [ "timers.target" ];

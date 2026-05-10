@@ -13,41 +13,41 @@ let
  source_repo = "grapefruit89/mynixos";
  };
 
- user = config.my.configs.identity.user;
- domain = config.my.configs.identity.domain;
- 
- # 📊 Fastfetch: hardened Dashboard
- fastfetchConfig = pkgs.writeText "fastfetch-homelab.jsonc" (builtins.toJSON {
- logo = { source = "nixos"; padding = { top = 1; left = 2; }; };
- display = { separator = " ➜ "; color = { keys = "blue"; title = "green"; }; };
- modules = [
- { type = "title"; format = "{user-name}@{host-name}"; } "separator"
- { type = "os"; key = "OS"; } { type = "kernel"; key = "Kernel"; } { type = "uptime"; key = "Uptime"; }
- { type = "packages"; key = "Pkgs"; } { type = "shell"; key = "Shell"; } "break"
- { type = "cpu"; key = "CPU"; } { type = "gpu"; key = "GPU"; } { type = "memory"; key = "Mem"; }
- { type = "disk"; key = "Disk (/)"; folders = "/"; } "break"
- { type = "localip"; key = "LAN"; compact = true; }
- { type = "custom"; format = "https://${domain}"; key = "Base"; }
- { type = "custom"; format = "https://admin.${domain}"; key = "Admin"; } "break" "colors"
- ];
- });
- 
- # 🔧 Health-Check (Aligned with Layer 10/20/30)
- serviceStatusScript = pkgs.writeShellScriptBin "check-services" ''
- #!/usr/bin/env bash
- # Services aus 10-gtw, 20-infra, 30-media
- CRITICAL_SERVICES=("sshd:SSH" "caddy:Proxy" "tailscaled:VPN" "jellyfin:Jellyfin" "postgresql:Database")
- echo -e "\n🛡️ hardened Service Status:\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
- for entry in "''${CRITICAL_SERVICES[@]}"; do
- service="''${entry%%:*}"; label="''${entry##*:}"
- if systemctl is-active --quiet "$service"; then
- echo -e " ✅ \e[32m$label\e[0m"
- else
- echo -e " ❌ \e[31m$label (DOWN!)\e[0m"
- fi
- done
- echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
- '';
+  user = config.my.configs.identity.user;
+  domain = config.my.configs.identity.domain;
+  
+  # 📊 Fastfetch: Aviation-Grade Dashboard
+  fastfetchConfig = pkgs.writeText "fastfetch-homelab.jsonc" (builtins.toJSON {
+    logo = { source = "nixos"; padding = { top = 1; left = 2; }; };
+    display = { separator = " ➜ "; color = { keys = "blue"; title = "green"; }; };
+    modules = [
+      { type = "title"; format = "{user-name}@{host-name}"; } "separator"
+      { type = "os"; key = "OS"; } { type = "kernel"; key = "Kernel"; } { type = "uptime"; key = "Uptime"; }
+      { type = "packages"; key = "Pkgs"; } { type = "shell"; key = "Shell"; } "break"
+      { type = "cpu"; key = "CPU"; } { type = "gpu"; key = "GPU"; } { type = "memory"; key = "Mem"; }
+      { type = "disk"; key = "Disk (/)"; folders = "/"; } "break"
+      { type = "localip"; key = "LAN"; compact = true; }
+      { type = "custom"; format = "https://${domain}"; key = "Base"; }
+      { type = "custom"; format = "https://admin.${domain}"; key = "Admin"; } "break" "colors"
+    ];
+  });
+  
+  # 🔧 Health-Check (Aligned with Layer 10/20/30)
+  serviceStatusScript = pkgs.writeShellScriptBin "check-services" ''
+    #!/usr/bin/env bash
+    # Services aus 10-gtw, 20-infra, 30-media
+    CRITICAL_SERVICES=("sshd:SSH" "caddy:Proxy" "jellyfin:Jellyfin" "postgres:Database")
+    echo -e "\n🛡️  Aviation-Grade Service Status:\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    for entry in "''${CRITICAL_SERVICES[@]}"; do
+      service="''${entry%%:*}"; label="''${entry##*:}"
+      if systemctl is-active --quiet "$service"; then
+        echo -e "  ✅ \e[32m$label\e[0m"
+      else
+        echo -e "  ❌ \e[31m$label (DOWN!)\e[0m"
+      fi
+    done
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  '';
 in
 {
  options.my.meta.shell_premium = lib.mkOption {

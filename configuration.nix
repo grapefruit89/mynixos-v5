@@ -16,55 +16,56 @@ in
  readOnly = true;
  };
 
- imports = [
- # 🛡️ 1. EXTERNAL PLUGINS
- inputs.sops-nix.nixosModules.sops
- inputs.impermanence.nixosModules.impermanence
- 
- # 🛠️ 2. SHARED SYSTEM LOGIC (CORE)
- ./services-spec.nix
- ./modules/core/configs.nix
- ./modules/core/ports.nix
- ./modules/core/registry.nix
- ./modules/core/lib-helpers-meta.nix
- ./modules/core/secrets.nix
- ./modules/core/graphics.nix
- ./modules/core/backup.nix
- ./modules/policy/forbidden-tech.nix
- ./modules/services/pocket-id-provider.nix
- # ./modules/core/auto-locale.nix # In base-server integriert
+  imports = [
+    # 🛡️ 1. EXTERNAL PLUGINS
+    inputs.sops-nix.nixosModules.sops
+    inputs.impermanence.nixosModules.impermanence
+    
+    # 🛠️ 2. SHARED SYSTEM LOGIC (CORE)
+    ./services-spec.nix
+    ./modules/core/configs.nix
+    ./modules/core/ports.nix
+    ./modules/core/uid-registry.nix
+    ./modules/core/users-registry.nix
+    ./modules/core/registry.nix
+    ./modules/core/admin-triggers.nix
+    ./modules/core/boot-watchdog.nix
+    ./modules/core/lib-helpers-meta.nix
+    ./modules/core/secrets.nix
+    ./modules/core/graphics.nix
+    ./modules/core/kernel-hardening.nix
+    ./modules/core/backup.nix
 
- # 🎖️ 3. MISSION PROFILES (Bundles)
- ./profiles/base-server.nix
- ./profiles/media-beast.nix
- ./profiles/security-hardened.nix
- ./profiles/automation-apps.nix
- ./profiles/knowledge-apps.nix
- ./profiles/extra-apps.nix
+    # --- MISSION PROFILES ---
+    ./profiles/base-server.nix
+    ./profiles/media-beast.nix
+    ./profiles/security-hardened.nix
+    ./profiles/automation-apps.nix
+    ./profiles/knowledge-apps.nix
+    ./profiles/extra-apps.nix
+    ./modules/services/wireguard-admin.nix
 
- # 👤 4. PILOT (USER)
- ./users/moritz/default.nix
- ./users/moritz/home.nix
- ];
+    # 👤 4. PILOT (USER)
+    ./users/moritz/default.nix
+    ./users/moritz/home.nix
+    ];
 
- config = {
- system.stateVersion = "25.11";
- networking.hostName = "nixhome";
+    config = {
+    system.stateVersion = "25.11";
+    networking.hostName = "nixhome";
 
- # 🛠️ MCP-NIXOS INTEGRATION
- nixpkgs.overlays = [ inputs.mcp-nixos.overlays.default ];
- environment.systemPackages = [ pkgs.mcp-nixos ];
- 
- # 🚩 GLOBAL TOGGLES (Aus der Registry)
- my.services = {
- kernelSlim.enable = true;
- shell.premium.enable = true;
- caddy.enable = true;
- postgresql.enable = true;
- linkding.enable = true;
- olivetin.enable = false;
- };
+    # 🛠️ MCP-NIXOS INTEGRATION
+    nixpkgs.overlays = [ inputs.mcp-nixos.overlays.default ];
+    environment.systemPackages = [ pkgs.mcp-nixos ];
 
- my.media.storagePool.enable = true;
- };
+    # 🚩 GLOBAL TOGGLES (Aus der Registry)
+    my.services = {
+      blocky.enable = true;
+      shell.premium.enable = true;
+      storagePool.enable = true;
+      caddy.enable = true;
+      postgresql.enable = true;
+      wireguard-admin.enable = true;
+    };
+  };
 }

@@ -37,6 +37,10 @@ let
       cond = lib.hasPrefix "/persist" config.my.configs.paths.tierA;
       msg = "⚠️ [SEC-STO-001]: Tier A storage is NOT under /persist! Impermanence integrity at risk.";
     }
+    {
+      cond = builtins.elem "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILvttE1EzwLJpzFc/LuuXZP485Ma0mEJQiu3iMXaO58W" config.my.identity.sshKeys;
+      msg = "❌ [SEC-SSH-001]: Primary SSH Key is missing in identity.nix! Rebuild blocked to prevent lockout.";
+    }
   ];
 
 in
@@ -44,7 +48,7 @@ in
   options.my.security.policy = {
     mode = lib.mkOption {
       type = lib.types.enum [ "warn" "strict" ];
-      default = "warn";
+      default = "strict";
       description = "Policy enforcement mode: 'warn' (non-blocking) or 'strict' (fail build).";
     };
   };

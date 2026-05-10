@@ -47,21 +47,33 @@ in {
 
  boot.extraModulePackages = [];
 
- # 📂 DISK LAYOUT (Static UUIDs for Q958)
- fileSystems."/" = {
- device = "/dev/disk/by-uuid/8d1d5128-6413-4b5b-bd96-e55851ae5dc2";
- fsType = "ext4";
- };
+    # 📂 DISK LAYOUT (Aviation-Grade: Stateless Root with ext4 Persistence)
+    boot.initrd.systemd.tpm2.enable = true; # Enable TPM2 support in initrd
 
- fileSystems."/boot" = {
- device = "/dev/disk/by-uuid/B413-DB53";
- fsType = "vfat";
- options = ["fmask=0077" "dmask=0077"];
- };
+    boot.initrd.luks.devices."cryptroot" = {
+      device = "/dev/disk/by-uuid/CHANGE_ME_TO_PARTITION_UUID"; # The UUID of the physical partition
+      preLVM = true;
+    };
 
- # 🔗 PCIE PASSTHROUGH (Placeholder for VM-Identity)
- # Move specific PCI-IDs here if hardware-bound
- # boot.kernelParams = [ "vfio-pci.ids=..." ];
+    # Root is tmpfs (defined in modules/core/impermanence.nix)
+    # We only define the persistent stores here.
+
+    fileSystems."/nix" = {
+      device = "/dev/disk/by-uuid/CHANGE_ME_NIX_UUID";
+      fsType = "ext4";
+    };
+
+    fileSystems."/persist" = {
+      device = "/dev/disk/by-uuid/CHANGE_ME_PERSIST_UUID";
+      fsType = "ext4";
+      neededForBoot = true;
+    };
+
+    fileSystems."/boot" = {
+      device = "/dev/disk/by-uuid/B413-DB53";
+      fsType = "vfat";
+      options = ["fmask=0077" "dmask=0077"];
+    };
 
  swapDevices = [];
 

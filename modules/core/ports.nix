@@ -1,63 +1,62 @@
-{ lib, ... }: {
-  # 🚀 Single Source of Truth für alle Ports
-  # Alle Dienste müssen ihre Ports von hier beziehen.
+{ lib, config, ... }: {
+  # 🚀 Single Source of Truth für alle Ports (v6.0)
+  # Alle Dienste nutzen primär Unix-Sockets. TCP-Ports sind reine Fallbacks auf 127.0.0.1.
+  
   options.my.ports = lib.mkOption {
     type = lib.types.attrsOf lib.types.port;
     default = {
-      # 10-Infrastructure
+      # 🛡️ ADMINISTRATIVE (High-Port)
       ssh = 53844;
-      pocketId = 8089;
-      postgres = 5432;
-      valkey = 6379;
-      adguard = 3004; # Web UI
-      caServer = 5000;
-      cockpit = 9090;
-      mqtt = 1883;
+      wireguard = 51820;
 
-      # 20-Automation
-      homeAssistant = 8123;
-      n8n = 5678;
+      # 🏗️ 10xxx: INFRASTRUCTURE & CORE
+      pocket-id = 10880;
+      adguard = 10053;
+      cockpit = 10090;
+      postgres = 10432;
+      valkey = 10379;
       ollama = 11434;
       zigbee2mqtt = 8084;
       linkding = 8085;
       olivetin = 8086;
 
-      # 30-Media
-      jellyfin = 8096;
-      jellyseerr = 5055;
-      sonarr = 8989;
-      radarr = 7878;
-      bazarr = 6767;
-      prowlarr = 9696;
-      lidarr = 8686;
-      readarr = 8787;
-      sabnzbd = 8081;
-      navidrome = 4533;
-      audiobookshelf = 8000;
+      # 📦 20xxx: APPS & MEDIA
+      jellyfin = 20096;
+      seerr = 20055;
+      sonarr = 20989;
+      radarr = 20878;
+      prowlarr = 20696;
+      sabnzbd = 20880;
+      navidrome = 20533;
+      audiobookshelf = 20000;
+      paperless = 20981;
+      vaultwarden = 20222;
+      monica = 20985;
+      filebrowser = 20081;
+      homepage = 20300;
+      matrix = 20001;
+      readmeabook = 20002;
 
-      # 40-Knowledge
-      paperless = 28981;
-      miniflux = 8070;
-      linkwarden = 3007;
-      
-      # 50-Apps
-      vaultwarden = 8222;
-      monica = 8082;
-      readeck = 8072;
-      karakeep = 20003;
-      couchdb = 5984;
-      filebrowser = 8071;
-      homepage = 3000;
-      matrix = 6167;
-      
-      # 80-Monitoring
-      netdata = 19999;
-      scrutiny = 8083;
-      uptimeKuma = 3002;
-      gatus = 8111;
-      ddnsUpdater = 8091;
-      edgeHttps = 4433;
+      # 📈 80xxx: MONITORING
+      netdata = 80999;
+      scrutiny = 80084;
+      uptime-kuma = 80005;
+      gatus = 80111;
     };
-    description = "Central port registry (SSoT)";
+    description = "Central port registry (SSoT). Only bound to 127.0.0.1.";
+  };
+
+  config = {
+    # 🚫 PORT 8080 IS FORBIDDEN (ADR 010)
+    assertions = [
+      {
+        assertion = ! (lib.any (p: p == 8080) (lib.attrValues config.my.ports));
+        message = "🚫 [PORT-VIOLATION] Port 8080 is strictly forbidden to avoid common collisions.";
+      }
+      {
+        assertion = ! (lib.any (p: p == 80) (lib.attrValues config.my.ports));
+        message = "🚫 [PORT-VIOLATION] Port 80 is reserved for Caddy redirection.";
+      }
+    ];
   };
 }

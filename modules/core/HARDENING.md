@@ -6,7 +6,7 @@ This document describes the implemented hardening measures for the core networki
 We implement a "Zero-Trust Loopback" model to prevent lateral movement between services.
 
 - **Admin Alias (`127.0.0.2`):** Administrative and backend services bind to this isolated loopback alias.
-- **UID-Based Filtering:** `nftables` is configured to DROP any traffic targeting `127.0.0.2` unless the source process is `caddy` (UID 978).
+- **UID-Based Filtering:** `nftables` is configured to DROP any traffic targeting `127.0.0.2` unless the source process is `caddy` (UID 2000).
 - **Result:** Even if a frontend service (e.g., Jellyfin) is compromised, it cannot physically reach backend management tools (e.g., Portainer, Netdata) even though they share the same host.
 
 ## 2. IPC Hardening (Unix Sockets)
@@ -22,7 +22,7 @@ The Caddy Admin API (`:2019`) has been moved to a Unix socket at `/run/caddy/adm
 
 ## 4. Trust Zones (SSoT)
 Defined in `repo_v5/services-spec.nix`:
-- `admin-mtls`: Requires hardware-bound mTLS (TPM-bound).
+- `admin-hangar`: Restricted to LAN sources (no SSO).
 - `family-pocketid`: Requires PocketID Forward-Auth.
 - `public`: No auth (limited use).
 

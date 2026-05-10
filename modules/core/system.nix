@@ -23,48 +23,18 @@ in {
  readOnly = true;
  };
 
- config = {
- # 💎 STATELESS ROOT (ADR 852)
- # ---------------------------------------------------------
- fileSystems."/" = lib.mkForce {
- device = "none";
- fsType = "tmpfs";
- options = [ "defaults" "size=4G" "mode=755" ];
- };
-
- # 💾 DECLARATIVE PERSISTENCE (Impermanence)
- # ---------------------------------------------------------
- environment.persistence."/persist" = {
- hideMounts = true;
- directories = [
- "/var/lib/sops-nix"
- "/var/lib/nixos"
- "/etc/nixos"
- "/var/lib/tailscale"
- "/var/lib/bluetooth"
- "/var/lib/pocket-id"
- "/var/lib/acme"
- "/var/log"
- ];
- files = [
- "/etc/machine-id"
- "/etc/ssh/ssh_host_ed25519_key"
- "/etc/ssh/ssh_host_ed25519_key.pub"
- ];
- };
-
- # 🛡️ BOOT & KERNEL
- boot.loader = {
- systemd-boot = {
- enable = lib.mkForce true;
- configurationLimit = lib.mkForce 15;
- editor = false;
- consoleMode = "max";
- };
- efi.canTouchEfiVariables = lib.mkForce true;
- grub.enable = lib.mkForce false;
- timeout = lib.mkForce 3;
- };
+  config = {
+    # 🛡️ BOOT & KERNEL
+    boot.loader = {
+      systemd-boot = {
+        enable = lib.mkForce true;
+        configurationLimit = lib.mkForce 15;
+        editor = false;
+      };
+      efi.canTouchEfiVariables = lib.mkForce true;
+      grub.enable = lib.mkForce false;
+      timeout = lib.mkForce 3;
+    };
 
  boot.initrd.systemd.enable = lib.mkDefault true; # 🚀 Modern initrd
 

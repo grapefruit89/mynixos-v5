@@ -126,18 +126,13 @@ in
  };
  };
 
- # 📁 PERMISSION MANAGEMENT
- systemd.tmpfiles.rules = [
- "d ${cfg.stateDir} 0750 ${cfg.user} ${cfg.group} -"
- "d ${cfg.downloadDir} 0775 ${cfg.user} ${cfg.group} -"
- ];
-
- # 💾 PERSISTENCE (Tier A)
- environment.persistence."/persist" = {
- directories = [ "/var/lib/sabnzbd" ];
- };
- }
- ]);
+      # 📁 PERMISSION MANAGEMENT
+      systemd.tmpfiles.rules = [
+        "d ${cfg.stateDir} 0750 ${cfg.user} ${cfg.group} -"
+        "d ${cfg.downloadDir} 0775 ${cfg.user} ${cfg.group} -"
+      ];
+    }
+  ]);
 }
 /**
  * ---\n * technical_integrity:\n * checksum: sha256:e13a9c7b9600bfbd98bc1057589bcf25b5b1b8aa890de35898f63eb3211fd04f1\n * eof_marker: NIXHOME_VALID_EOF* ---\n */

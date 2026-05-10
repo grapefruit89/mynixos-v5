@@ -37,29 +37,40 @@ in {
       enable = true;
       dataDir = "${config.my.configs.paths.stateDir}/pocket-id";
       settings = {
-        PUBLIC_REGISTRATION = false;
-        ISSUER = "https://auth.${subdomain}.${domain}";
-        # Socket-First Ingress (Supported by Pocket-ID Go backend)
-        UNIX_SOCKET = "/run/pocket-id/pocket-id.sock";
-        UNIX_SOCKET_MODE = "0660";
-        BACKEND_PORT = config.my.ports.pocketId;
+        issuer = lib.mkForce "https://auth.${subdomain}.${domain}";
+        title = "NixHome Identity";
+        public_registration = false;
       };
     };
 
     # 🛡️ Hardening via the Factory or manual overrides
     systemd.services.pocket-id.serviceConfig = {
-      RuntimeDirectory = "pocket-id";
-      RuntimeDirectoryMode = "0770";
-      # Additional Hardening
-      MemoryDenyWriteExecute = true;
-      RestrictAddressFamilies = [ "AF_UNIX" "AF_INET" "AF_INET6" ];
-      OOMScoreAdjust = -1000; # 🚀 Highest Priority for Identity
+      ProtectSystem = "strict";
+      ProtectHome = true;
+      PrivateTmp = true;
+      PrivateDevices = true;
+      Restart = "always";
+      RestartSec = "5s";
+      OOMScoreAdjust = -100;
     };
 
-    # Give Caddy access to the pocket-id group to read the socket
-    users.users.caddy.extraGroups = [ "pocket-id" ];
-
-    # 🧱 Persistent data
-    environment.persistence."/persist".directories = [ "/var/lib/pocket-id" ];
+    # 🚀 AUTOMATED VHOST OVERRIDE
+    # Special path-based routing for Auth Provider
+    services.caddy.virtualHosts."auth.${subdomain}.${domain}" = {
+      extraConfig = lib.mkForce ''
+        # Admin Panel: Restricted to LAN/Tunnel
+        handle /admin/* {
+          import admin_auth
+          reverse_proxy 127.0.0.1:${toString port}
+        }
+        
+        # Public Auth Paths (WAN Accessible)
+        handle {
+          import hardened_headers
+          import compression
+          reverse_proxy 127.0.0.1:${toString port}
+        }
+      '';
+    };
   };
 }
