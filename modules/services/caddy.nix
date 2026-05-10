@@ -89,27 +89,6 @@ in {
  }
  }
 
- # --- DDOS SHIELD (3-Stage Defense - UX Optimized) ---
- (ddos_shield) {
- # Stage 2: Authenticated (Pocket-ID) -> No Limits
- @is_auth {
- header_regexp Cookie "pocketid_session="
- }
-
- # Stage 1: Verified Human (JS-Challenge passed) -> 500 req/min
- @is_human {
- header_regexp Cookie "m7c5_human=verified"
- not remote_ip 127.0.0.1
- not remote_ip ${trustedIPs}
- }
- rate_limit @is_human {
- zone human_limit {
- key {remote_host}
- window 1m
- max_events 500
- }
- }
-
         # --- HARDENED HEADERS (Aviation-Grade Stealth) ---
         (hardened_headers) {
           header {
@@ -138,8 +117,6 @@ in {
 
         # --- FAMILY AUTH (Pocket-ID) ---
         (family_auth) {
-          import ddos_shield
-          import human_challenge
           
           @needs_auth {
             not remote_ip 127.0.0.1
@@ -169,7 +146,6 @@ in {
             header_down X-Accel-Buffering no
           }
           import compression
-          import wake_on_demand
         }
 
         # --- WILDCARD SUBDOMAIN ---

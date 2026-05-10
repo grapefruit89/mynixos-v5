@@ -72,15 +72,22 @@
       "kernel.kptr_restrict" = 2;
       "kernel.dmesg_restrict" = 1;
       "kernel.unprivileged_bpf_disabled" = 1; 
+      "kernel.unprivileged_userns_clone" = 0; # Disables unprivileged user namespaces
       "net.core.bpf_jit_enable" = 1; # Enabled for performance, restricted below
       "net.core.bpf_jit_harden" = 2; # Hardened JIT
       "kernel.ftrace_enabled" = false;
       "kernel.perf_event_paranoid" = 3;
       "kernel.sysrq" = 0; # Disable SysRQ
+      
+      # ASLR & Memory Hardening
+      "vm.mmap_rnd_bits" = 32;
 
       # Swappiness tuning for RAM-heavy streamers
       "vm.swappiness" = 10;
     };
+
+    # 🛡️ APPMAROR ENFORCEMENT
+    security.apparmor.enable = true;
 
     # 💎 BOOT PARAMETERS (ADR 001)
     boot.kernelParams = [

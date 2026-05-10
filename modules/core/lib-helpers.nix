@@ -73,6 +73,10 @@ in rec {
         # 🛡️ TITANIUM HARDENING (ADR 001)
         ProtectSystem = "strict";
         ProtectHome = true;
+        ProtectClock = true;
+        LockPersonality = true;
+        RestrictNamespaces = true;
+        SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" ];
         PrivateTmp = true;
         NoNewPrivileges = true;
         
