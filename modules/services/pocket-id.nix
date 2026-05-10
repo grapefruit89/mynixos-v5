@@ -16,6 +16,7 @@ let
   sreConfig = config.my.configs;
   domain = sreConfig.identity.domain;
   subdomain = sreConfig.identity.subdomain;
+  port = config.my.ports.pocket-id;
 in {
   # 🧬 Audit-Compliance: Metadaten als echtes Nix-Attribut
   options.my.meta.pocketId = lib.mkOption {

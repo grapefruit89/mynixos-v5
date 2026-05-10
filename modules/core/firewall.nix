@@ -1,7 +1,7 @@
 {
- lib,
- config,
- ...
+  lib,
+  config,
+  ...
 }: let
   # 🚀 NMS v4.2 Metadaten (Aviation-Grade Shield)
   nms = {
@@ -16,28 +16,23 @@
     source_repo = "grapefruit89/mynixos";
   };
 
- # SSoT Integration
- sshPort = config.my.ports.ssh;
- lanCidr = config.my.configs.network.lanCidr;
+  # SSoT Integration
+  sshPort = config.my.ports.ssh;
+  lanCidr = config.my.configs.network.lanCidr;
 in {
- options.my.meta.firewall = lib.mkOption {
- type = lib.types.attrs;
- default = nms;
- readOnly = true;
- description = "NMS metadata for firewall module";
- };
+  options.my.meta.firewall = lib.mkOption {
+    type = lib.types.attrs;
+    default = nms;
+    readOnly = true;
+    description = "NMS metadata for firewall module";
+  };
 
- config = {
- networking.nftables.enable = true;
- networking.firewall = {
- enable = true; # hardened: Firewall ALWAYS active.
- trustedInterfaces = [ "lo" "tailscale0" ];
- 
- # 🛡️ GLOBAL PUBLIC PORTS
- # Nur HTTPS ist von außen erreichbar. Port 80 und SSH sind zu.
- allowedTCPPorts = [
- 443 # HTTPS (Caddy Edge)
- ];
+  config = {
+    # 🛰️ LOOPBACK ALIAS (Zone: Admin)
+    networking.interfaces.lo.ipv4.addresses = [
+      { address = "127.0.0.1"; prefixLength = 8; }
+      { address = "127.0.0.2"; prefixLength = 32; }
+    ];
 
     networking.nftables.enable = true;
     networking.firewall = {
@@ -92,20 +87,11 @@ in {
         # Block everything NOT from allowed countries or verified GeoIP on public port 443
         tcp dport 443 ip saddr != @allowed_countries ip saddr != @geo_allowed counter drop
 
- # DNS Support für das LAN (AdGuard)
- ip saddr ${lanCidr} tcp dport 53 accept
- ip saddr ${lanCidr} udp dport 53 accept
- ip6 saddr { ::1/128, fe80::/10, fd7a:115c:a1e0::/48 } tcp dport 53 accept
- ip6 saddr { ::1/128, fe80::/10, fd7a:115c:a1e0::/48 } udp dport 53 accept
- 
- # mDNS für lokale Auflösung
- ip saddr ${lanCidr} udp dport 5353 accept
- ip6 saddr { ::1/128, fe80::/10, fd7a:115c:a1e0::/48 } udp dport 5353 accept
- 
- # ICMP (Ping)
- ip protocol icmp accept
- ip6 nexthdr icmpv6 accept
- '';
+        # 🌍 IPv6 PROTECTION (WAN-Block)
+        # Block all public IPv6 traffic to Port 443. 
+        # Only IPv4 (with Geoblock) is allowed from WAN.
+        # LAN-IPv6 is still allowed via trustedInterfaces.
+        tcp dport 443 ip6 saddr != { ::1/128, fe80::/10 } counter drop
 
         # SSH Support für das LAN (Custom Port)
         ip saddr ${lanCidr} tcp dport ${toString sshPort} accept
@@ -113,12 +99,9 @@ in {
         # DNS Support für das LAN (Blocky)
         ip saddr ${lanCidr} tcp dport 53 accept
         ip saddr ${lanCidr} udp dport 53 accept
-        ip6 saddr { ${lanCidrV6}, ${linkLocalV6} } tcp dport 53 accept
-        ip6 saddr { ${lanCidrV6}, ${linkLocalV6} } udp dport 53 accept
         
         # mDNS für lokale Auflösung
         ip saddr ${lanCidr} udp dport 5353 accept
-        ip6 saddr { ${lanCidrV6}, ${linkLocalV6} } udp dport 5353 accept
         
         # ICMP (Ping)
         ip protocol icmp accept

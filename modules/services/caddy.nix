@@ -41,25 +41,6 @@ in {
  "net.ipv4.tcp_fastopen" = 3;
  };
 
- services.caddy = {
- enable = true;
- 
- # 🛠️ GLOBAL OPTIONS (Source: Fragment 2526 / Performance Kick)
- globalConfig = ''
- admin localhost:2019
- 
- # 🧩 Performance & Resources
- servers {
- trusted_proxies static ${trustedIPs}
- trusted_proxies_strict
- # Speed-up: Buffer settings
- max_header_size 16kb
- }
- 
- # ACME DNS-01 Challenge (Cloudflare)
- acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
- '';
-
     services.caddy = {
       enable = true;
       

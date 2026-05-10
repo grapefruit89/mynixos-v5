@@ -18,7 +18,6 @@
       ollama = 11434;
       zigbee2mqtt = 8084;
       linkding = 8085;
-      olivetin = 8086;
 
       # 📦 20xxx: APPS & MEDIA
       jellyfin = 20096;

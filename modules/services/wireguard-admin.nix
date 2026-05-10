@@ -34,13 +34,13 @@ in {
         # Server's private key loaded from SOPS
         privateKeyFile = config.sops.secrets.wireguard_admin_private_key.path;
 
-        peers = [
-          {
-            # Admin's primary device public key
-            publicKey = "REPLACE_WITH_ADMIN_DEVICE_PUBLIC_KEY"; # TODO: Replace with actual key
-            allowedIPs = [ "10.100.0.2/32" ];
-          }
-        ];
+        # peers = [
+        #   {
+        #     # Admin's primary device public key
+        #     publicKey = "REPLACE_WITH_ADMIN_DEVICE_PUBLIC_KEY"; # TODO: Replace with actual key
+        #     allowedIPs = [ "10.100.0.2/32" ];
+        #   }
+        # ];
       };
     };
 
