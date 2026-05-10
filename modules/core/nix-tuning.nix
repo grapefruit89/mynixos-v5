@@ -43,6 +43,7 @@ in {
 
  # 🏎️ STORE OPTIMIZATION
  auto-optimise-store = true;
+ nix.optimise.automatic = true;
  connect-timeout = 5;
  experimental-features = [ "nix-command" "flakes" "auto-allocate-uids" "cgroups" ];
  

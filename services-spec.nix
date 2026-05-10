@@ -75,4 +75,15 @@
     # Dashboard (Entry point)
     homepage = { port = p.homepage; zone = "admin-hangar"; domain = "dash"; description = "Service Dashboard"; };
   };
+
+  config.assertions = let
+    svcs = lib.attrValues config.my.services.spec;
+    ports = lib.filter (p: p != null) (map (s: s.port) svcs);
+    uniquePorts = lib.unique ports;
+  in [
+    {
+      assertion = (lib.length ports) == (lib.length uniquePorts);
+      message = "🚫 [PORT-CONFLICT] Duplicate ports detected in services-spec.nix!";
+    }
+  ];
 }

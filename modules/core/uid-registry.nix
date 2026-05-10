@@ -45,4 +45,14 @@
     };
     description = "Static UID registry for all services.";
   };
+
+  config.assertions = let
+    uids = lib.attrValues config.my.users.registry;
+    uniqueUids = lib.unique uids;
+  in [
+    {
+      assertion = (lib.length uids) == (lib.length uniqueUids);
+      message = "🚫 [UID-CONFLICT] Duplicate UIDs detected in uid-registry.nix!";
+    }
+  ];
 }

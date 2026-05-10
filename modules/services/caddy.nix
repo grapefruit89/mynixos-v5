@@ -219,8 +219,7 @@ in {
       };
     };
 
-    # 🧱 AUTOMATIC FIREWALL EXPOSURE
-    networking.firewall.allowedTCPPorts = [ 80 443 ];
+
 
     # 🚀 AUTOMATED VHOST GENERATION (from services-spec.nix)
     services.caddy.virtualHosts = let
@@ -261,73 +260,3 @@ in {
     in lib.listToAttrs (lib.mapAttrsToList genVHost ingressServices);
   };
 }
-/**
- * ---\n * technical_integrity:\n *   checksum: sha256:d13e9a7b9600bfbd98bc1057589bcf25b5b1b8aa890de35898f63eb3211fd04e2f\n *   eof_marker: NIXHOME_VALID_EOF* ---\n */
-XHOME_VALID_EOF* ---\n */
-XHOME_VALID_EOF* ---\n */
-" "/var/log/caddy" ];
-        
-        # Hardening Shield
-        ProtectSystem = "strict";
-        ProtectHome = true;
-        PrivateTmp = true;
-        PrivateDevices = true;
-        MemoryDenyWriteExecute = true;
-        OOMScoreAdjust = -500;
-        
-        # Hide Process Info (ProtectProc)
-        ProcSubset = "pid";
-        ProtectProc = "invisible";
-        
-        # Grant low-port binding capability
-        CapabilityBoundingSet = [ "CAP_NET_BIND_SERVICE" ];
-        AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
-      };
-    };
-
-    # 🧱 AUTOMATIC FIREWALL EXPOSURE
-    networking.firewall.allowedTCPPorts = [ 80 443 ];
-
-    # 🚀 AUTOMATED VHOST GENERATION (from services-spec.nix)
-    services.caddy.virtualHosts = let
-      cfgSpec = config.my.services.spec;
-      identity = config.my.configs.identity;
-      
-      # Helper to build the FQDN
-      mkFQDN = svc: "${svc.domain}.${identity.subdomain}.${identity.domain}";
-      
-      # Helper to build the upstream address (Socket > IP:Port)
-      mkUpstream = name: svc: if svc.socket != null 
-        then "unix/${svc.socket}" 
-        else if svc.zone == "admin-hangar"
-        then "127.0.0.2:${toString svc.port}"
-        else "127.0.0.1:${toString svc.port}";
-
-      # Filter for services that need an ingress proxy
-      ingressServices = lib.filterAttrs (_: svc: svc.domain != null) cfgSpec;
-      
-      # Generate virtual host config per service
-      genVHost = name: svc: {
-        name = mkFQDN svc;
-        value = {
-          extraConfig = if svc.zone == "admin-hangar" then ''
-              import admin_auth
-              reverse_proxy ${mkUpstream name svc}
-            ''
-            else if svc.zone == "public" then ''
-              import public_access
-              reverse_proxy ${mkUpstream name svc}
-            ''
-            else ''
-              import family_auth
-              reverse_proxy ${mkUpstream name svc}
-            '';
-        };
-      };
-    in lib.listToAttrs (lib.mapAttrsToList genVHost ingressServices);
-  };
-}
-/**
- * ---\n * technical_integrity:\n *   checksum: sha256:d13e9a7b9600bfbd98bc1057589bcf25b5b1b8aa890de35898f63eb3211fd04e2f\n *   eof_marker: NIXHOME_VALID_EOF* ---\n */
-XHOME_VALID_EOF* ---\n */
-XHOME_VALID_EOF* ---\n */
