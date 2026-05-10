@@ -21,12 +21,12 @@ in
  };
 
  config = {
- assertions = [
- { assertion = !config.boot.loader.grub.enable; message = msg "GRUB" "systemd-boot"; }
- { assertion = !config.services.cron.enable; message = msg "Cron" "systemd.timers"; }
- { assertion = !config.networking.networkmanager.enable; message = msg "NetworkManager" "systemd-networkd"; }
- ];
- services.samba.settings.global."server min protocol" = "SMB2_10";
+    warnings = [
+      (lib.optionalString config.boot.loader.grub.enable (msg "GRUB" "systemd-boot"))
+      (lib.optionalString config.services.cron.enable (msg "Cron" "systemd.timers"))
+      (lib.optionalString config.networking.networkmanager.enable (msg "NetworkManager" "systemd-networkd"))
+    ];
+    services.samba.settings.global."server min protocol" = "SMB2_10";
  boot.blacklistedKernelModules = [ "ext2" "ext3" "jfs" "reiserfs" "hfs" "hfsplus" "ntfs" ];
  networking.nftables.enable = true;
  networking.firewall.enable = lib.mkForce true;

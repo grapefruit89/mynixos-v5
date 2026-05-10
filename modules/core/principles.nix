@@ -30,12 +30,9 @@ in
  # 5. ZERO-TOUCH RECOVERY: Hardware is a vessel, Identity is on the USB anchor.
  # ---------------------------------------------------------
 
- # Assertion: Ensure no illegal cross-layer dependencies
- assertions = [
- {
- assertion = true; # Placeholder for future logic check
- message = "NMS v4.2: Architectural Integrity Check passed.";
- }
+ # Warning: Ensure no illegal cross-layer dependencies
+ warnings = [
+ # Placeholder for future logic check
  ];
  };
 }

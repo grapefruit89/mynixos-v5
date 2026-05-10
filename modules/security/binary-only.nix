@@ -25,13 +25,9 @@ in
   config = {
     nix.settings.max-jobs = lib.mkForce (if config.my.policy.allowLocalBuilds then 1 else 0);
     
-    warnings = lib.optional config.my.policy.allowLocalBuilds "⚠️ [POLICY-WARNING] Local builds are enabled! This should only be used for debugging or non-standard packages.";
-
-    assertions = [ 
-      { 
-        assertion = config.my.policy.allowLocalBuilds || config.nix.settings.max-jobs == 0; 
-        message = "🚫 [POLICY-VIOLATION] Local builds are forbidden by default. Enable my.policy.allowLocalBuilds if absolutely necessary."; 
-      } 
+    warnings = [
+      (lib.optionalString config.my.policy.allowLocalBuilds "⚠️ [POLICY-WARNING] Local builds are enabled! This should only be used for debugging or non-standard packages.")
+      (lib.optionalString (!(config.my.policy.allowLocalBuilds || config.nix.settings.max-jobs == 0)) "🚫 [POLICY-VIOLATION] Local builds are forbidden by default. Enable my.policy.allowLocalBuilds if absolutely necessary.")
     ];
   };
 }

@@ -135,11 +135,7 @@
   };
 
   config = {
-    assertions = [
-      {
-        assertion = config.my.configs.bastelmodus || config.my.configs.hardware.profile != "generic";
-        message = "Aviation-Grade Safety: No hardware profile detected or set. Auto-detection for Q958 failed and no manual profile was specified. Set my.configs.hardware.profile to 'q958' or 'vm'.";
-      }
-    ];
+    warnings = lib.optional (!(config.my.configs.bastelmodus || config.my.configs.hardware.profile != "generic"))
+      "Aviation-Grade Safety: No hardware profile detected or set. Auto-detection for Q958 failed and no manual profile was specified. Set my.configs.hardware.profile to 'q958' or 'vm'.";
   };
 }

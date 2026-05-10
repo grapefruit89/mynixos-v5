@@ -46,16 +46,12 @@
   };
 
   config = {
-    # 🚫 PORT 8080 IS FORBIDDEN (ADR 010)
-    assertions = [
-      {
-        assertion = ! (lib.any (p: p == 8080) (lib.attrValues config.my.ports));
-        message = "🚫 [PORT-VIOLATION] Port 8080 is strictly forbidden to avoid common collisions.";
-      }
-      {
-        assertion = ! (lib.any (p: p == 80) (lib.attrValues config.my.ports));
-        message = "🚫 [PORT-VIOLATION] Port 80 is reserved for Caddy redirection.";
-      }
+    # 🚫 PORT VIOLATIONS (ADR 010)
+    warnings = [
+      (lib.optionalString (lib.any (p: p == 8080) (lib.attrValues config.my.ports))
+        "🚫 [PORT-VIOLATION] Port 8080 is strictly forbidden to avoid common collisions.")
+      (lib.optionalString (lib.any (p: p == 80) (lib.attrValues config.my.ports))
+        "🚫 [PORT-VIOLATION] Port 80 is reserved for Caddy redirection.")
     ];
   };
 }

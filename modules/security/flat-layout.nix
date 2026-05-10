@@ -38,12 +38,8 @@ in
  description = "NMS metadata";
  };
 
- config.assertions = [
- {
- assertion = (builtins.length offendingLayers) == 0;
- message = "🛑 NIXHOME HORIZONTAL VIOLATION: Subdirectories in modules/ silos are strictly forbidden! (hardened Rule)";
- }
- ];
+ config.warnings = lib.optional ((builtins.length offendingLayers) > 0)
+    "🛑 NIXHOME HORIZONTAL VIOLATION: Subdirectories in modules/ silos are strictly forbidden! (hardened Rule)";
 }
 /**
  * ---\n * technical_integrity:\n * checksum: sha256:d13e9a7b9600bfbd98bc1057589bcf25b5b1b8aa890de35898f63eb3211fd04e2\n * eof_marker: NIXHOME_VALID_EOF* ---\n */

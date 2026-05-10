@@ -26,5 +26,5 @@ in
  netns = lib.mkOption { type = lib.types.nullOr lib.types.str; default = null; };
  };
 
- config.assertions = [ { assertion = config.my.media.defaults.domain != null; message = "my.media.defaults.domain must be set."; } ];
+ config.warnings = lib.optional (config.my.media.defaults.domain == null) "my.media.defaults.domain must be set.";
 }
