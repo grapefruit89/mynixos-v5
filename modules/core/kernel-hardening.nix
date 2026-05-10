@@ -93,6 +93,7 @@
     ];
 
     # Whitelist of required modules
+    boot.initrd.availableKernelModules = [ "nvme" "ahci" "xhci_pci" "usbhid" "usb_storage" "sd_mod" ];
     boot.kernelModules = [ "kvm_intel" "nct6775" "coretemp" "veth" "i915" "nvme" ];
   };
 }

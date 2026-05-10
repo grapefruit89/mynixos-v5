@@ -8,6 +8,7 @@
     environment.persistence."/persist" = {
       hideMounts = true;
       directories = [
+        "/nix"
         "/var/log"
         "/var/lib/nixos"
         "/var/lib/systemd/coredump"
