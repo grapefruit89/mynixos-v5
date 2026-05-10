@@ -115,29 +115,35 @@ in {
       in ''
         # We use a custom table for outbound to not interfere with standard NixOS rules
         nft 'add table inet outbound_filter'
-        nft 'add chain inet outbound_filter output { type filter hook output priority 0; policy accept; }'
+        nft 'add chain inet outbound_filter output { type filter hook output priority 0; policy drop; }'
         nft 'flush chain inet outbound_filter output'
 
-        # Allow System (UID < 2000)
+        # 1. Allow System (UID < 2000) & Loopback
         nft 'add rule inet outbound_filter output meta skuid < 2000 accept'
+        nft 'add rule inet outbound_filter output oifname "lo" accept'
 
-        # Whitelist: Caddy (ACME / Cloudflare API)
+        # 2. Whitelist: Caddy (ACME / Cloudflare API)
         nft 'add rule inet outbound_filter output meta skuid ${toString u.caddy} accept'
 
-        # Whitelist: Jellyfin (TMDB / Metadata)
-        nft 'add rule inet outbound_filter output meta skuid ${toString u.jellyfin} accept'
-
-        # Whitelist: Arr-Stack (Indexer / Metadata)
-        nft 'add rule inet outbound_filter output meta skuid { ${toString u.sonarr}, ${toString u.radarr}, ${toString u.prowlarr}, ${toString u.sabnzbd}, ${toString u.lidarr}, ${toString u.readarr} } accept'
-
-        # Whitelist: Monitoring (Gatus / Uptime / Homepage)
-        nft 'add rule inet outbound_filter output meta skuid { ${toString u.gatus}, ${toString u.uptime-kuma}, ${toString u.homepage} } accept'
-
-        # Whitelist: Blocky (Upstream DNS over TLS)
+        # 3. Whitelist: Blocky (Upstream DNS over TLS)
         nft 'add rule inet outbound_filter output meta skuid ${toString u.blocky} tcp dport 853 accept'
 
-        # Drop everything else in the app range (2000-2999)
-        nft 'add rule inet outbound_filter output meta skuid 2000-2999 counter drop'
+        # 4. Whitelist: Media Streamers (Metadata APIs)
+        # Includes: Jellyfin, Navidrome, Audiobookshelf
+        nft 'add rule inet outbound_filter output meta skuid { ${toString u.jellyfin}, ${toString u.navidrome}, ${toString u.audiobookshelf} } accept'
+
+        # 5. Whitelist: Arr-Stack (Indexer / Metadata)
+        nft 'add rule inet outbound_filter output meta skuid { ${toString u.sonarr}, ${toString u.radarr}, ${toString u.prowlarr}, ${toString u.sabnzbd}, ${toString u.lidarr}, ${toString u.readarr} } accept'
+
+        # 6. Whitelist: Monitoring & Management
+        nft 'add rule inet outbound_filter output meta skuid { ${toString u.gatus}, ${toString u.uptime-kuma}, ${toString u.homepage} } accept'
+
+        # 7. Whitelist: Critical Backend
+        # Matrix/Conduit, Vector (if needed), Restic (Backblaze)
+        nft 'add rule inet outbound_filter output meta skuid { ${toString u.matrix}, ${toString u.vector} } accept'
+        
+        # Log dropped packets for debugging (Phase 6A fallback)
+        nft 'add rule inet outbound_filter output meta skuid 2000-2999 counter log prefix "NFT_OUTBOUND_DROP: "'
       '';
 
       extraStopRules = ''
