@@ -97,27 +97,8 @@ in
             ++ config.my.configs.network.lanCidrs;
         };
       };
-
- serviceConfig = {
- # Netzwerk-Schild (Ergänzend zur Factory)
- IPAddressAllow = [ "127.0.0.1/8" "::1/128" ] 
- ++ config.my.configs.network.lanCidrs
- ++ config.my.configs.network.tailnetCidrs;
- };
- };
-
- # 📁 BIND MOUNTS FÜR METADATEN (ABC-Tiering / ADR 852)
- systemd.tmpfiles.rules = [
- "d ${ssdMetadataDir} 0775 jellyfin media -"
- ];
-
- fileSystems."/var/lib/jellyfin/metadata" = {
- device = ssdMetadataDir;
- options = [ "bind" ];
- dependsOn = [ srePaths.tierB ];
- };
- }
- ]);
+    }
+  ]);
 }
 /**
  * ---\n * technical_integrity:\n * checksum: sha256:d13e9a7b9600bfbd98bc1057589bcf25b5b1b8aa890de35898f63eb3211fd04f4\n * eof_marker: NIXHOME_VALID_EOF* ---\n */

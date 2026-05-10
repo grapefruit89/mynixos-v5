@@ -66,6 +66,7 @@ in
       caddy.enable = true;
       postgresql.enable = true;
       wireguard-admin.enable = true;
+      vector.enable = true;
     };
   };
 }

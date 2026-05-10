@@ -168,6 +168,9 @@ in rec {
         PrivateTmp = true;
         NoNewPrivileges = true;
         RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" ];
+        # Resilience: Automatic restart with backoff
+        Restart = "always";
+        RestartSec = "5s";
         # C-04 Safeguard: Strict memory limits for all streamers
         MemoryMax = memoryMax;
         MemoryHigh = "75%"; # Gentle throttling before hard kill
