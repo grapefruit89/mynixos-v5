@@ -36,13 +36,6 @@
       options = [ "defaults" "size=4G" "mode=755" ];
     };
 
- # 🚀 ROOT-ON-RAM SETUP (Stateless Manifesto)
- fileSystems."/" = lib.mkForce {
- device = "none";
- fsType = "tmpfs";
- options = [ "defaults" "size=4G" "mode=755" ];
- };
-
     # Metadaten für die Traceability
     my.meta.impermanence = {
       id = "NIXH-00-COR-IMP";

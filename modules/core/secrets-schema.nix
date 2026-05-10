@@ -21,13 +21,16 @@ let
 
     # Infrastructure
     cloudflare_token = "";
-    cloudflared_tunnel_credentials = "";
     github_token = "";
-    tailscale_token = "";
+    wireguard_admin_private_key = "";
     
     # Automation & Apps
     paperless_secret_key = "";
     vaultwarden_env = "";
+    miniflux_admin_password = "";
+    readeck_env = "";
+    linkwarden_env = "";
+    n8n_enc_key = "";
     
     # Media Stack
     sonarr_api_key = "";

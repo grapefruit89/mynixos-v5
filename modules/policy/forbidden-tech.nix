@@ -69,13 +69,8 @@ in {
       (optionalString (config.services.openssh.settings.PasswordAuthentication or true)
         "⚠️ [POL-006] SSH-Passwort-Authentifizierung ist NICHT ERWÜNSCHT! Grund: ${forbiddenReasons.passwords}")
 
-      # OliveTin
-      (optionalString (config.services.olivetin.enable or false)
-        "⚠️ [POL-WARN] OliveTin ist NICHT ERWÜNSCHT! Grund: ${forbiddenReasons.oliveTin}")
-
-      # fapolicyd
-      (optionalString (config.services.fapolicyd.enable or false)
-        "⚠️ [POL-WARN] fapolicyd ist NICHT ERWÜNSCHT! Grund: ${forbiddenReasons.fapolicyd}")
+      # No active Tailscale/OliveTin services should exist
+      # Validation handled by absence of modules rather than runtime toggles
     ];
   };
 }
