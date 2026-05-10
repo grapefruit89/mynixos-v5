@@ -311,33 +311,26 @@ let
   '';
 
   # ===========================================================================
-  # DYNAMIC UPDATE SCRIPT
+  # DYNAMIC UPDATE SCRIPT (Atomic nftables execution)
   # ===========================================================================
   geoipScript = pkgs.writeShellScript "update-geoip" ''
    set -euo pipefail
-   TMPDIR=$(mktemp -d)
-   trap 'rm -rf -- "$TMPDIR"' EXIT
-   cd "$TMPDIR"
-
    echo "Updating Geo-IP allowlist..."
-   touch merged.txt
-   for cc in de at lt; do
-     echo "Fetching $cc..."
-     ${pkgs.curl}/bin/curl -sSf "https://www.ipdeny.com/ipblocks/data/countries/$cc.zone" >> merged.txt
+   
+   DE_IPS=$(${pkgs.curl}/bin/curl -sSf https://www.ipdeny.com/ipblocks/data/countries/de.zone)
+   AT_IPS=$(${pkgs.curl}/bin/curl -sSf https://www.ipdeny.com/ipblocks/data/countries/at.zone)
+   LT_IPS=$(${pkgs.curl}/bin/curl -sSf https://www.ipdeny.com/ipblocks/data/countries/lt.zone)
+
+   # Generate a complete nftables ruleset snippet
+   echo "flush set inet filter geo_allowed" > /tmp/geoip.nft
+   for ip in $DE_IPS $AT_IPS $LT_IPS; do
+     echo "add element inet filter geo_allowed { $ip }" >> /tmp/geoip.nft
    done
 
-   # 🛡️ SANITY CHECK: Ensure we actually got some data
-   if [ ! -s merged.txt ]; then
-     echo "🚨 ERROR: No GeoIP data fetched. Aborting update to prevent empty allowlist."
-     exit 1
-   fi
-
-   # Format for 'add element' (nftables command)
-   ELEMENTS=$(${pkgs.gawk}/bin/awk '{printf "%s, ", $0}' merged.txt | ${pkgs.gnused}/bin/sed 's/, $//')
-   echo "add element inet filter geo_allowed { $ELEMENTS }" > geoip-allowed.txt
-
-   # Atomic replacement with safety separator
-   mv -- geoip-allowed.txt /var/lib/nftables/geoip-allowed.txt
+   # Atomically apply the new ruleset
+   ${pkgs.nftables}/bin/nft -f /tmp/geoip.nft
+   rm -f /tmp/geoip.nft
+   
    echo "Geo-IP allowlist updated successfully."
   '';
 
@@ -350,21 +343,10 @@ in {
       Type = "oneshot";
       ExecStart = geoipScript;
       # Hardening
-      StateDirectory = "nftables";
-      RuntimeDirectory = "nftables-tmp";
       ProtectSystem = "strict";
       ReadOnlyPaths = "/";
-      ReadWritePaths = "/var/lib/nftables";
       PrivateTmp = true;
       NoNewPrivileges = true;
     };
   };
-
-  # Ensure the directory and initialize with the static seed
-  systemd.tmpfiles.rules = [
-    "d /var/lib/nftables 0755 root root -"
-    # Initialisierung der Datei mit dem statischen Seed als gültiger nftables-Befehl.
-    # Der Timer überschreibt diese Datei später mit frischen Daten.
-    "f /var/lib/nftables/geoip-allowed.txt 0644 root root - add element inet filter geo_allowed { ${staticSeed} }"
-  ];
 }

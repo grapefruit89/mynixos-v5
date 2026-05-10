@@ -32,10 +32,13 @@ in {
         };
         
         sinks = {
-          stdout = {
-            type = "console";
+          file_output = {
+            type = "file";
+            path = "/var/log/vector/all-logs-%Y-%m-%d.json";
             inputs = [ "journal" ];
-            encoding.codec = "json";
+            encoding = { codec = "json"; };
+            # Rotation, um die Platte nicht vollaufen zu lassen
+            max_size = 104857600; # 100MB
           };
         };
       };
@@ -56,5 +59,8 @@ in {
       PrivateTmp = true;
       MemoryDenyWriteExecute = true;
     };
+
+    # Create target directory for Vector logs
+    systemd.tmpfiles.rules = [ "d /var/log/vector 0750 vector vector -" ];
   };
 }
