@@ -118,6 +118,8 @@
 
       # Legacy / High-Level Mappings
       mediaLibrary = "${privateData}/media";
+      # Tier C: Cold archive for overflow B2 media files
+      mediaArchive = "${tierC}/archive/media";
       storagePool = tierC;
     };
 

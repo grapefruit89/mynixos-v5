@@ -12,6 +12,10 @@ let
     "storage-init"
     "nixhome-emergency"
     "rotate-vector-logs"
+    # Media servers: read-only access to cold archive via MergerFS
+    "jellyfin"
+    "navidrome"
+    "audiobookshelf"
   ];
 
   # Helper to check if any path in a list points to Tier C
