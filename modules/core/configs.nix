@@ -71,6 +71,11 @@
         default = [ "10.100.0.1/32" "fdc9:100::1/128" ];
         description = "Admin WireGuard VPN Interface IPs";
       };
+      globalAllowedV6 = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [];
+        description = "List of globally trusted IPv6 ranges (Aviation-Grade)";
+      };
     };
 
  locale = {

@@ -83,15 +83,18 @@ in {
         set tor_exit_nodes {
           type ipv4_addr; flags interval
         }
+        set tor_exit_nodes_v6 {
+          type ipv6_addr; flags interval
+        }
 
         # 🛡️ GLOBAL RATE LIMITING
-        # IPv4 Port 443 limit: 60/min
+        # Port 443 limit: 60/min (Dual-Stack)
         tcp dport 443 ct state new meter https_meter { ip saddr limit rate over 60/minute burst 20 packets } counter drop
-        # IPv6 Port 443 limit: 60/min
         tcp dport 443 ct state new meter https_meter_v6 { ip6 saddr limit rate over 60/minute burst 20 packets } counter drop
         
-        # SSH port limit: 5/min
+        # SSH port limit: 5/min (Dual-Stack Parity)
         tcp dport ${toString sshPort} ct state new meter ssh_meter { ip saddr limit rate over 5/minute burst 5 packets } counter drop
+        tcp dport ${toString sshPort} ct state new meter ssh_meter_v6 { ip6 saddr limit rate over 5/minute burst 5 packets } counter drop
 
         # 🛡️ EAST-WEST ISOLATION (Zone: Admin Loopback)
         # Only Caddy is allowed to talk to the Admin Loopback Alias (127.0.0.2)
@@ -102,28 +105,43 @@ in {
         tcp dport { 5432, 6379 } meta skuid != { ${toString u.caddy}, ${toString u.postgresql}, ${toString u.valkey} } counter drop
 
         # 🌍 GEOBLOCK PROTECTION (DE, AT, LT for public ports)
-        # Block everything NOT from allowed countries on public port 443
-        tcp dport 443 ip saddr != @allowed_countries ip6 saddr != @allowed_countries_v6 counter drop
+        # Block everything NOT from allowed countries on public port 443 (Dual-Stack Parity)
+        tcp dport 443 ip saddr != @allowed_countries counter drop
+        tcp dport 443 ip6 saddr != @allowed_countries_v6 counter drop
 
         # 🛡️ TOR-BLOCKING (Decision FW-03)
-        ${lib.optionalString cfg.blockTor "ip saddr @tor_exit_nodes counter drop"}
+        ${lib.optionalString cfg.blockTor ''
+          ip saddr @tor_exit_nodes counter drop
+          ip6 saddr @tor_exit_nodes_v6 counter drop
+        ''}
 
-        # SSH Support für das LAN (Custom Port)
+        # SSH Support für das LAN (Custom Port - Dual-Stack)
         ip saddr ${lanCidr} tcp dport ${toString sshPort} accept
+        ip6 saddr ${lanCidrV6} tcp dport ${toString sshPort} accept
 
         # DNS Support für das LAN (Blocky)
-        ip saddr ${lanCidr} tcp dport 53 accept
-        ip saddr ${lanCidr} udp dport 53 accept
-        ip6 saddr ${lanCidrV6} tcp dport 53 accept
-        ip6 saddr ${lanCidrV6} udp dport 53 accept
+        ip saddr ${lanCidr} { tcp, udp } dport 53 accept
+        ip6 saddr ${lanCidrV6} { tcp, udp } dport 53 accept
 
         # mDNS für lokale Auflösung
         ip saddr ${lanCidr} udp dport 5353 accept
         ip6 saddr { ${lanCidrV6}, ${linkLocalV6} } udp dport 5353 accept
         
-        # ICMP (Ping)
+        # ICMP/ICMPv6 (Harden ND/DoS)
         ip protocol icmp accept
-        ip6 nexthdr icmpv6 accept
+        # ICMPv6: Limit rate for non-critical types to prevent ND-DoS
+        icmpv6 type { 
+          destination-unreachable, 
+          packet-too-big, 
+          time-exceeded, 
+          parameter-problem, 
+          echo-request, 
+          echo-reply,
+          nd-router-solicit,
+          nd-router-advert,
+          nd-neighbor-solicit,
+          nd-neighbor-advert
+        } limit rate 20/second accept
       '';
 
 
@@ -198,8 +216,9 @@ in {
           IPV4_ZONE="$WORKDIR/ipv4.zone"
           IPV6_ZONE="$WORKDIR/ipv6.zone"
           TOR_ZONE="$WORKDIR/tor.zone"
+          TOR_ZONE_V6="$WORKDIR/tor_v6.zone"
 
-          touch "$IPV4_ZONE" "$IPV6_ZONE" "$TOR_ZONE"
+          touch "$IPV4_ZONE" "$IPV6_ZONE" "$TOR_ZONE" "$TOR_ZONE_V6"
 
           for country in ${lib.concatStringsSep " " cfg.allowedCountries}; do
             echo "Downloading $country (v4)..."
@@ -210,7 +229,12 @@ in {
 
           # Fetch Tor Exit Nodes
           echo "Downloading Tor exit nodes..."
-          curl -s --fail "https://check.torproject.org/exit-addresses" | grep ExitAddress | awk '{print $2}' > "$TOR_ZONE"
+          TEMP_TOR="$WORKDIR/tor_raw.zone"
+          curl -s --fail "https://check.torproject.org/exit-addresses" | grep ExitAddress | awk '{print $2}' > "$TEMP_TOR"
+          
+          # Split into v4 and v6
+          grep -v ":" "$TEMP_TOR" > "$TOR_ZONE" || true
+          grep ":" "$TEMP_TOR" > "$TOR_ZONE_V6" || true
 
           # Atomic update using a full ruleset snippet
           echo "Applying atomic nftables update..."
@@ -232,10 +256,16 @@ in {
             echo "    elements = { ::1, fe80::/10, $(cat "$IPV6_ZONE" | tr '\n' ',' | sed 's/,$//') }"
             echo "  }"
 
-            # Tor Set
+            # Tor Set (v4)
             echo "  set tor_exit_nodes {"
             echo "    type ipv4_addr; flags interval;"
             echo "    elements = { $(cat "$TOR_ZONE" | tr '\n' ',' | sed 's/,$//' | sed 's/^,//') }"
+            echo "  }"
+
+            # Tor Set (v6)
+            echo "  set tor_exit_nodes_v6 {"
+            echo "    type ipv6_addr; flags interval;"
+            echo "    elements = { $(cat "$TOR_ZONE_V6" | tr '\n' ',' | sed 's/,$//' | sed 's/^,//') }"
             echo "  }"
             
             echo "}"
