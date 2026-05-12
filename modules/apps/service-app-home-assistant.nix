@@ -64,7 +64,7 @@ in
  # 📡 HARDWARE & INTEGRATION
  zigbeeDevice = lib.mkOption { 
  type = lib.types.str; 
- default = "socket://192.168.2.46:6638"; 
+ default = "socket://${config.my.configs.network.lanIP}:6638"; 
  description = "Zigbee adapter path or socket";
  };
  bluetooth = lib.mkOption { type = lib.types.bool; default = false; };

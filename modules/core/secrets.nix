@@ -3,7 +3,19 @@
  lib,
  pkgs,
  ...
-}: let
+}:
+# 🛡️ SOPS MULTI-KEY STRATEGY (Decision S-01)
+# Secrets are encrypted for three independent keys. Any one can decrypt.
+#  - Key 1: Server SSH Host Key (age-ssh-ed25519) – present on /persist
+#  - Key 2: Admin Age Key – stored on admin workstation, NEVER on server
+#  - Key 3: Recovery Age Key – stored offline (USB in safe, paper)
+#
+# RECOVERY: If host key is lost:
+#  1. Boot recovery medium
+#  2. Use admin/recovery key to decrypt secrets.yaml
+#  3. Restore /persist from restic
+#  4. Run nixos-rebuild switch
+let
  # 🚀 NMS v4.2 Metadaten (hardened Vault)
  nms = {
  id = "NIXH-00-COR-028";
@@ -29,12 +41,24 @@ in {
  imports = [ ./secrets-schema.nix ];
 
  options.my.meta.secrets = lib.mkOption {
- type = lib.types.attrs;
- default = nms;
- readOnly = true;
- };
+    type = lib.types.attrs;
+    default = nms;
+    readOnly = true;
+  };
 
-      secrets = {
+  options.my.security.sops.multiKey = {
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Require multi-key encryption (server + admin + recovery)";
+    };
+  };
+
+  config = {
+    warnings = lib.optional (!config.my.security.sops.multiKey.enable)
+      "⚠️ SOPS multi-key encryption DISABLED – secrets are vulnerable to total loss.";
+
+    sops = {
         # Infrastructure
         cloudflare_token = {};
         github_token = {};
@@ -54,7 +78,16 @@ in {
         readarr_api_key = {};
 
  # 🚀 DERIVED SECRETS (Schema-First)
- secrets = sopsEntries;
+ secrets = sopsEntries // {
+    "sops-recovery-test" = {
+      sopsFile = ../secrets/secrets.yaml;
+      format = "yaml";
+      owner = "root";
+      group = "root";
+      mode = "0400";
+      neededForUsers = false;
+    };
+ };
 
  # 📄 ENVIRONMENT TEMPLATES (Injecting Secrets into Services)
  templates."media-stack.env" = {
@@ -120,6 +153,24 @@ in {
  ReadWritePaths = [ config.my.configs.paths.tierB ];
  };
  };
+
+    systemd.services.sops-recovery-validation = {
+      description = "Weekly SOPS Recovery Validation";
+      after = [ "network.target" ];
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = "${pkgs.sops}/bin/sops --decrypt /run/secrets/sops-recovery-test";
+        ProtectSystem = "strict";
+        PrivateTmp = true;
+        NoNewPrivileges = true;
+      };
+    };
+
+    systemd.timers.sops-recovery-validation = {
+      description = "Weekly SOPS Recovery Validation Timer";
+      timerConfig = { OnCalendar = "weekly"; Persistent = true; };
+      wantedBy = [ "timers.target" ];
+    };
  };
 }
 /**

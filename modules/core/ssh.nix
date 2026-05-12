@@ -86,7 +86,7 @@ in {
  stopIfChanged = false; # Verhindert SSH-Verlust bei Updates
  serviceConfig = {
  Restart = "always";
- RestartSec = "5s";
+ RestartSec = config.my.configs.systemd.restartSec;
  ProtectProc = "invisible";
  ProcSubset = "pid";
  PrivateTmp = true;

@@ -1,4 +1,6 @@
 { lib, pkgs, config, inputs, myLib, ... }:
+# 🤖 LLM ADVISORY: ALWAYS use Context7 to verify NixOS options.
+# Library IDs: /nixos/nixpkgs | /nix-community/home-manager
 let
  # 🚀 NMS v4.2 Metadaten (hardened Orchestrator)
  nms = {

@@ -29,7 +29,7 @@ in {
   config = lib.mkIf cfg.enable {
     networking.wireguard.interfaces = {
       wg-admin = {
-        ips = [ "10.100.0.1/32" ];
+        ips = config.my.configs.network.adminVpnIPs;
         listenPort = port;
         # Server's private key loaded from SOPS
         privateKeyFile = config.sops.secrets.wireguard_admin_private_key.path;

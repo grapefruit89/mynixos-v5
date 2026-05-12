@@ -72,7 +72,7 @@ in {
  default = [
  { 
  name = "Caddy Local"; 
- url = "http://localhost:2019/config/"; 
+ url = "http://localhost:${toString config.my.ports.caddyAdmin}/config/"; 
  interval = "60s"; 
  conditions = [ "[STATUS] == 200" ]; 
  }

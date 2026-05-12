@@ -28,8 +28,9 @@ in
  {
  users = [ user ];
  commands = [
- { command = "/run/current-system/sw/bin/nixos-rebuild"; options = [ "NOPASSWD" ]; }
+ { command = "${pkgs.nixos-rebuild}/bin/nixos-rebuild"; options = [ "NOPASSWD" ]; }
  { command = "${pkgs.nix}/bin/nix"; options = [ "NOPASSWD" ]; }
+ { command = "${pkgs.nix}/bin/nix-collect-garbage"; options = [ "NOPASSWD" ]; }
  { command = "ALL"; options = lib.mkIf bastelmodus [ "NOPASSWD" ]; }
  ];
  }

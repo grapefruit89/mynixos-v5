@@ -66,6 +66,11 @@
         default = "fe80::/10";
         description = "IPv6 Link-Local range";
       };
+      adminVpnIPs = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ "10.100.0.1/32" "fdc9:100::1/128" ];
+        description = "Admin WireGuard VPN Interface IPs";
+      };
     };
 
  locale = {
@@ -115,12 +120,24 @@
  };
  
  vpn = {
- privado = lib.mkOption {
- type = lib.types.attrs;
- default = {};
- description = "Privado VPN configuration (placeholder)";
+ privado = {
+   publicKey = lib.mkOption { type = lib.types.str; default = "KgTUh3KLijVluDvNpzDCJJfrJ7EyLzYLmdHCksG4sRg="; };
+   endpoint = lib.mkOption { type = lib.types.str; default = "91.148.237.38:51820"; };
+   address = lib.mkOption { type = lib.types.str; default = "100.64.3.155/32"; };
+   dns = lib.mkOption { type = lib.types.listOf lib.types.str; default = ["198.18.0.1" "198.18.0.2"]; };
  };
  };
+
+    zones = {
+      admin = lib.mkOption { type = lib.types.str; default = "admin-hangar"; };
+      public = lib.mkOption { type = lib.types.str; default = "public"; };
+      family = lib.mkOption { type = lib.types.str; default = "family-pocketid"; };
+      loopback = lib.mkOption { type = lib.types.str; default = "loopback"; };
+    };
+
+    systemd = {
+      restartSec = lib.mkOption { type = lib.types.str; default = "5s"; };
+    };
 
  resourceLimits = {
  maxMediaRamMB = lib.mkOption { type = lib.types.int; default = 4096; };

@@ -1,5 +1,15 @@
 # 🚀 NixHome Project Status (Hardened Edition)
 
+## 🤖 LLM Guiderails (MANDATORY)
+**This project is time-sensitive and requires high precision regarding NixOS releases and library options.**
+
+1.  **Context7 Enforcement:** NEVER rely on internal training data for NixOS versions, EOL dates, or module options.
+2.  **Required Tooling:** Use `context7/query-docs` before proposing any changes to the flake or core modules.
+3.  **Core Library IDs:**
+    -   `nixpkgs`: `/nixos/nixpkgs`
+    -   `home-manager`: `/nix-community/home-manager`
+    -   `sops-nix`: `/mic92/sops-nix`
+
 ## 📌 Status
 - **Architecture:** Horizontal Responsibility (v5.0)
 - **Security:** Hardened Kernel & Systemd Sandboxing active.

@@ -51,7 +51,7 @@ in {
       PrivateTmp = true;
       PrivateDevices = true;
       Restart = "always";
-      RestartSec = "5s";
+      RestartSec = config.my.configs.systemd.restartSec;
       OOMScoreAdjust = -100;
     };
 

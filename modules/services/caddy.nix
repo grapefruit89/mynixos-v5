@@ -23,7 +23,13 @@ let
   # 🌐 Trusted IPs (Cloudflare, LAN)
   # Source: Fragment 18278 & Local Network SSoT
   trustedIPs = lib.concatStringsSep " " (
-    ["127.0.0.1" "173.245.48.0/20" "103.21.244.0/22" "103.22.200.0/22" "103.31.4.0/22" "141.101.64.0/18" "108.162.192.0/18" "190.93.240.0/20" "188.114.96.0/20" "197.234.240.0/22" "198.41.128.0/17" "162.158.0.0/15" "104.16.0.0/13" "104.24.0.0/14" "172.64.0.0/13" "131.0.72.0/22"]
+    [
+      "127.0.0.1" "::1"
+      # Cloudflare IPv4
+      "173.245.48.0/20" "103.21.244.0/22" "103.22.200.0/22" "103.31.4.0/22" "141.101.64.0/18" "108.162.192.0/18" "190.93.240.0/20" "188.114.96.0/20" "197.234.240.0/22" "198.41.128.0/17" "162.158.0.0/15" "104.16.0.0/13" "104.24.0.0/14" "172.64.0.0/13" "131.0.72.0/22"
+      # Cloudflare IPv6
+      "2400:cb00::/32" "2606:4700::/32" "2803:f800::/32" "2405:b500::/32" "2405:8100::/32" "2a06:98c0::/29" "2c0f:f248::/32"
+    ]
     ++ sreConfig.network.lanCidrs
   );
 
@@ -208,7 +214,7 @@ in {
       # Helper to build the upstream address (Socket > IP:Port)
       mkUpstream = name: svc: if svc.socket != null 
         then "unix/${svc.socket}" 
-        else if svc.zone == "admin-hangar"
+        else if svc.zone == config.my.configs.zones.admin
         then "127.0.0.2:${toString svc.port}"
         else "127.0.0.1:${toString svc.port}";
 
@@ -219,11 +225,11 @@ in {
       genVHost = name: svc: {
         name = mkFQDN svc;
         value = {
-          extraConfig = if svc.zone == "admin-hangar" then ''
+          extraConfig = if svc.zone == config.my.configs.zones.admin then ''
               import admin_auth
               reverse_proxy ${mkUpstream name svc}
             ''
-            else if svc.zone == "public" then ''
+            else if svc.zone == config.my.configs.zones.public then ''
               import public_access
               reverse_proxy ${mkUpstream name svc}
             ''

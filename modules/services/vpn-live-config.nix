@@ -20,12 +20,14 @@ in
  description = "NMS metadata for vpn-live-config module";
  };
 
- config = {
+ config = let
+   p = config.my.configs.vpn.privado;
+ in {
  my.configs.vpn.privado = {
- publicKey = lib.mkForce "KgTUh3KLijVluDvNpzDCJJfrJ7EyLzYLmdHCksG4sRg=";
- endpoint = lib.mkForce "91.148.237.38:51820";
- address = lib.mkForce "100.64.3.155/32";
- dns = lib.mkForce ["198.18.0.1" "198.18.0.2"];
+   publicKey = lib.mkDefault p.publicKey;
+   endpoint = lib.mkDefault p.endpoint;
+   address = lib.mkDefault p.address;
+   dns = lib.mkDefault p.dns;
  };
  };
 }

@@ -10,7 +10,8 @@ let
  nms = { id = "NIXH-60-APP-006"; title = "Monica"; description = "Personal CRM."; layer = 60; nixpkgs.category = "services/web-apps"; capabilities = [ "web/crm" ]; audit.last_reviewed = "2026-03-02"; audit.complexity = 3; };
  port = config.my.ports.monica;
  domain = config.my.configs.identity.domain;
- appKeyFile = "/var/lib/monica/app-key";
+ stateDir = "${config.my.configs.paths.stateDir}/monica";
+ appKeyFile = "${stateDir}/app-key";
 in
 {
  options.my.meta.monica = lib.mkOption { type = lib.types.attrs; default = nms; readOnly = true; };
@@ -19,12 +20,12 @@ in
    enable = true; 
    hostname = "monica.${domain}"; 
    appURL = "https://monica.${domain}"; 
-   appKeyFile = "${config.my.configs.paths.stateDir}/monica/app-key"; 
+   inherit appKeyFile; 
    nginx.listen = [ { addr = "127.0.0.1"; port = port; ssl = false; } ]; 
    database.createLocally = true; 
  };
  services.caddy.virtualHosts."monica.${domain}" = { extraConfig = "import sso_auth\nreverse_proxy 127.0.0.1:${toString port}"; };
- system.activationScripts.monicaAppKeyFile.text = "install -d -m 0750 -o monica -g monica ${config.my.configs.paths.stateDir}/monica; if [ ! -s ${config.my.services.monica.appKeyFile} ]; then head -c 32 /dev/urandom | base64 > ${config.my.services.monica.appKeyFile}; fi";
+ system.activationScripts.monicaAppKeyFile.text = "install -d -m 0750 -o monica -g monica ${stateDir}; if [ ! -s ${appKeyFile} ]; then head -c 32 /dev/urandom | base64 > ${appKeyFile}; fi";
  systemd.services.phpfpm-monica = {
    after = [ "postgresql.service" ];
    serviceConfig = { 
@@ -32,7 +33,7 @@ in
      ProtectHome = true; 
      PrivateTmp = true; 
      PrivateDevices = true; 
-     ReadWritePaths = [ "${config.my.configs.paths.stateDir}/monica" ]; 
+     ReadWritePaths = [ stateDir ]; 
    };
  };
  };

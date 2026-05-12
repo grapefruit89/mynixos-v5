@@ -39,8 +39,8 @@ in {
         # 🎯 Split-Horizon
         conditional = {
           mapping = {
-            "nix.m7c5.de" = "127.0.0.1";
-            "m7c5.de" = "127.0.0.1";
+            "${config.my.configs.identity.subdomain}.${config.my.configs.identity.domain}" = "127.0.0.1, ::1";
+            "${config.my.configs.identity.domain}" = "127.0.0.1, ::1";
           };
         };
 

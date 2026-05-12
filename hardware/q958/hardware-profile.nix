@@ -32,7 +32,8 @@ in
  "intel_pstate=passive" # Use passive mode to allow TLP/thermald better control
  ];
 
- boot.kernelModules = [ "kvm_intel" ];
+ boot.initrd.availableKernelModules = [ "nvme" "ahci" "xhci_pci" "usbhid" "usb_storage" "sd_mod" ];
+ boot.kernelModules = [ "kvm_intel" "nct6775" "coretemp" "i915" "e1000e" "ipmi_si" "tpm_tis" ];
 
  # 🖥️ GPU (INTEL UHD 630)
  # Note: Using hardware.graphics for NixOS 25.11 compatibility

@@ -28,4 +28,7 @@
  enable = true;
  lockdownMode = "permissive"; # Safety first: Log violations, don't kill yet.
  };
+
+ # 🛡️ Hardened Firewall (Geo-Blocking & Dual-Stack)
+ my.security.firewall.enable = true;
 }

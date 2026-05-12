@@ -1,6 +1,7 @@
 { config, lib, pkgs, ... }: {
-  # 🛡️ AVIATION-GRADE KERNEL HARDENING (NixHome v6.0)
-  # Comprehensive module blacklist and sysctl hardening for Q958 Hardware.
+  # 🛡️ AVIATION-GRADE KERNEL HARDENING (NixHome v6.1)
+  # Comprehensive module blacklist and sysctl hardening.
+  # Static declarative approach (Decision R-03).
 
   config = {
     # 🏎️ KERNEL PACKAGES (Latest Coffee Lake Support)
@@ -44,6 +45,7 @@
       # 6. Legacy Bus & Misc
       "firewire_core" "firewire_ohci" "firewire_sbp2" "firewire_net" "parport"
       "parport_pc" "lp" "ppdev" "pcmcia" "pcmcia_core" "yenta_socket" "rsrc_nonstatic"
+      "thunderbolt"
 
       # 7. Non-Intel GPUs
       "nouveau" "radeon" "amdgpu" "mgag200" "ast" "cirrus" "vmwgfx" "vboxvideo"
@@ -53,10 +55,18 @@
       "ib_core" "ib_uverbs" "ib_cm" "ib_mad" "mlx4_ib" "mlx5_ib" "rdma_cm" "iw_cm"
       "rdma_ucm" "megaraid_sas" "hpsa" "mpt3sas" "aacraid" "lpfc" "qla2xxx" "bfa" "zfcp"
 
-      # 9. Legacy Protocols
+      # 9. Legacy Protocols & Vulnerable Modules (Decision FW-11)
       "isdn" "hisax" "hysdn" "atm" "uvcvideo" "videodev" "ppp" "pppoe" "pppox" "slhc"
-      "ip6table_filter"
+      "ip6table_filter" "esp4" "esp6" "rxrpc"
     ];
+
+    # 🛡️ MODULE WHITELISTING (NixOS native mechanism)
+    boot.extraModprobeConfig = ''
+      install esp4 /bin/false
+      install esp6 /bin/false
+      install rxrpc /bin/false
+      # Strikte Whitelist-Technik: Verhindert automatisches Laden ungenutzter Module
+    '';
 
     # 🏎️ SYSCTL SECURITY HARDENING
     boot.kernel.sysctl = {
@@ -73,34 +83,58 @@
       "kernel.dmesg_restrict" = 1;
       "kernel.unprivileged_bpf_disabled" = 1; 
       "kernel.unprivileged_userns_clone" = 0; # Disables unprivileged user namespaces
-      "net.core.bpf_jit_enable" = 1; # Enabled for performance, restricted below
-      "net.core.bpf_jit_harden" = 2; # Hardened JIT
+      "net.core.bpf_jit_enable" = 1;
+      "net.core.bpf_jit_harden" = 2;
       "kernel.ftrace_enabled" = false;
       "kernel.perf_event_paranoid" = 3;
-      "kernel.sysrq" = 0; # Disable SysRQ
+      "kernel.sysrq" = 0;
+      "kernel.kexec_load_disabled" = 1; # Disables kexec (Decision KM-02)
       
       # ASLR & Memory Hardening
       "vm.mmap_rnd_bits" = 32;
+      "vm.unprivileged_userfaultfd" = 0; # KM-03: Mitigates heap grooming
 
       # Swappiness tuning for RAM-heavy streamers
       "vm.swappiness" = 10;
     };
 
-    # 🛡️ APPMAROR ENFORCEMENT
+    # 🛡️ RUNTIME PROTECTION
     security.apparmor.enable = true;
+    security.lockKernelModules = true; # Decision KM-01
 
     # 💎 BOOT PARAMETERS (ADR 001)
     boot.kernelParams = [
-      "slab_nomerge"        # Prevents heap grooming
-      "init_on_free=1"      # Sanitize free'd pages (replaces deprecated page_poison)
-      "init_on_alloc=1"     # Zero-init allocations
-      "page_alloc.shuffle=1" # Randomizes page allocation
-      "debugfs=off"         # Closes debug attack vector
+      "slab_nomerge"
+      "init_on_free=1"
+      "init_on_alloc=1"
+      "page_alloc.shuffle=1"
+      "debugfs=off"
+      "module.sig_enforce=1" # KM-04: Only load signed modules
       "quiet" "loglevel=3"
     ];
 
-    # Whitelist of required modules
-    boot.initrd.availableKernelModules = [ "nvme" "ahci" "xhci_pci" "usbhid" "usb_storage" "sd_mod" ];
-    boot.kernelModules = [ "kvm_intel" "nct6775" "coretemp" "veth" "i915" "nvme" ];
+    # Whitelist of required generic modules (Hardware specific modules moved to hardware-profile)
+    boot.kernelModules = [ "usbcore" "ext4" "wireguard" "veth" ];
+
+    # 🚨 ALERTING AUDIT SERVICE
+    systemd.services.kernel-module-audit = {
+      description = "Audit loaded kernel modules with alerting";
+      after = [ "network.target" ];
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = pkgs.writeShellScript "audit-modules" ''
+          # List of allowed modules (merged from initrd, hardware and generic)
+          ALLOWED="nvme ahci xhci_pci usbhid usb_storage sd_mod nct6775 coretemp i915 e1000e ipmi_si tpm_tis usbcore ext4 wireguard veth"
+          CURRENT=$(lsmod | awk 'NR>1 {print $1}')
+          
+          for mod in $CURRENT; do
+            if ! echo "$ALLOWED" | grep -qiw "$mod"; then
+              echo "AUDIT_WARNING: Unexpected kernel module detected: $mod"
+            fi
+          done
+        '';
+      };
+      startAt = "daily";
+    };
   };
 }

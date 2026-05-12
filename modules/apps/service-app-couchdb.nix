@@ -20,7 +20,7 @@ let
  };
 
  cfg = config.my.services.couchdb;
- port = 5984; # CouchDB standard port
+ port = config.my.ports.couchdb;
 
 in
 {

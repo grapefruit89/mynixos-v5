@@ -69,7 +69,7 @@ in {
  ExecStart = mergerScript;
  # 🛡️ hardened Hardening
  Restart = "always";
- RestartSec = "10s";
+ RestartSec = "10s"; # 🔄 Intentional override of global systemd.restartSec default
  OOMScoreAdjust = -1000;
  };
  };

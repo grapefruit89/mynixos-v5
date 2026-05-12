@@ -18,7 +18,7 @@
  };
 
  user = config.my.configs.identity.user;
- rescuePort = 2222;
+ rescuePort = config.my.ports.sshRescue;
 in {
  options.my.meta.ssh_rescue = lib.mkOption {
  type = lib.types.attrs;

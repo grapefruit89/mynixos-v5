@@ -37,6 +37,8 @@ in {
 
  # 🚫 BINARY ONLY ENFORCEMENT (Fragment 748)
  # Verhindert lokale Builds (Saves SSD & CPU)
+ # ⚠️ EXCEPTION: Services like Ollama (GPU/Unfree) or ZFS (Kernel module) 
+ # require local builds if not present in cache. Set max-jobs > 0 for these.
  max-jobs = lib.mkDefault 0;
  builders-use-substitutes = true;
  fallback = lib.mkDefault false;
@@ -51,6 +53,10 @@ in {
  sandbox = true;
  trusted-users = ["root" config.my.configs.identity.user];
  };
+
+ # 🚫 BUILD CONFLICT ASSERTION (Ollama vs max-jobs=0)
+ warnings = lib.optional (config.services.ollama.enable && config.nix.settings.max-jobs == 0)
+   "🚫 [BUILD-CONFLICT] Ollama is enabled but nix.settings.max-jobs is 0. This will likely cause build failure as Ollama components often require local compilation.";
 
  # 💤 RESOURCE HYGIENE
  nix.daemonCPUSchedPolicy = "idle";

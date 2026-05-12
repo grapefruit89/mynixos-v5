@@ -7,11 +7,13 @@
     default = {
       # 🛡️ ADMINISTRATIVE (High-Port)
       ssh = 53844;
+      sshRescue = 2222;
       wireguard = 51820;
 
       # 🏗️ 10xxx: INFRASTRUCTURE & CORE
       pocket-id = 10880;
       adguard = 10053;
+      caddyAdmin = 2019;
       cockpit = 10090;
       postgres = 10432;
       valkey = 10379;
@@ -32,6 +34,7 @@
       vaultwarden = 20222;
       monica = 20985;
       filebrowser = 20081;
+      couchdb = 20984;
       homepage = 20300;
       matrix = 20001;
       readmeabook = 20002;
