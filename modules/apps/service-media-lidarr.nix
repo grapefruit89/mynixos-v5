@@ -76,7 +76,7 @@ in
  cfg.stateDir 
  cfg.metadataDir
  srePaths.mediaLibrary
- (srePaths.tierC + "/downloads")
+ srePaths.downloads
  ];
  })
 

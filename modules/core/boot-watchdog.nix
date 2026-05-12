@@ -29,7 +29,7 @@
         echo "✅ PostgreSQL: ACTIVE"
         
         # 4. Persistence Check
-        if [ ! -d "/persist/var/lib/caddy" ]; then
+        if [ ! -d "${config.my.configs.paths.stateDir}/caddy" ]; then
           echo "❌ PERSISTENCE FAILURE: Caddy state missing!"
           exit 1
         fi

@@ -20,7 +20,7 @@
     ../modules/services/caddy.nix
     ../modules/services/blocky.nix
     ../modules/services/postgresql.nix
-    ../modules/monitoring/gatus.nix
+    ../modules/services/service-gatus.nix
     ../modules/core/boot-watchdog.nix
   ];
 

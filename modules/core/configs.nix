@@ -97,19 +97,28 @@
       cpuType = lib.mkOption { type = lib.types.str; default = "intel"; };
     };
 
-    # 💾 ABC-TIERING STORAGE PATHS (ADR 852 / Fragment 1035)
-    paths = {
-      stateDir = lib.mkOption { type = lib.types.str; default = "/persist/var/lib"; };
+    # 💾 ABC-TIERING STORAGE PATHS (ADR 852 / v6.1 Strict Spec)
+    # Tier A: NVMe (Databases, OS, High-IOPS)
+    # Tier B: SSD (Cache B1, Private B2, Buffer B3)
+    # Tier C: HDD (Archive - Exclusive for cold downloads/media overflow)
+    paths = rec {
       tierA = myLib.mkTracedOption "SRC-OBS-852" (lib.mkOption { type = lib.types.str; default = "/persist"; description = "NVMe: Persistent State"; });
-      tierB = myLib.mkTracedOption "SRC-OBS-852" (lib.mkOption { type = lib.types.str; default = "/mnt/cache"; description = "SSD: Cache & Transcodes"; });
-      tierC = myLib.mkTracedOption "SRC-OBS-852" (lib.mkOption { type = lib.types.str; default = "/mnt/hdd_pool"; description = "HDD: Bulk Media Archive"; });
+      tierB = myLib.mkTracedOption "SRC-OBS-852" (lib.mkOption { type = lib.types.str; default = "/mnt/cache"; description = "SSD: Fast Storage (B1/B2/B3)"; });
+      tierC = myLib.mkTracedOption "SRC-OBS-852" (lib.mkOption { type = lib.types.str; default = "/mnt/hdd_pool"; description = "HDD: Cold Archive (Exclusive)"; });
+
+      # Derived Paths (SSoT)
+      stateDir = "${tierA}/var/lib";
+      appData = "${tierA}/app-data"; # Tier A: Databases, Configs
       
-      appData = lib.mkOption { type = lib.types.str; default = "/persist/app-data"; description = "Tier A: High-IOPS (Databases, Configs)"; };
-      appCache = lib.mkOption { type = lib.types.str; default = "/mnt/cache/app-cache"; description = "Tier B: High-Volume (Images, Transcodes)"; };
-      downloads = lib.mkOption { type = lib.types.str; default = "/mnt/cache/downloads"; description = "Tier B: High-Write (Active SABnzbd)"; };
-      
-      mediaLibrary = lib.mkOption { type = lib.types.str; default = "/mnt/hdd_pool/media"; };
-      storagePool = lib.mkOption { type = lib.types.str; default = "/mnt/hdd_pool"; };
+      # Tier B Categorization
+      appCache = "${tierB}/cache";   # B1: Volatile Cache
+      privateData = "${tierB}/private"; # B2: Photos, Documents, Active Media
+      downloads = "${tierB}/buffer"; # B3: Active SABnzbd / Downloads
+      logDir = "${tierB}/logs";      # SSD Log Tier
+
+      # Legacy / High-Level Mappings
+      mediaLibrary = "${privateData}/media";
+      storagePool = tierC;
     };
 
  # 🚩 SAFETY TOGGLES

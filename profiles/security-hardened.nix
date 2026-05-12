@@ -9,8 +9,7 @@
  ../modules/security/flat-layout.nix
  ../modules/security/hardened-core.nix
  ../modules/security/hermetic.nix
- ../modules/policy/forbidden-tech.nix
- ];
+ ../modules/services/service-forbidden-tech.nix ];
 
  # Standard-Metadaten für das Profil
  my.meta.profile_security = {

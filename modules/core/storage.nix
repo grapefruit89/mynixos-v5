@@ -31,7 +31,7 @@ in
  {
  description = "Unified Storage Pool (MergerFS)";
  where = "/storage";
- what = "/mnt/cache:/mnt/hdd1:/mnt/hdd2";
+ what = "${srePaths.tierB}:${srePaths.tierC}/archive";
  type = "fuse.mergerfs";
  options = "allow_other,use_ino,cache.files=off,cache.entry=3600,cache.attr=3600,cache.readdir=true,dropcacheonclose=true,category.create=mfs,minfreespace=50G,fsname=mergerfs-pool,noatime";
  wantedBy = [ "multi-user.target" ];
@@ -51,7 +51,7 @@ in
  description = "Refined Inode Warmer for HDD Ghost-Tree";
  serviceConfig = {
  Type = "oneshot";
- ExecStart = "${pkgs.findutils}/bin/find /mnt/hdd_pool -mindepth 1 -maxdepth 5 -exec stat {} +";
+ ExecStart = "${pkgs.findutils}/bin/find ${srePaths.tierC} -mindepth 1 -maxdepth 5 -exec stat {} +";
  };
  };
 

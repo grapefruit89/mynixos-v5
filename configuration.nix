@@ -37,6 +37,8 @@ in
     ./modules/core/graphics.nix
     ./modules/core/kernel-hardening.nix
     ./modules/core/backup.nix
+    ./modules/core/storage-policy.nix
+    ./modules/services/service-deferred-ops.nix
 
     # --- MISSION PROFILES ---
     ./profiles/base-server.nix

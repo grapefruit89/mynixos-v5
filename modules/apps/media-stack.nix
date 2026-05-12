@@ -33,12 +33,20 @@ in
  "d ${srePaths.mediaLibrary}/music 0775 lidarr media -"
  "d ${srePaths.mediaLibrary}/books 0775 readarr media -"
  "d ${srePaths.mediaLibrary}/documents 0775 paperless media -"
- "d ${srePaths.storagePool}/downloads 0775 root media -"
- "d ${srePaths.storagePool}/downloads/torrents 0775 prowlarr media -"
- "d ${srePaths.storagePool}/downloads/usenet 0775 sabnzbd media -"
+ 
+ # Tier B: Active Downloads (Buffer B3)
+ "d ${srePaths.downloads} 0775 root media -"
+ "d ${srePaths.downloads}/torrents 0775 prowlarr media -"
+ "d ${srePaths.downloads}/usenet 0775 sabnzbd media -"
+ "d ${srePaths.downloads}/incomplete 0775 root media -"
+ 
+ # Tier C: Archive (Exclusive for cold downloads/overflow)
+ "d ${srePaths.tierC}/archive 0775 root media -"
+ "d ${srePaths.tierC}/archive/downloads 0775 root media -"
+
+ # Core State
  "d ${srePaths.stateDir} 0755 root root -"
- "d /mnt/fast-pool/metadata 0775 root media -"
- "d /mnt/fast-pool/cache 0775 root media -"
+ "d ${srePaths.appCache} 0775 root media -"
  ];
  };
 }

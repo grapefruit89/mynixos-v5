@@ -1,9 +1,10 @@
+# /var/log is persisted via modules/core/impermanence.nix.
 { config, lib, pkgs, ... }:
 let
   cfg = config.my.logging.vector;
   srePaths = config.my.configs.paths;
   # 💾 LOGGING TIER B (SSD) - Optimized for RAM-to-SSD chunking
-  logDir = "${srePaths.tierB}/logs/system";
+  logDir = "${srePaths.logDir}/system";
   maxTotalSizeMB = 2048; # 2 GB for Tier B
 in
 {

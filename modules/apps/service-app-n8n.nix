@@ -82,8 +82,12 @@ in
  useSSO = true;
  description = "n8n Workflow Automation";
  persist = true;
- readWritePaths = [ cfg.stateDir cfg.cacheDir ];
+ readWritePaths = [ cfg.dataDir ];
+ extraServiceConfig = {
+   IPAddressAllow = "any";
+ };
  })
+
 
  {
  # 👥 USER & GROUP (Source: Fragment 5240)

@@ -86,6 +86,11 @@ in
  useSSO = true;
  description = "Home Assistant Core";
  persist = true;
+ extraServiceConfig = {
+   IPAddressAllow = "any";
+   # HA needs some devices for Zigbee/Bluetooth if not using netns
+   PrivateDevices = lib.mkForce false;
+ };
  readWritePaths = [ cfg.stateDir cfg.cacheDir cfg.mediaDir ];
  })
 

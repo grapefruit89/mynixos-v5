@@ -48,13 +48,13 @@ in
  };
  incompleteDir = lib.mkOption { 
  type = lib.types.str; 
- default = "${srePaths.tierB}/incomplete/sabnzbd"; 
- description = "Staging area for active downloads (Tier B SATA SSD for large 4K payloads)";
+ default = "${srePaths.downloads}/incomplete"; 
+ description = "Staging area for active downloads (Tier B B3)";
  };
  downloadDir = lib.mkOption { 
  type = lib.types.str; 
- default = "${srePaths.tierC}/downloads/usenet"; 
- description = "Final storage for downloads (Tier C)";
+ default = "${srePaths.tierC}/archive/usenet"; 
+ description = "Final cold storage for downloads (Tier C Archive)";
  };
 
  # 🔑 SECRETS (Source: Fragment 3331)
@@ -80,6 +80,10 @@ in
  useSSO = true;
  description = "SABnzbd Usenet Client";
  persist = true;
+ extraServiceConfig = {
+   IPAddressAllow = "any";
+   MemoryMax = "2G";
+ };
  readWritePaths = [ 
  cfg.stateDir 
  cfg.incompleteDir 

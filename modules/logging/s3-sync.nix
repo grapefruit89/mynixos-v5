@@ -25,7 +25,7 @@ in
       serviceConfig = {
         Type = "oneshot";
         EnvironmentFile = config.sops.templates."backblaze-restic.env".path;
-        ExecStart = "${pkgs.rclone}/bin/rclone sync \"/mnt/cache/logs/system\" \":s3:${cfg.bucket}/logs\" " +
+        ExecStart = "${pkgs.rclone}/bin/rclone sync \"${config.my.configs.paths.logDir}/system\" \":s3:${cfg.bucket}/logs\" " +
                     "--s3-provider Other " +
                     "--s3-endpoint \"${cfg.endpoint}\" " +
                     "--s3-env-auth " +

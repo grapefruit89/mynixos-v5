@@ -74,7 +74,7 @@ in
  # ABC-Tiering Paths (Source: ADR 852)
  PAPERLESS_DATA_DIR = "${srePaths.stateDir}/paperless";
  PAPERLESS_MEDIA_ROOT = "${srePaths.mediaLibrary}/documents/paperless";
- PAPERLESS_CONSUMPTION_DIR = "${srePaths.tierC}/consume/paperless";
+ PAPERLESS_CONSUMPTION_DIR = "${srePaths.privateData}/consume/paperless";
  
  # Database & Valkey Wiring
  PAPERLESS_DBHOST = "/run/postgresql";

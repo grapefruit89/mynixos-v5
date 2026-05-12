@@ -30,6 +30,11 @@ in rec {
     User = if isHardened then name else null;
     UMask = "0077";
     
+    # 🌐 NETWORK & MEMORY HARDENING (v6.1 RAM Isolation)
+    IPAddressDeny = "any";
+    MemoryHigh = "500M";
+    MemoryMax = "1G";
+
     # 💾 PERSISTENCE
     ReadWritePaths = readWritePaths ++ [ 
       appDataDir 
@@ -138,17 +143,18 @@ in rec {
     oomScoreAdjust ? 400,
     description ? "Streaming Service",
     useVPN ? false,
+    extraServiceConfig ? {},
   }: let
     srePaths = config.my.configs.paths;
     stateDir = "${srePaths.stateDir}/${name}";
-    cacheDir = "${srePaths.tierB}/cache/${name}";
+    cacheDir = "${srePaths.appCache}/${name}";
     mediaDir = srePaths.mediaLibrary;
   in (lib.mkMerge [
     (config.myLib.mkService {
       inherit config name port description persist useVPN;
       isStream = true;
       readWritePaths = [ cacheDir mediaDir ];
-      extraServiceConfig = {
+      extraServiceConfig = lib.recursiveUpdate {
         RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" ];
         Restart = "always";
         RestartSec = "5s";
@@ -158,7 +164,7 @@ in rec {
         OOMScoreAdjust = oomScoreAdjust;
         PrivateDevices = if useGPU then lib.mkForce false else true;
         DeviceAllow = if useGPU then [ "/dev/dri/renderD128 rw" ] else [];
-      };
+      } extraServiceConfig;
     })
     {
       systemd.tmpfiles.rules = [

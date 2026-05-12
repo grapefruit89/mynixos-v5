@@ -7,8 +7,7 @@ in
  # Optimized for Intel Coffee Lake (Gen 9) & UHD Graphics 630.
 
  imports = [
- ../../modules/storage/storage-mover.nix
- ];
+ ../../modules/services/service-storage-mover.nix ];
  
  config = lib.mkIf (cfg.profile == "q958") {
  

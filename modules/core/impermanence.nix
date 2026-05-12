@@ -16,7 +16,7 @@
         "/var/lib/bluetooth"
         "/var/lib/pocket-id"
         "/var/lib/caddy"
-        "/var/lib/postgresql"
+        "/var/lib/postgresql" # PostgreSQL socket, database runs on tmpfs
         "/home/moritz"
         "/etc/nixos"
         "/etc/NetworkManager/system-connections"
@@ -35,6 +35,12 @@
       device = "none";
       fsType = "tmpfs";
       options = [ "defaults" "size=4G" "mode=755" ];
+    };
+
+    fileSystems."/proc" = {
+      device = "proc";
+      fsType = "proc";
+      options = [ "nosuid" "nodev" "noexec" "hidepid=2" ];
     };
 
     # Metadaten für die Traceability

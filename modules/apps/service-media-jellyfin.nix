@@ -60,6 +60,10 @@ in
  memoryMax = "4G";
  cpuWeight = 80;
  description = "Jellyfin hardened Instance";
+ extraServiceConfig = {
+   # CPU Pinning (aktivieren bei Bedarf):
+   # CPUAffinity = 2 3;  # Dedizierte Cores für QuickSync, nur bei Performance-Problemen aktivieren
+ };
  })
 
  # 🔧 2. JELLYFIN SPECIFICS

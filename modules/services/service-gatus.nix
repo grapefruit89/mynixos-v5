@@ -1,3 +1,4 @@
+# Dashboard accessible ONLY via WireGuard tunnel (admin_auth).
 { config, lib, pkgs, myLib, ... }:
 
 let
@@ -22,7 +23,7 @@ let
       endpoints = cfg.endpoints ++ [
  { 
  name = "Gatus Self"; 
- url = "http://localhost:${toString cfg.port}/api/v1/health"; 
+ url = "unix:///run/gatus/gatus.sock:/api/v1/health"; 
  interval = "60s"; 
  conditions = [ "[STATUS] == 200" ]; 
  }
@@ -72,25 +73,25 @@ in {
  default = [
  { 
  name = "Caddy Local"; 
- url = "http://localhost:${toString config.my.ports.caddyAdmin}/config/"; 
+ url = "unix:///run/caddy/admin.sock:/config/"; 
  interval = "60s"; 
  conditions = [ "[STATUS] == 200" ]; 
  }
  { 
  name = "Jellyfin"; 
- url = "http://localhost:${toString config.my.ports.jellyfin}/health"; 
+ url = "unix:///run/jellyfin/jellyfin.sock:/health"; 
  interval = "60s"; 
  conditions = [ "[STATUS] == 200" ]; 
  }
  { 
  name = "Navidrome"; 
- url = "http://localhost:${toString config.my.ports.navidrome}/rest/ping.view"; 
+ url = "unix:///run/navidrome/navidrome.sock:/rest/ping.view"; 
  interval = "60s"; 
  conditions = [ "[STATUS] == 200" ]; 
  }
  { 
  name = "Pocket-ID"; 
- url = "http://localhost:${toString config.my.ports.pocketId}/health"; 
+ url = "unix:///run/pocket-id/pocket-id.sock:/health"; 
  interval = "60s"; 
  conditions = [ "[STATUS] == 200" ]; 
  }
@@ -105,11 +106,14 @@ in {
  inherit config;
  name = "gatus";
  port = cfg.port;
- useSSO = true;
+ # Dashboard accessible ONLY via WireGuard tunnel
+useSSO = false;
  persist = true;
  description = "Gatus Health Dashboard";
      extraServiceConfig = {
         ExecStart = lib.mkForce "${pkgs.gatus}/bin/gatus --config \"${gatusConfig}\"";
+        # 🌐 NETWORK ACCESS (v6.1 Hardening Override for Alerting)
+        IPAddressAllow = "any";
       };
  })
 

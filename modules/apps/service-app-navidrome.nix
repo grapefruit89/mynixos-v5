@@ -39,6 +39,10 @@ in
  memoryMax = "1G";
  cpuWeight = 60;
  description = "Navidrome Music Streaming";
+ extraServiceConfig = {
+   # CPU Pinning (aktivieren bei Bedarf):
+   # CPUAffinity = 2 3;  # Dedizierte Cores für QuickSync/Transcoding
+ };
  })
 
  # 🔧 2. NAVIDROME SPECIFICS

@@ -70,6 +70,10 @@ in
  cpuWeight = 70;
  oomScoreAdjust = 350;
  description = "Audiobookshelf Instance";
+ extraServiceConfig = {
+   # CPU Pinning (aktivieren bei Bedarf):
+   # CPUAffinity = 2 3;  # Dedizierte Cores für QuickSync, nur bei Performance-Problemen aktivieren
+ };
  })
 
  {
