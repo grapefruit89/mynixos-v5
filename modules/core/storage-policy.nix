@@ -2,10 +2,31 @@
 let
   cfg = config.my.configs;
   paths = cfg.paths;
-  isQ958 = cfg.hardware.profile == "q958";
+  
+  # Services allowed to touch Tier C (Exemptions)
+  tierCExemptions = [
+    "storage-mover"
+    "sabnzbd"
+    "hdd-inode-warmer"
+    "storage-init"
+    "nixhome-emergency"
+    "rotate-vector-logs"
+  ];
+
+  # Helper to check if any path in a list points to Tier C
+  usesTierC = pathList: lib.any (p: lib.strings.hasInfix paths.tierC (toString p)) pathList;
+
+  # Identify unauthorized services
+  unauthorizedTierCServices = lib.filterAttrs (name: svc: 
+    !(lib.elem name tierCExemptions) && 
+    (usesTierC (svc.serviceConfig.ReadWritePaths or []) || 
+     usesTierC (svc.serviceConfig.BindPaths or []) ||
+     usesTierC (svc.serviceConfig.BindReadOnlyPaths or []))
+  ) config.systemd.services;
+
 in
 {
-  config = lib.mkIf (!cfg.bastelmodus) {
+  config = {
     # 🛡️ HARDWARE VALIDATION ASSERTIONS
     # Ensure paths are mounted on the correct physical media
     assertions = [
@@ -22,15 +43,11 @@ in
         message = "ABC Tiering Error: Tier C (HDD) MUST be mounted at /mnt/hdd_pool.";
       }
       
-      # 🛡️ STRICT TIER C EXCLUSION
-      # Only SABnzbd final destination and the storage mover are allowed to touch Tier C
+      # 🛡️ GLOBAL TIER C EXCLUSION (v6.1 Strict Spec)
+      # No service except the mover and sabnzbd-archive is allowed to touch Tier C.
       {
-        assertion = !lib.strings.hasInfix paths.tierC config.services.jellyfin.dataDir;
-        message = "ABC Tiering Violation: Jellyfin dataDir cannot reside on Tier C (HDD). Move to Tier B.";
-      }
-      {
-        assertion = !lib.strings.hasInfix paths.tierC config.my.media.navidrome.musicDir;
-        message = "ABC Tiering Violation: Navidrome musicDir cannot reside on Tier C (HDD). Move to Tier B.";
+        assertion = unauthorizedTierCServices == {};
+        message = "ABC Tiering Violation: Unauthorized services detected accessing Tier C (HDD): ${lib.concatStringsSep ", " (lib.attrNames unauthorizedTierCServices)}. All application data must reside on Tier B (SSD).";
       }
     ];
   };
