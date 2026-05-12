@@ -4,6 +4,7 @@ let
   paths = cfg.paths;
   
   # Services allowed to touch Tier C (Exemptions)
+  # v6.1 Strict Spec Enforcement
   tierCExemptions = [
     "storage-mover"
     "sabnzbd"
