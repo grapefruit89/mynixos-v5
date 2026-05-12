@@ -189,12 +189,15 @@ in {
         PrivateTmp = true;
         PrivateDevices = true;
         MemoryDenyWriteExecute = true;
-        OOMScoreAdjust = -500;
+        OOMScoreAdjust = -900;
         
         # Hide Process Info (ProtectProc)
         ProcSubset = "pid";
         ProtectProc = "invisible";
         
+        # 🌐 NETWORK ACCESS (v6.1 Hardening Override)
+        IPAddressAllow = "any";
+
         # Grant low-port binding capability
         CapabilityBoundingSet = [ "CAP_NET_BIND_SERVICE" ];
         AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];

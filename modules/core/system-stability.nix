@@ -36,11 +36,20 @@ in {
 
   # 🚀 OOMD (Out-Of-Memory Daemon)
   # Proaktives Management von Speicherengpässen (Besonders wichtig für AI/Ollama)
-  systemd.oomd = {
+    systemd.oomd = {
     enable = true;
     enableUserSlices = true;
     enableSystemSlice = true;
   };
+
+  # VIP OOM PROTECTION (v6.1)
+  # PostgreSQL (-1000), Caddy (-900), Pocket-ID (-900) are protected
+  # from the OOM killer. The system must never kill its database,
+  # reverse proxy, or authentication provider.
+
+  # 🛑 USER RESOURCE LIMITS
+  # Prevent unprivileged user processes from exhausting system RAM
+  systemd.slices.user.sliceConfig.ManagedOOMMemoryPressureLimit = "50%";
 
   # 🏎️ KERNEL PANIC HANDLING
  boot.kernel.sysctl = {

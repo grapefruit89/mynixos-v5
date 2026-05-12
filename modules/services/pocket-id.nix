@@ -52,7 +52,7 @@ in {
       PrivateDevices = true;
       Restart = "always";
       RestartSec = config.my.configs.systemd.restartSec;
-      OOMScoreAdjust = -100;
+      OOMScoreAdjust = -900;
     };
 
     # 🚀 AUTOMATED VHOST OVERRIDE
