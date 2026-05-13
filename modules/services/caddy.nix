@@ -89,7 +89,7 @@ in {
  path /.env* /.git* /.vscode* /wp-config* /config.json* /actuator* /phpmyadmin* /.aws* /.ssh* /xmlrpc.php /wp-login* /admin* /setup.php /install.php /shell* /cmd.php /cgi-bin*
  }
  handle @evil_paths {
- # 💀 Time-Stealing: Respond with teapot but take forever to close the connection
+ # 💀 Connection-Killer: Immediate 444 (No Response)
  header -Server
  abort
  }
@@ -123,10 +123,10 @@ in {
 
         # --- FAMILY AUTH (Pocket-ID) ---
         (family_auth) {
-          
           @needs_auth {
             not remote_ip 127.0.0.1
             not header_regexp host ^auth\.
+            not path /.well-known/*
           }
           # FW-NEW-01 FIX: Fallback to TCP listener for Pocket-ID
           forward_auth @needs_auth 127.0.0.1:${toString config.my.ports."pocket-id" or 8089} {
@@ -138,36 +138,16 @@ in {
           import compression
         }
 
+        # --- ACME CHALLENGE BYPASS ---
+        (acme_bypass) {
+          handle /.well-known/acme-challenge/* {
+            root * /var/lib/caddy/acme-challenges
+            file_server
+          }
+        }
+
  # 🧱 AUTOMATIC FIREWALL EXPOSURE
  networking.firewall.allowedTCPPorts = [ 443 ];
-
-        # --- STREAM OPTIMIZATION (Jellyfin / Audiobookshelf) ---
-        (proxy_stream) {
-          reverse_proxy {args[0]} {
-            # 🏎️ Zero-Latency Mode
-            flush_interval -1
-            header_up Host {upstream_hostport}
-            header_up X-Real-IP {remote_host}
-            # 🛡️ Disable buffering for streams
-            header_down X-Accel-Buffering no
-          }
-          import compression
-        }
-
-        # --- WILDCARD SUBDOMAIN ---
-        *.${sreConfig.identity.subdomain}.${sreConfig.identity.domain} {
-          tls {
-            dns cloudflare {env.CLOUDFLARE_API_TOKEN}
-          }
-          
-          # CA-08 FIX: Restricted certificate landing zone (no browsing)
-          handle /certs/* {
-            root * /var/www/landing-zone
-            file_server {
-              hide .git
-            }
-          }
-        }
       '';
     };
 
@@ -201,9 +181,13 @@ in {
         # Grant low-port binding capability
         CapabilityBoundingSet = [ "CAP_NET_BIND_SERVICE" ];
         AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
-      };
-    };
+        };
 
+        restartTriggers = [
+        config.sops.templates."caddy-env".path
+        config.services.caddy.globalConfig
+        ];
+        };
 
 
     # 🚀 AUTOMATED VHOST GENERATION (from services-spec.nix)
@@ -228,20 +212,59 @@ in {
       genVHost = name: svc: {
         name = mkFQDN svc;
         value = {
-          extraConfig = if svc.zone == config.my.configs.zones.admin then ''
+          extraConfig = if svc.domain == "auth" then ''
+              import acme_bypass
+              # Public endpoints for OIDC/Auth
+              handle /api/auth/* {
+                reverse_proxy ${mkUpstream name svc}
+              }
+              handle /.well-known/* {
+                reverse_proxy ${mkUpstream name svc}
+              }
+              # Administrative paths restricted to LAN
+              handle /admin/* {
+                import admin_auth
+                reverse_proxy ${mkUpstream name svc}
+              }
+              # Fallback to family_auth for everything else
+              handle {
+                import family_auth
+                reverse_proxy ${mkUpstream name svc}
+              }
+            ''
+            else if svc.zone == config.my.configs.zones.admin then ''
+              import acme_bypass
               import admin_auth
               reverse_proxy ${mkUpstream name svc}
             ''
             else if svc.zone == config.my.configs.zones.public then ''
-              import public_access
+              import acme_bypass
+              import hardened_headers
               reverse_proxy ${mkUpstream name svc}
             ''
             else ''
+              import acme_bypass
               import family_auth
-              reverse_proxy ${mkUpstream name svc}
+              ${if svc.domain == "media" || svc.domain == "music" || svc.domain == "audiobooks" then 
+                "import proxy_stream ${mkUpstream name svc}" 
+                else "reverse_proxy ${mkUpstream name svc}"}
             '';
         };
       };
-    in lib.listToAttrs (lib.mapAttrsToList genVHost ingressServices);
+      
+      baseHosts = lib.listToAttrs (lib.mapAttrsToList genVHost ingressServices);
+      
+      # 🛡️ CATCH-ALL WILDCARD
+      catchAllHost = {
+        "*.${identity.subdomain}.${identity.domain}" = {
+          extraConfig = ''
+            import acme_bypass
+            import honeypot
+            import hardened_headers
+            respond "Forbidden" 444
+          '';
+        };
+      };
+    in lib.recursiveUpdate baseHosts catchAllHost;
   };
 }

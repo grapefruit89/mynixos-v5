@@ -99,7 +99,7 @@ in {
  "fail2ban/filter.d/caddy-scan.conf".text = ''
  [Definition]
  # Erweitert um gefährliche Bot-Muster (.env, .php, .config)
- failregex = ^.*"remote_ip":"<ADDR>".*"uri":".*(?:\.env|\.git|\.config|\.php|\.zip|\.gz|wp-admin|wp-login|xmlrpc)".*"status":404.*$
+ failregex = ^.*"remote_ip":"<ADDR>".*"uri":".*(?:\.env|\.git|\.config|\.php|\.zip|\.gz|wp-admin|wp-login|xmlrpc)".*"status":(404|444).*$
  journalmatch = _SYSTEMD_UNIT=caddy.service
  '';
  };

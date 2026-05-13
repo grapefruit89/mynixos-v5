@@ -73,11 +73,17 @@ in {
         u = config.my.users.registry;
         cfg = config.my.security.firewall;
       in ''
-        # 🌍 DYNAMIC SETS (Populated by update-geoip-sets)
-        set allowed_countries {
+        # 🌍 DYNAMIC SETS (Populated by geoip-update service)
+        set geo_allowed {
           type ipv4_addr; flags interval
         }
-        set allowed_countries_v6 {
+        set geo_allowed_v6 {
+          type ipv6_addr; flags interval
+        }
+        set dc_blocked {
+          type ipv4_addr; flags interval
+        }
+        set dc_blocked_v6 {
           type ipv6_addr; flags interval
         }
         set tor_exit_nodes {
@@ -94,6 +100,7 @@ in {
         
         # SSH port limit: 5/min (Dual-Stack Parity)
         tcp dport ${toString sshPort} ct state new meter ssh_meter { ip saddr limit rate over 5/minute burst 5 packets } counter drop
+        # IPv6 Parity (H-07)
         tcp dport ${toString sshPort} ct state new meter ssh_meter_v6 { ip6 saddr limit rate over 5/minute burst 5 packets } counter drop
 
         # 🛡️ EAST-WEST ISOLATION (Zone: Admin Loopback)
@@ -104,10 +111,15 @@ in {
         # Authorized: Caddy (Proxy), Postgres (Self), Valkey (Self)
         tcp dport { 5432, 6379 } meta skuid != { ${toString u.caddy}, ${toString u.postgresql}, ${toString u.valkey} } counter drop
 
-        # 🌍 GEOBLOCK PROTECTION (DE, AT, LT for public ports)
+        # 🌍 DEFENSIVE FILTERING (Layer 0)
+        # 1. Block Datacenters (FireHOL / ipverse)
+        tcp dport 443 ip saddr @dc_blocked counter drop
+        tcp dport 443 ip6 saddr @dc_blocked_v6 counter drop
+
+        # 2. Whitelist Countries (DE, AT, LT for public ports)
         # Block everything NOT from allowed countries on public port 443 (Dual-Stack Parity)
-        tcp dport 443 ip saddr != @allowed_countries counter drop
-        tcp dport 443 ip6 saddr != @allowed_countries_v6 counter drop
+        tcp dport 443 ip saddr != @geo_allowed counter drop
+        tcp dport 443 ip6 saddr != @geo_allowed_v6 counter drop
 
         # 🛡️ TOR-BLOCKING (Decision FW-03)
         ${lib.optionalString cfg.blockTor ''
@@ -193,94 +205,6 @@ in {
       # 🔍 INTRUSION DETECTION (H-09)
       # Log refused connections for auditing (Portscans, LAN Recon)
       logRefusedConnections = true;
-    };
-
-    # 🔄 GEO-IP SET UPDATER
-    systemd.services.update-geoip-sets = let
-      cfg = config.my.security.firewall;
-    in lib.mkIf cfg.enable {
-      description = "Update nftables Geo-IP and Tor sets";
-      after = [ "network-online.target" ];
-      wants = [ "network-online.target" ];
-      path = with pkgs; [ curl nftables gawk sed ];
-      serviceConfig = {
-        Type = "oneshot";
-        ExecStart = pkgs.writeShellScript "update-geoip" ''
-          set -e
-          echo "Fetching Geo-IP zones for: ${toString cfg.allowedCountries}..."
-          
-          # Create temporary files for the new sets
-          WORKDIR=$(mktemp -d)
-          trap 'rm -rf "$WORKDIR"' EXIT
-
-          IPV4_ZONE="$WORKDIR/ipv4.zone"
-          IPV6_ZONE="$WORKDIR/ipv6.zone"
-          TOR_ZONE="$WORKDIR/tor.zone"
-          TOR_ZONE_V6="$WORKDIR/tor_v6.zone"
-
-          touch "$IPV4_ZONE" "$IPV6_ZONE" "$TOR_ZONE" "$TOR_ZONE_V6"
-
-          for country in ${lib.concatStringsSep " " cfg.allowedCountries}; do
-            echo "Downloading $country (v4)..."
-            curl -s --fail "https://www.ipdeny.com/ipblocks/data/countries/$country.zone" >> "$IPV4_ZONE"
-            echo "Downloading $country (v6)..."
-            curl -s --fail "https://www.ipdeny.com/ipv6/ipaddresses/blocks/$country.zone" >> "$IPV6_ZONE"
-          done
-
-          # Fetch Tor Exit Nodes
-          echo "Downloading Tor exit nodes..."
-          TEMP_TOR="$WORKDIR/tor_raw.zone"
-          curl -s --fail "https://check.torproject.org/exit-addresses" | grep ExitAddress | awk '{print $2}' > "$TEMP_TOR"
-          
-          # Split into v4 and v6
-          grep -v ":" "$TEMP_TOR" > "$TOR_ZONE" || true
-          grep ":" "$TEMP_TOR" > "$TOR_ZONE_V6" || true
-
-          # Atomic update using a full ruleset snippet
-          echo "Applying atomic nftables update..."
-          
-          NFT_CMD="$WORKDIR/update.nft"
-          
-          {
-            echo "table inet filter {"
-            
-            # IPv4 Set
-            echo "  set allowed_countries {"
-            echo "    type ipv4_addr; flags interval;"
-            echo "    elements = { 127.0.0.1, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, $(cat "$IPV4_ZONE" | tr '\n' ',' | sed 's/,$//') }"
-            echo "  }"
-
-            # IPv6 Set
-            echo "  set allowed_countries_v6 {"
-            echo "    type ipv6_addr; flags interval;"
-            echo "    elements = { ::1, fe80::/10, $(cat "$IPV6_ZONE" | tr '\n' ',' | sed 's/,$//') }"
-            echo "  }"
-
-            # Tor Set (v4)
-            echo "  set tor_exit_nodes {"
-            echo "    type ipv4_addr; flags interval;"
-            echo "    elements = { $(cat "$TOR_ZONE" | tr '\n' ',' | sed 's/,$//' | sed 's/^,//') }"
-            echo "  }"
-
-            # Tor Set (v6)
-            echo "  set tor_exit_nodes_v6 {"
-            echo "    type ipv6_addr; flags interval;"
-            echo "    elements = { $(cat "$TOR_ZONE_V6" | tr '\n' ',' | sed 's/,$//' | sed 's/^,//') }"
-            echo "  }"
-            
-            echo "}"
-          } > "$NFT_CMD"
-
-          # Use -f for atomic transaction
-          if nft -f "$NFT_CMD"; then
-            echo "✅ Geo-IP and Tor sets updated successfully."
-          else
-            echo "❌ Failed to apply atomic update."
-            exit 1
-          fi
-        '';
-      };
-      startAt = "daily";
     };
   };
 }

@@ -11,7 +11,7 @@
     ../modules/core/firewall.nix
     ../modules/core/fail2ban.nix
     ../modules/core/zram-swap.nix
-    ../modules/logging/vector-hdd.nix
+    ../modules/logging/vector-ram.nix
     ../modules/core/shell-premium.nix
     ../modules/core/system-stability.nix
     ../modules/core/principles.nix

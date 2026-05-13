@@ -7,8 +7,10 @@
  ../modules/security/binary-only.nix
  ../modules/security/no-legacy.nix
  ../modules/security/flat-layout.nix
- ../modules/security/hardened-core.nix
+ ../modules/security/runtime-guard.nix
  ../modules/security/hermetic.nix
+ ../modules/security/geoip-update.nix
+ ../modules/security/security-stats.nix
  ../modules/services/service-forbidden-tech.nix ];
 
  # Standard-Metadaten für das Profil

@@ -16,6 +16,7 @@
         "/var/lib/bluetooth"
         "/var/lib/pocket-id"
         "/var/lib/caddy"
+        "/var/lib/geoip"
         "/var/lib/postgresql" # PostgreSQL socket, database runs on tmpfs
         "/home/moritz"
         "/etc/nixos"
