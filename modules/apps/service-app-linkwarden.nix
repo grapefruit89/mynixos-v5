@@ -65,7 +65,13 @@ in {
  StateDirectory = "linkwarden";
  };
  };
- };
+
+ systemd.services.linkwarden.restartTriggers = [
+ config.services.linkwarden.package
+ config.services.linkwarden.environmentFile
+ ];
+ }
+;
 }
 /**
 * ---

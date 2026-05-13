@@ -51,6 +51,10 @@ in
       SystemCallFilter = [ "@system-service" "~@privileged" ];
       OOMScoreAdjust = 500;
     };
+    restartTriggers = [
+      config.services.miniflux.package
+      config.services.miniflux.adminCredentialsFile
+    ];
   };
  };
 }

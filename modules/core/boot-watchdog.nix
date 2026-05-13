@@ -35,6 +35,17 @@
         fi
         echo "✅ Persistence: VERIFIED"
         
+        # 🔐 TPM INTEGRITY CHECK (v6.2)
+        # Activate after first successful boot with TPM enrollment:
+        # GOLDEN_PCR0="<expected_hash>"
+        # GOLDEN_PCR1="<expected_hash>"
+        # GOLDEN_PCR7="<expected_hash>"
+        # CURRENT_PCR0=$(tpm2_pcrread sha256:0 | cut -d' ' -f2)
+        # if [ "$CURRENT_PCR0" != "$GOLDEN_PCR0" ]; then
+        #   echo "❌ TPM PCR0 MISMATCH: Firmware tampering detected!"
+        #   exit 1
+        # fi
+        
         echo "🚀 SYSTEM STATUS: STABLE - ALL SYSTEMS GO"
       '';
     };

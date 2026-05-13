@@ -42,5 +42,9 @@ in
         reverse_proxy 127.0.0.1:${toString config.my.ports.homepage}
       '';
     };
+
+    systemd.services.homepage-dashboard.restartTriggers = [
+      config.my.secrets.files.sharedEnv
+    ];
   };
 }

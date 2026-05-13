@@ -53,25 +53,11 @@ in {
       Restart = "always";
       RestartSec = config.my.configs.systemd.restartSec;
       OOMScoreAdjust = -900;
-    };
+      };
 
-    # 🚀 AUTOMATED VHOST OVERRIDE
-    # Special path-based routing for Auth Provider
-    services.caddy.virtualHosts."auth.${subdomain}.${domain}" = {
-      extraConfig = lib.mkForce ''
-        # Admin Panel: Restricted to LAN/Tunnel
-        handle /admin/* {
-          import admin_auth
-          reverse_proxy 127.0.0.1:${toString port}
-        }
-        
-        # Public Auth Paths (WAN Accessible)
-        handle {
-          import hardened_headers
-          import compression
-          reverse_proxy 127.0.0.1:${toString port}
-        }
-      '';
-    };
+      systemd.services.pocket-id.restartTriggers = [
+      config.services.pocket-id.package
+      (builtins.toJSON config.services.pocket-id.settings)
+      ];
   };
 }

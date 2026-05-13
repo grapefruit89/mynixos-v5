@@ -95,6 +95,24 @@ in {
  interval = "60s"; 
  conditions = [ "[STATUS] == 200" ]; 
  }
+ { 
+ name = "PostgreSQL"; 
+ url = "unix:///run/postgresql/.s.PGSQL.5432"; 
+ interval = "60s"; 
+ conditions = [ "[CONNECTED] == true" ]; 
+ }
+ { 
+ name = "Valkey"; 
+ url = "unix:///run/valkey/valkey.sock"; 
+ interval = "60s"; 
+ conditions = [ "[CONNECTED] == true" ]; 
+ }
+ { 
+ name = "Blocky DNS"; 
+ url = "http://127.0.0.1:4000/metrics"; 
+ interval = "60s"; 
+ conditions = [ "[STATUS] == 200" ]; 
+ }
  ];
  description = "List of endpoints to monitor (declarative).";
  };

@@ -59,6 +59,12 @@ in
    SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" ]; 
    OOMScoreAdjust = -1000; # 🚀 Highest Priority for DB
  };
+
+ systemd.services.postgresql.restartTriggers = [
+   config.services.postgresql.package
+   (builtins.toJSON config.services.postgresql.settings)
+ ];
+
  systemd.services.miniflux.after = [ "postgresql.service" ];
  systemd.services.n8n.after = [ "postgresql.service" ];
  systemd.services.paperless-web.after = [ "postgresql.service" ];

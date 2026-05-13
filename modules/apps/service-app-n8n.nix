@@ -155,9 +155,15 @@ in
  RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" ];
  SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" ];
  };
+
+ restartTriggers = [
+ pkgs.n8n
+ config.sops.secrets.n8n_enc_key.path
+ ];
  };
 
  # 🗄️ POSTGRES AUTO-SETUP
+
  services.postgresql = lib.mkIf (cfg.database.type == "postgres") {
  ensureDatabases = [ "n8n" ];
  ensureUsers = [ {

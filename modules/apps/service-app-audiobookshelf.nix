@@ -103,6 +103,11 @@ in
  # Node.js JIT Exception (Source: Fragment 9654)
  MemoryDenyWriteExecute = false; 
  };
+
+ restartTriggers = [
+   config.services.audiobookshelf.package
+ ];
+ };
  };
 
       # 📁 PERMISSION MANAGEMENT

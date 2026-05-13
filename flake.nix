@@ -25,10 +25,56 @@
  };
 
  outputs = { self, nixpkgs, ... }@inputs: let
- # 🏆 hardened System Library Factory (System Parametric)
- mkMyLib = system: import ./modules/core/lib-helpers.nix { inherit (nixpkgs) lib; pkgs = nixpkgs.legacyPackages.${system}; };
+   # 🏆 hardened System Library Factory (System Parametric)
+   mkMyLib = system: import ./modules/core/lib-helpers.nix { inherit (nixpkgs) lib; pkgs = nixpkgs.legacyPackages.${system}; };
+   
+   systems = [ "x86_64-linux" ];
+   forAllSystems = nixpkgs.lib.genAttrs systems;
  in {
- nixosConfigurations = {
+   checks = forAllSystems (system: {
+     nixmeta-validation = let
+       pkgs = nixpkgs.legacyPackages.${system};
+     in pkgs.runCommand "validate-nixmeta" {
+       nativeBuildInputs = [ pkgs.jq pkgs.bash ];
+     } ''
+       cd ${self}
+       ${pkgs.bash}/bin/bash ${./scripts/validate-nixmeta.sh}
+       touch $out
+     '';
+   });
+
+   apps = forAllSystems (system: {
+     validate-nixmeta = {
+       type = "app";
+       program = let
+         pkgs = nixpkgs.legacyPackages.${system};
+         script = pkgs.writeShellScriptBin "validate-nixmeta" ''
+           ${pkgs.bash}/bin/bash ${./scripts/validate-nixmeta.sh}
+         '';
+       in "${script}/bin/validate-nixmeta";
+     };
+   });
+
+   devShells = forAllSystems (system: {
+     default = let
+       pkgs = nixpkgs.legacyPackages.${system};
+     in pkgs.mkShell {
+       buildInputs = [
+         pkgs.jq
+         pkgs.ripgrep
+         pkgs.fd
+       ];
+       shellHook = ''
+         echo -e "\n🚀 \033[0;32mNixHome DevShell Loaded\033[0m"
+         echo "Available NIXMETA commands:"
+         echo "  nix run .#validate-nixmeta"
+         echo "  nix run .#generate-nixmeta-schema"
+         echo "  nix flake check"
+       '';
+     };
+   });
+
+   nixosConfigurations = {
  # 🚀 HOST: FUJITSU Q958 (DEIN SYSTEM)
  nixhome = nixpkgs.lib.nixosSystem {
  system = "x86_64-linux";

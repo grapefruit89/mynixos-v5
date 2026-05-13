@@ -69,6 +69,10 @@ in {
       PrivateTmp = lib.mkForce true;
       OOMScoreAdjust = 300;
     };
+    restartTriggers = [
+      config.services.vaultwarden.package
+      config.services.vaultwarden.environmentFile
+    ];
   };
  };
 }

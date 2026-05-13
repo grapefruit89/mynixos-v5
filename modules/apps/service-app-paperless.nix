@@ -83,9 +83,19 @@ in
  # Paperless spricht mit Valkey über den Unix-Socket des fabrik-eigenen Servers
  PAPERLESS_REDIS = "unix://${config.services.redis.servers.paperless.unixSocket}";
  };
- 
  serviceConfig.EnvironmentFile = lib.optional (cfg.secretFile != null) cfg.secretFile;
  };
+
+ systemd.services.paperless-consumer.restartTriggers = [
+ config.services.paperless.package
+ (lib.optionalString (config.services.paperless.passwordFile != null) config.services.paperless.passwordFile)
+ ];
+
+ systemd.services.paperless-web.restartTriggers = [
+ config.services.paperless.package
+ ];
+ };
+ }
 
  # Mirror environment to worker for processing
  systemd.services.paperless-worker.environment = config.systemd.services.paperless-web.environment;

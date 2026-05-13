@@ -13,3 +13,10 @@ creation_rules:
           # To retrieve your YubiKey age public key, run: age-plugin-yubikey --list
           # Then uncomment and add the key below:
           # - &admin_yubikey age1... 
+
+# 🚨 RECOVERY STRATEGY (C-03):
+# For maximum safety, separate keys into independent key_groups.
+# Group 1: Server + Admin (Standard Operations)
+# Group 2: Recovery (Emergency Only)
+# This prevents a single compromised key from threatening the entire vault
+# if combined with a leak of the recovery key.

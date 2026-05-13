@@ -53,7 +53,12 @@ in {
     # 👤 Static UID from registry
     users.users.blocky.uid = config.my.users.registry.blocky;
 
+    systemd.services.blocky.restartTriggers = [
+      (builtins.toJSON config.services.blocky.settings)
+    ];
+
     # Forward local resolver to blocky
+
     services.resolved.extraConfig = ''
       DNS=127.0.0.1
       Domains=~.

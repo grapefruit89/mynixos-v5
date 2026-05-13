@@ -52,5 +52,9 @@ in {
       sopsFile = ../../secrets/secrets.yaml;
       owner = "root";
     };
+
+    systemd.services.wireguard-wg-admin.restartTriggers = [
+      config.sops.secrets.wireguard_admin_private_key.path
+    ];
   };
 }

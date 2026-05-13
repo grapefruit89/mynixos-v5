@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "NIXMETA v2.0 Metadata Schema",
+  "type": "object",
+  "required": [
+    "specVersion",
+    "id",
+    "title",
+    "layer",
+    "category",
+    "lastReviewed",
+    "reviewedBy",
+    "status",
+    "complexity",
+    "description"
+  ],
+  "properties": {
+    "specVersion": {
+      "type": "string",
+      "const": "2.0"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9/_-]+$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 3
+    },
+    "layer": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 99
+    },
+    "category": {
+      "type": "string"
+    },
+    "lastReviewed": {
+      "type": "string",
+      "format": "date"
+    },
+    "reviewedBy": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "review", "production", "deprecated"]
+    },
+    "complexity": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "depends_on": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "provides": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "sha256": { "type": "string" },
+        "size_bytes": { "type": "integer" },
+        "lines_of_code": { "type": "integer" }
+      }
+    }
+  }
+}
