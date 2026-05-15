@@ -8,13 +8,43 @@ let
  description = (opt.description or "") + " [Source: ${src}]"; 
  };
 
+ # 🛠️ BOILERPLATE REDUCER (from nixconf)
+ mkOpt = type: default: description: lib.mkOption { inherit type default description; };
+ mkBoolOpt = default: description: mkOpt lib.types.bool default description;
+ mkEnableOption = desc: lib.mkEnableOption desc // { default = false; };
+
+ # 🧮 LIST HELPERS
+ mergeAttrsList = builtins.foldl' (a: b: a // b) { };
+
+ # 📂 RECURSIVE IMPORTER (Dendritic Pattern)
+ # Traverses a directory tree and returns a list of all .nix files (excluding default.nix).
+ recursiveImportDir = dir: let
+   # Read the directory content
+   content = builtins.readDir dir;
+   
+   # Process entries
+   processEntry = name: type: let
+     path = dir + "/${name}";
+   in
+     if type == "directory" then
+       recursiveImportDir path
+     else if type == "regular" && lib.hasSuffix ".nix" name && name != "default.nix" then
+       [ path ]
+     else
+       [];
+   
+   # Flatten the list of lists
+   allEntries = lib.mapAttrsToList processEntry content;
+ in
+   lib.flatten allEntries;
+
 in rec {
-  inherit mkTracedOption;
+  inherit mkTracedOption mkOpt mkBoolOpt recursiveImportDir;
 
   # --- INTERNAL HELPERS (KISS) ---
   
   # Generates a hardened systemd serviceConfig
-  mkSystemdConfig = { name, isHardened, staticUid, requiresPostgres, readWritePaths, extraServiceConfig, finalNetns, appDataDir, appCacheDir, stateDir }: lib.recursiveUpdate {
+  mkSystemdConfig = { name, isHardened, staticUid, requiresPostgres, readWritePaths, readOnlyPaths, extraServiceConfig, finalNetns, appDataDir, appCacheDir, stateDir, tailscaleOnly, network, useGPU }: lib.recursiveUpdate {
     # --- Hardened Production Baseline (v7.0 Strict - Audit Topic 9) ---
     # These settings apply to EVERY service wrapped in mkService.
     ProtectSystem = "strict";
@@ -23,7 +53,20 @@ in rec {
     NoNewPrivileges = true;
     LockPersonality = true;
     RestrictNamespaces = true;
-    SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" ];
+    SystemCallFilter = [
+      "@system-service"
+      "~@privileged"
+      "~@resources"
+      "~@clock"
+      "~@cpu-emulation"
+      "~@debug"
+      "~@obsolete"
+      "~@module"
+      "~@mount"
+      "~@raw-io"
+      "~@reboot"
+      "~@swap"
+    ];
 
     # Kernel Protection
     ProtectKernelTunables = true;
@@ -33,20 +76,36 @@ in rec {
     # Process Isolation
     ProtectClock = true;
     ProtectHostname = true;
+    ProtectProc = "invisible";
+    ProcSubset = "pid";
     MemoryDenyWriteExecute = true;
     RestrictRealtime = true;
     RestrictSUIDSGID = true;
     # Network & System Sandbox
     PrivateMounts = true;
     SystemCallArchitectures = "native";
+    RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" ];
+    
+    # 👤 IDENTITY & DEVICE HARDENING (jailed-agents pattern)
+    PrivateUsers = true;
+    PrivateDevices = if useGPU then false else true;
+    
+    InaccessiblePaths = [
+      "-+/sys/kernel/debug"
+      "-+/sys/kernel/tracing"
+      "-+/boot"
+    ];
     
     # 👤 IDENTITY HARDENING (ADR 005)
     DynamicUser = if isHardened then false else true;
     User = if isHardened then name else null;
-    UMask = "0077";
     
     # 🌐 NETWORK & MEMORY HARDENING (v6.1 RAM Isolation)
+    PrivateNetwork = if (network == "none" && finalNetns == null) then true else false;
     IPAddressDeny = "any";
+    IPAddressAllow = if network == "tailscale" then [ "100.64.0.0/10" "fd7a:115c:a1e0::/48" ]
+                    else if network == "full" then "any"
+                    else [];
     MemoryHigh = "500M";
     MemoryMax = "1G";
 
@@ -56,6 +115,7 @@ in rec {
       appCacheDir
       stateDir
     ];
+    ReadOnlyPaths = readOnlyPaths;
 
     # 🐘 Conditional Postgres Access
     BindPaths = lib.optional requiresPostgres "/run/postgresql";
@@ -83,10 +143,15 @@ in rec {
     description ? "Hardened Production Service",
     useSSO ? true,
     useVPN ? false,
+    useZeroTrustSecrets ? false,
+    tailscaleOnly ? false,
+    network ? "full",
+    useGPU ? false,
     netns ? null,
     requiresPostgres ? false,
     isStream ? false,
     readWritePaths ? [],
+    readOnlyPaths ? [],
     persist ? true,
     socket ? null,
     extraServiceConfig ? {},
@@ -95,6 +160,8 @@ in rec {
     svcRegistry = config.my.services.spec.${name} or {};
     registrySocket = svcRegistry.socket or null;
     registryPort = svcRegistry.port or port;
+    
+    finalNetwork = if tailscaleOnly then "tailscale" else network;
 
     finalSocket = if (lib.isString socket) then socket 
                   else if registrySocket != null then registrySocket
@@ -107,22 +174,38 @@ in rec {
     isHardened = staticUid != null;
     finalNetns = if useVPN then (if netns != null then netns else "vpn-${name}") else null;
     
+    appDataDir = "${srePaths.appData}/${name}";
+    appCacheDir = "${srePaths.appCache}/${name}";
+    stateDir = "${srePaths.stateDir}/${name}";
+
   in {
     # 📝 1. SYSTEMD SERVICE
     systemd.services."${name}" = {
       inherit description;
-      after = [ "network.target" ] ++ (lib.optional (finalNetns != null) "netns-${finalNetns}.service");
-      bindsTo = lib.optional (finalNetns != null) "netns-${finalNetns}.service";
+      after = [ "network.target" ] 
+              ++ (lib.optional (finalNetns != null) "netns-${finalNetns}.service")
+              ++ (lib.optional (finalNetwork == "tailscale") "tailscaled.service")
+              ++ (lib.optional useZeroTrustSecrets "secrets-decryptor.service");
+      bindsTo = (lib.optional (finalNetns != null) "netns-${finalNetns}.service")
+                ++ (lib.optional (finalNetwork == "tailscale") "tailscaled.service")
+                ++ (lib.optional useZeroTrustSecrets "secrets-decryptor.service");
       
-      serviceConfig = mkSystemdConfig {
-        inherit name isHardened staticUid requiresPostgres readWritePaths extraServiceConfig finalNetns;
-        appDataDir = "${srePaths.appData}/${name}";
-        appCacheDir = "${srePaths.appCache}/${name}";
-        stateDir = "${srePaths.stateDir}/${name}";
-      };
+      serviceConfig = (mkSystemdConfig {
+        inherit name isHardened staticUid requiresPostgres readWritePaths readOnlyPaths extraServiceConfig finalNetns useGPU appDataDir appCacheDir stateDir;
+        network = finalNetwork;
+      }) // (lib.optionalAttrs useZeroTrustSecrets {
+        EnvironmentFile = [ "/run/secrets/secrets.env" ];
+      });
     };
 
-    # 👤 2. USER/GROUP
+    # 💾 2. PERSISTENCE (Automated via mkService)
+    my.persistence.directories = lib.mkIf persist [
+      appDataDir
+      appCacheDir
+      stateDir
+    ];
+
+    # 👤 3. USER/GROUP
     users.users = lib.mkIf isHardened {
       "${name}" = {
         isSystemUser = true;
@@ -168,13 +251,13 @@ in rec {
     (config.myLib.mkService {
       inherit config name port description persist useVPN;
       isStream = true;
-      readWritePaths = [ cacheDir mediaDir ];
+      readWritePaths = [ cacheDir ];
+      readOnlyPaths = [ mediaDir ];
       extraServiceConfig = lib.recursiveUpdate {
-        RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" ];
         Restart = "always";
         RestartSec = "5s";
         MemoryMax = memoryMax;
-        MemoryHigh = "75%";
+        MemoryHigh = "1.5G"; # Hardened Limit for Streaming (Baseline)
         CPUWeight = cpuWeight;
         OOMScoreAdjust = oomScoreAdjust;
         PrivateDevices = if useGPU then lib.mkForce false else true;

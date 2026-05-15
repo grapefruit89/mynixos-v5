@@ -1,4 +1,4 @@
-# NixHome v6.0 — Aviation-Grade Homelab
+# NixHome v6.0 — Production Hardened Homelab
 
 [![NixOS Stable](https://img.shields.io/badge/NixOS-25.11-blue.svg?style=flat-square&logo=nixos)](https://nixos.org)
 [![Flakes](https://img.shields.io/badge/Nix-Flakes-blue.svg?style=flat-square&logo=nixos)](https://nixos.wiki/wiki/Flakes)
@@ -175,4 +175,4 @@ ntest  # sudo nixos-rebuild test --flake .#nixhome
 ## ⚖️ License
 Distributed under the MIT License. See `LICENSE` for more information.
 
-*“Aviation-Grade Homelab: Because your data deserves a flight-rated infrastructure.”*
+*“Production Hardened Homelab: Because your data deserves a production-ready infrastructure.”*

@@ -36,7 +36,7 @@ in {
       description = "Primary Admin (${user})";
       extraGroups = ["wheel" "video" "render" "media" "networkmanager"];
       
-      # Passwort via Sops (Aviation-Grade Security)
+      # Passwort via Sops (Hardened Security)
       hashedPasswordFile = config.sops.secrets.user_password.path;
       
       openssh.authorizedKeys.keys = config.my.identity.sshKeys;

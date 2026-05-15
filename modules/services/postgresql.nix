@@ -15,6 +15,17 @@
 # ---ENDNIXMETA
 { config, lib, pkgs, ... }:
 let
+ # 🚀 NMS v4.0 Metadaten
+ nms = {
+ id = "NIXH-20-INF-002";
+ title = "PostgreSQL (SRE Optimized)";
+ description = "Optimized PostgreSQL cluster with socket-first configuration and automated backups.";
+ layer = 10;
+ nixpkgs.category = "services/database";
+ capabilities = ["database/postgresql" "system/persistence" "maintenance/auto-backup"];
+ audit.last_reviewed = "2026-05-14";
+ audit.complexity = 2;
+ };
 in
 {
  options.my.meta.postgresql = lib.mkOption {
@@ -59,6 +70,8 @@ in
    ProtectHome = true; 
    PrivateTmp = true; 
    PrivateDevices = true; 
+   PrivateNetwork = true;
+   PrivateUsers = true;
    NoNewPrivileges = true; 
    SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" ]; 
    OOMScoreAdjust = -1000; # 🚀 Highest Priority for DB

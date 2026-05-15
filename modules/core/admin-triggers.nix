@@ -1,5 +1,5 @@
 { config, lib, pkgs, ... }: {
-  # 🚀 AVIATION-GRADE ADMIN TRIGGERS (ADR 007)
+  # 🚀 PRODUCTION HARDENED ADMIN TRIGGERS (ADR 007)
   # Hardened systemd units for administrative tasks.
   # Usage: sudo systemctl start admin-<trigger>
   

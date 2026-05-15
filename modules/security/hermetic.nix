@@ -16,7 +16,7 @@ let
   nms = {
     id = "NIXH-90-SEC-HRM";
     title = "Hermetic (TPM Identity)";
-    description = "TPM-bound SSH identity provider for aviation-grade administrative access.";
+    description = "TPM-bound SSH identity provider for production-hardened administrative access.";
     layer = 90;
     capabilities = ["security/tpm" "security/ssh-sk" "identity/hardware-bound"];
     audit.last_reviewed = "2026-05-09";

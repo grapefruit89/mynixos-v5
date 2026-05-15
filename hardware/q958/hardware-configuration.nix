@@ -47,7 +47,7 @@ in {
 
  boot.extraModulePackages = [];
 
-    # 📂 DISK LAYOUT (Aviation-Grade: Stateless Root with ext4 Persistence)
+    # 📂 DISK LAYOUT (Production Hardened: Stateless Root with ext4 Persistence)
     boot.initrd.systemd.tpm2.enable = true; # Enable TPM2 support in initrd
 
     boot.initrd.luks.devices."cryptroot" = {

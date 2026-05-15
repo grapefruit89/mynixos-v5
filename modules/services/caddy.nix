@@ -93,7 +93,7 @@ in {
  }
  }
 
-        # --- HARDENED HEADERS (Aviation-Grade Stealth) ---
+        # --- HARDENED HEADERS (v7.0 Strict Stealth) ---
         (hardened_headers) {
           header {
             X-Content-Type-Options nosniff

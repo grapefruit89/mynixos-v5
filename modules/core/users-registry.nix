@@ -1,5 +1,5 @@
 { lib, ... }: {
-  # 🚀 AVIATION-GRADE USER REGISTRY (ADR 005)
+  # 🚀 PRODUCTION-HARDENED USER REGISTRY (ADR 005)
   # Centralized mapping for static UIDs to enable nftables 'meta skuid' filtering.
   # UID Range: 2000-2999 (Reserved for persistent services with network identity)
 

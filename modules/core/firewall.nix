@@ -47,7 +47,7 @@ in {
 
     networking.nftables.enable = true;
     networking.firewall = {
-      enable = true; # Aviation-Grade: Firewall ALWAYS active.
+      enable = true; # Production Hardened: Firewall ALWAYS active.
       trustedInterfaces = [ "lo" ];
       
       # 🛡️ GLOBAL PUBLIC PORTS

@@ -1,9 +1,9 @@
 { config, lib, pkgs, ... }: {
-  # 🚀 AVIATION-GRADE BOOT WATCHDOG
+  # 🚀 PRODUCTION HARDENED BOOT WATCHDOG
   # Runs after multi-user.target to verify system health.
 
   systemd.services.boot-watchdog = {
-    description = "Aviation-Grade Boot Health Check";
+    description = "v7.0 Strict Boot Health Check";
     after = [ "multi-user.target" "caddy.service" "pocket-id.service" "postgresql.service" ];
     wantedBy = [ "multi-user.target" ];
     

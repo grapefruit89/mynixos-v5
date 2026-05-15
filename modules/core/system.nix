@@ -28,7 +28,9 @@ in {
     boot.loader = {
       systemd-boot = {
         enable = lib.mkForce true;
-        configurationLimit = lib.mkForce 15;
+        # ⚠️ SAFE LIMIT: Verhindert Überlaufen der EFI-Partition (oft nur 50-100MB).
+        # Bei ~10MB pro Generation (Kernel + Initrd) sind 5-8 ein sicherer Wert.
+        configurationLimit = lib.mkForce 8;
         editor = false;
       };
       efi.canTouchEfiVariables = lib.mkForce true;
@@ -48,13 +50,6 @@ in {
  # Schnelles Booten & Cleanup
  boot.tmp.cleanOnBoot = true;
  boot.initrd.verbose = false;
-
- boot.kernel.sysctl = {
- "net.ipv4.conf.all.rp_filter" = lib.mkForce 1;
- "net.ipv4.tcp_syncookies" = lib.mkForce 1;
- "kernel.kptr_restrict" = lib.mkForce 2;
- "kernel.unprivileged_bpf_disabled" = lib.mkForce 1;
- };
 
  nixpkgs.config.allowUnfree = lib.mkDefault true;
  programs.nix-ld.enable = lib.mkDefault true;

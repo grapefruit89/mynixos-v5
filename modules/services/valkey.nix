@@ -41,10 +41,10 @@ in
  environment.persistence."/persist".directories = [ "/var/lib/redis-valkey" ];
 
  systemd.services.redis-valkey.serviceConfig = {
- ProtectSystem = "strict"; ProtectHome = true; PrivateTmp = true; PrivateDevices = true; NoNewPrivileges = true;
- MemoryDenyWriteExecute = true; RestrictAddressFamilies = [ "AF_INET" "AF_UNIX" ]; OOMScoreAdjust = -1000;
+   ProtectSystem = "strict"; ProtectHome = true; PrivateTmp = true; PrivateDevices = true; NoNewPrivileges = true;
+   PrivateNetwork = true; PrivateUsers = true;
+   MemoryDenyWriteExecute = true; RestrictAddressFamilies = [ "AF_INET" "AF_UNIX" ]; OOMScoreAdjust = -1000;
  };
-
  systemd.services.redis-valkey.restartTriggers = [
    config.services.redis.package
    (builtins.toJSON config.services.redis.servers.valkey.settings)

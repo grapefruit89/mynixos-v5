@@ -23,24 +23,9 @@ in
     inputs.sops-nix.nixosModules.sops
     inputs.impermanence.nixosModules.impermanence
     
-    # 🛠️ 2. SHARED SYSTEM LOGIC (CORE)
-    ./services-spec.nix
-    ./modules/core/configs.nix
-    ./modules/core/architecture-rules.nix
-    ./modules/core/ports.nix
-    ./modules/core/uid-registry.nix
-    ./modules/core/users-registry.nix
-    ./modules/core/registry.nix
-    ./modules/core/admin-triggers.nix
-    ./modules/core/boot-watchdog.nix
-    ./modules/core/lib-helpers-meta.nix
-    ./modules/core/secrets.nix
-    ./modules/core/graphics.nix
-    ./modules/core/kernel-hardening.nix
-    ./modules/security/hardened-core.nix
-    ./modules/core/backup.nix
-    ./modules/core/storage-policy.nix
-    ./modules/services/service-deferred-ops.nix
+    # 🌲 2. DENDRITIC MODULE DISCOVERY (v7.0 Strict)
+    # Automatically imports all modules from ./modules/
+    ./modules
 
     # --- MISSION PROFILES ---
     ./profiles/base-server.nix
@@ -49,7 +34,6 @@ in
     ./profiles/automation-apps.nix
     ./profiles/knowledge-apps.nix
     ./profiles/extra-apps.nix
-    ./modules/services/wireguard-admin.nix
 
     # 👤 4. PILOT (USER)
     ./users/moritz/default.nix

@@ -44,11 +44,10 @@ while IFS= read -r file; do
     TOTAL_FILES=$((TOTAL_FILES + 1))
     
     # Extraction
-    # Matches everything between delimiters and removes the "# " prefix
-    json_block=$(sed -n '/# ---NIXMETA/,/# ---ENDNIXMETA/p' "$file" | grep -v "# ---NIXMETA" | grep -v "# ---ENDNIXMETA" | sed 's/^# \?//' || true)
+    # Matches everything between delimiters and removes the "# " or "#" prefix
+    json_block=$(sed -n '/^# ---NIXMETA/,/^# ---ENDNIXMETA/p' "$file" | sed '1d;$d;s/^# //;s/^#//' || true)
     
     if [[ -z "$json_block" ]]; then
-        # echo -e "${YELLOW}⚠️  MISSING HEADER:${NC} $file"
         MISSING_HEADER=$((MISSING_HEADER + 1))
         continue
     fi
@@ -60,11 +59,26 @@ while IFS= read -r file; do
         continue
     fi
     
-    # JSON Schema Validation
-    if ! echo "$json_block" | jq --argfile schema "$SCHEMA_FILE" -e 'input | $schema' >/dev/null 2>&1; then
+    # JSON Schema Validation (Robust JQ check)
+    ERRORS=$(echo "$json_block" | jq --argfile schema "$SCHEMA_FILE" -r '
+      . as $in |
+      (
+        # Check required fields
+        ($schema.required[] | select($in | has(.) | not) | "Missing required field: \(.)"),
+        # Check Enum: status
+        (if $in.status and ([$schema.properties.status.enum[]] | contains([$in.status]) | not) then "Invalid status: \($in.status) (Must be one of: \($schema.properties.status.enum | join(", ")))" else empty end),
+        # Check Type/Range: layer
+        (if $in.layer != null and ($in.layer | type != "number" or . < 0 or . > 99) then "Invalid layer: \($in.layer) (Must be integer 0-99)" else empty end),
+        # Check Type/Range: complexity
+        (if $in.complexity != null and ($in.complexity | type != "number" or . < 1 or . > 5) then "Invalid complexity: \($in.complexity) (Must be integer 1-5)" else empty end),
+        # Check SpecVersion
+        (if $in.specVersion != $schema.properties.specVersion.const then "Invalid specVersion: \($in.specVersion) (Expected: \($schema.properties.specVersion.const))" else empty end)
+      )
+    ' 2>/dev/null)
+
+    if [[ -n "$ERRORS" ]]; then
         echo -e "${RED}❌ SCHEMA VIOLATION:${NC} $file"
-        echo -e "   → Details:"
-        echo "$json_block" | jq --argfile schema "$SCHEMA_FILE" 'input | $schema' 2>&1 | head -n 10
+        echo "$ERRORS" | sed 's/^/   → /'
         SCHEMA_ERRORS=$((SCHEMA_ERRORS + 1))
         continue
     fi

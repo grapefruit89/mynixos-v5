@@ -2,7 +2,7 @@
 # {
 #   "specVersion": "2.0",
 #   "id": "NIXH-000-COR-KER-001",
-#   "title": "Aviation-Grade Kernel Hardening",
+#   "title": "Production Hardened Kernel Hardening",
 #   "layer": 0,
 #   "category": "core/security",
 #   "lastReviewed": "2026-05-14",
@@ -15,7 +15,7 @@
 # ---ENDNIXMETA
 
 { config, lib, pkgs, ... }: {
-  # 🛡️ AVIATION-GRADE KERNEL HARDENING (NixHome v6.1)
+  # 🛡️ PRODUCTION HARDENED KERNEL HARDENING (NixHome v6.1)
   # Comprehensive module blacklist and sysctl hardening.
   # Static declarative approach (Decision R-03).
 
@@ -87,16 +87,18 @@
     # 🏎️ SYSCTL SECURITY HARDENING
     boot.kernel.sysctl = {
       # Network Hardening
+      "net.ipv4.tcp_syncookies" = 1;
       "net.ipv4.conf.all.rp_filter" = 1;
       "net.ipv4.conf.default.rp_filter" = 1;
-      "net.ipv4.tcp_syncookies" = 1;
+      "net.core.bpf_jit_harden" = 2;
+      "net.ipv4.conf.all.accept_redirects" = 0;
+      "net.ipv6.conf.all.accept_redirects" = 0;
       "net.ipv4.icmp_echo_ignore_broadcasts" = true;
-      "net.ipv4.conf.all.accept_redirects" = false;
       "net.ipv4.conf.all.secure_redirects" = false;
-      
       # Integrity & Privacy
       "kernel.kptr_restrict" = 2;
       "kernel.dmesg_restrict" = 1;
+      "kernel.printk" = "3 3 3 3";
       "kernel.unprivileged_bpf_disabled" = 1; 
       "kernel.unprivileged_userns_clone" = 0; # Disables unprivileged user namespaces
       "net.core.bpf_jit_enable" = 1;
@@ -105,6 +107,7 @@
       "kernel.perf_event_paranoid" = 3;
       "kernel.sysrq" = 0;
       "kernel.kexec_load_disabled" = 1; # Disables kexec (Decision KM-02)
+
       
       # ASLR & Memory Hardening
       "vm.mmap_rnd_bits" = 32;
@@ -118,15 +121,18 @@
     security.apparmor.enable = true;
     security.lockKernelModules = true; # Decision KM-01
 
-    # 💎 BOOT PARAMETERS (ADR 001)
+    # 💎 BOOT PARAMETERS (ADR 001 - v7.0 Strict)
     boot.kernelParams = [
-      "slab_nomerge"
-      "init_on_free=1"
-      "init_on_alloc=1"
-      "page_alloc.shuffle=1"
-      "debugfs=off"
-      "module.sig_enforce=1" # KM-04: Only load signed modules
-      "quiet" "loglevel=3"
+      # Memory Protection
+      "slab_nomerge"          # Mitigates heap exploits
+      "init_on_free=1"        # Zero memory on free
+      "init_on_alloc=1"       # Zero memory on allocation
+      "page_alloc.shuffle=1"  # Randomize page allocator
+      "randomize_kstack_offset=on" # Randomize kernel stack offset
+      "vsyscall=none"         # Disable legacy vsyscall area
+      "debugfs=off"           # Disable debugfs
+      "module.sig_enforce=1"  # KM-04: Only load signed modules
+      "quiet" "splash" "loglevel=3"
     ];
 
     # Whitelist of required generic modules (Hardware specific modules moved to hardware-profile)

@@ -16,7 +16,7 @@ let
   user = config.my.configs.identity.user;
   domain = config.my.configs.identity.domain;
   
-  # 📊 Fastfetch: Aviation-Grade Dashboard
+  # 📊 Fastfetch: Production Dashboard
   fastfetchConfig = pkgs.writeText "fastfetch-homelab.jsonc" (builtins.toJSON {
     logo = { source = "nixos"; padding = { top = 1; left = 2; }; };
     display = { separator = " ➜ "; color = { keys = "blue"; title = "green"; }; };
@@ -37,7 +37,7 @@ let
     #!/usr/bin/env bash
     # Services aus 10-gtw, 20-infra, 30-media
     CRITICAL_SERVICES=("sshd:SSH" "caddy:Proxy" "jellyfin:Jellyfin" "postgres:Database")
-    echo -e "\n🛡️  Aviation-Grade Service Status:\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo -e "\n🛡️  Hardened Service Status:\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     for entry in "''${CRITICAL_SERVICES[@]}"; do
       service="''${entry%%:*}"; label="''${entry##*:}"
       if systemctl is-active --quiet "$service"; then

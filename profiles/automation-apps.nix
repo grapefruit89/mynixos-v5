@@ -1,5 +1,5 @@
 { config, lib, pkgs, ... }: {
-  # 🚀 AVIATION-GRADE MISSION PROFILE: AUTOMATION APPS
+  # 🚀 PRODUCTION HARDENED MISSION PROFILE: AUTOMATION APPS
   # Bündelt n8n, Home Assistant und Management-Tools.
 
   imports = [

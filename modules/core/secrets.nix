@@ -110,8 +110,7 @@ in {
  # ROTATION POLICY: Key rotation should be performed manually every 180 days by 
  # regenerating the SSH host key and re-encrypting the SOPS vault.
  systemd.services.sops-key-sync = {
-   description = "Aviation-Grade Secret Key Synchronization (Tier B)";
- # Correct logic: only run if the fallback directory is available
+   description = "Production Hardened Secret Key Synchronization (Tier B)"; # Correct logic: only run if the fallback directory is available
  unitConfig.ConditionPathExists = config.my.configs.paths.tierB;
  wantedBy = [ "multi-user.target" ];
  serviceConfig = {
