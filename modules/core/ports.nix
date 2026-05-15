@@ -44,6 +44,7 @@
       scrutiny = 80084;
       uptime-kuma = 80005;
       gatus = 80111;
+      ntfy = 80112;
     };
     description = "Central port registry (SSoT). Only bound to 127.0.0.1.";
   };

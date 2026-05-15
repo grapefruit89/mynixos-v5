@@ -1,3 +1,19 @@
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-090-MON-GAT-001",
+#   "title": "Gatus Health Dashboard",
+#   "layer": 90,
+#   "category": "services/monitoring",
+#   "lastReviewed": "2026-05-14",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 3,
+#   "tags": ["monitoring", "gatus", "healthcheck"],
+#   "description": "Hardened health dashboard with socket-first monitoring and ntfy alerting."
+# }
+# ---ENDNIXMETA
+
 # Dashboard accessible ONLY via WireGuard tunnel (admin_auth).
 { config, lib, pkgs, myLib, ... }:
 
@@ -50,8 +66,8 @@ in {
  enable = lib.mkEnableOption "ntfy alerting";
  url = lib.mkOption { 
  type = lib.types.str; 
- default = "https://ntfy.sh"; 
- description = "ntfy server URL";
+ default = identity.ntfyUrl; 
+ description = "ntfy server URL (Default: Local)";
  };
  topic = lib.mkOption { 
  type = lib.types.str; 
@@ -109,6 +125,7 @@ in {
  }
  { 
  name = "Blocky DNS"; 
+ # ⚠️ EXCEPTION: Blocky does not support unix sockets for metrics (Audit Topic 6)
  url = "http://127.0.0.1:4000/metrics"; 
  interval = "60s"; 
  conditions = [ "[STATUS] == 200" ]; 

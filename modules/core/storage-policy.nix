@@ -23,10 +23,19 @@ let
 
   # Identify unauthorized services
   unauthorizedTierCServices = lib.filterAttrs (name: svc: 
-    !(lib.elem name tierCExemptions) && 
-    (usesTierC (svc.serviceConfig.ReadWritePaths or []) || 
-     usesTierC (svc.serviceConfig.BindPaths or []) ||
-     usesTierC (svc.serviceConfig.BindReadOnlyPaths or []))
+    let
+      # Gather all strings that could contain a path
+      configStrings = lib.flatten [
+        (svc.serviceConfig.ReadWritePaths or [])
+        (svc.serviceConfig.BindPaths or [])
+        (svc.serviceConfig.BindReadOnlyPaths or [])
+        (svc.serviceConfig.ExecStart or [])
+        (svc.serviceConfig.ExecStartPre or [])
+        (svc.serviceConfig.ExecStartPost or [])
+        (svc.serviceConfig.EnvironmentFile or [])
+      ];
+    in
+    !(lib.elem name tierCExemptions) && (usesTierC configStrings)
   ) config.systemd.services;
 
 in

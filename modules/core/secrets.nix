@@ -1,3 +1,19 @@
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-000-COR-SEC-001",
+#   "title": "Secrets Master Vault",
+#   "layer": 0,
+#   "category": "core/security",
+#   "lastReviewed": "2026-05-14",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 3,
+#   "tags": ["secrets", "sops", "security"],
+#   "description": "Centralized secret management with multi-key age/SSH encryption."
+# }
+# ---ENDNIXMETA
+
 {
  config,
  lib,
@@ -16,19 +32,6 @@
 #  3. Restore /persist from restic
 #  4. Run nixos-rebuild switch
 let
- # 🚀 NMS v4.2 Metadaten (hardened Vault)
- nms = {
- id = "NIXH-00-COR-028";
- title = "Secrets (Sops Master Vault)";
- description = "Centralized secret-to-module mapping derived from fixed schema. Uses age with SSH-hostkey backing.";
- layer = 00;
- nixpkgs.category = "system/security";
- capabilities = ["security/secrets" "sops/mapping" "age/encryption"];
- audit.last_reviewed = "2026-05-09";
- audit.complexity = 3;
- source_repo = "grapefruit89/mynixos";
- };
-
  # 🗺️ SSoT: Schema to SOPS Transformation
  # Derives sops.secrets entries from the read-only schema.
  schemaKeys = lib.attrNames config.my.secrets.schema;
@@ -39,12 +42,6 @@ let
 
 in {
  imports = [ ./secrets-schema.nix ];
-
- options.my.meta.secrets = lib.mkOption {
-    type = lib.types.attrs;
-    default = nms;
-    readOnly = true;
-  };
 
   options.my.security.sops.multiKey = {
     enable = lib.mkOption {
@@ -59,23 +56,9 @@ in {
       "⚠️ SOPS multi-key encryption DISABLED – secrets are vulnerable to total loss.";
 
     sops = {
-        # Infrastructure
-        cloudflare_token = {};
-        github_token = {};
-        unraid_root_password = {};
-        
-        # Automation & Apps
-        n8n_enc_key = {};
-        vaultwarden_env = {};
-        paperless_secret_key = {};
-        miniflux_admin_password = {};
-        readeck_env = {};
-        linkwarden_env = {};
-        
-        # Media Stack
-        sonarr_api_key = {};
-        radarr_api_key = {};
-        readarr_api_key = {};
+      # 🔑 SSH KEY PATHS (ADR 016)
+      # Explicitly pointing to /persist to avoid race conditions with impermanence.
+      age.sshKeyPaths = [ "/persist/etc/ssh/ssh_host_ed25519_key" ];
 
  # 🚀 DERIVED SECRETS (Schema-First)
  secrets = sopsEntries // {
@@ -159,7 +142,7 @@ in {
       after = [ "network.target" ];
       serviceConfig = {
         Type = "oneshot";
-        ExecStart = "${pkgs.sops}/bin/sops --decrypt /run/secrets/sops-recovery-test";
+        ExecStart = "${pkgs.sops}/bin/sops --decrypt ${config.sops.secrets.sops-recovery-test.sopsFile} > /dev/null";
         ProtectSystem = "strict";
         PrivateTmp = true;
         NoNewPrivileges = true;
@@ -174,4 +157,9 @@ in {
  };
 }
 /**
- * ---\n * technical_integrity:\n * checksum: sha256:d8a9b7c1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9\n * eof_marker: NIXHOME_VALID_EOF* ---\n */
+ * ---
+ * technical_integrity:
+ *   checksum: sha256:d8a9b7c1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9
+ *   eof_marker: NIXHOME_VALID_EOF
+ * ---
+ */

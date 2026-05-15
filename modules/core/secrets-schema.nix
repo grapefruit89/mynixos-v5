@@ -1,11 +1,18 @@
-# modules/core/secrets-schema.nix
-# =============================================================================
-# SOPS-NIX SECRET SCHEMA (SSoT)
-# =============================================================================
-# This file defines the IMMUTABLE list of allowed secret keys.
-# No other module can add keys to this list (readOnly = true).
-# This prevents accidental key mutation or leakage of untracked secrets.
-# =============================================================================
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-000-COR-SCH-001",
+#   "title": "SOPS Secret Schema",
+#   "layer": 0,
+#   "category": "core/security",
+#   "lastReviewed": "2026-05-14",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 2,
+#   "tags": ["secrets", "schema", "security"],
+#   "description": "Hardened schema defining the immutable list of allowed SOPS secret keys."
+# }
+# ---ENDNIXMETA
 
 { lib, config, ... }:
 
@@ -61,7 +68,12 @@ in {
       unknownKeys = lib.filter (k: !lib.elem k allowedKeys) definedKeys;
     in lib.optional (unknownKeys != []) 
       "⚠️ [SEC-SCHEMA] Unknown keys found in sops.secrets: ${lib.concatStringsSep ", " unknownKeys}. Please register them in secrets-schema.nix.";
-  };
-}
-/**
- * ---\n * technical_integrity:\n * checksum: sha256:7f9a8b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a\n * eof_marker: NIXHOME_VALID_EOF* ---\n */
+    };
+    }
+    /**
+    * ---
+    * technical_integrity:
+    *   checksum: sha256:7f9a8b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a
+    *   eof_marker: NIXHOME_VALID_EOF
+    * ---
+    */

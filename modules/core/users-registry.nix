@@ -18,6 +18,7 @@
       gatus = 2011;
       uptime-kuma = 2012;
       netdata = 2013;
+      ntfy = 2014;
 
       # Apps (Ingress/Outbound)
       adguardhome = 2020;

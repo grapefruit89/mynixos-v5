@@ -18,16 +18,15 @@
  home-manager.url = "github:nix-community/home-manager/release-25.11";
  home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
- impermanence.url = "github:nix-community/impermanence";
+   impermanence.url = "github:nix-community/impermanence";
  
- mcp-nixos.url = "github:utensils/mcp-nixos";
- mcp-nixos.inputs.nixpkgs.follows = "nixpkgs";
+   mcp-nixos = {
+     url = "github:utensils/mcp-nixos";
+     inputs.nixpkgs.follows = "nixpkgs";
+   };
  };
 
  outputs = { self, nixpkgs, ... }@inputs: let
-   # 🏆 hardened System Library Factory (System Parametric)
-   mkMyLib = system: import ./modules/core/lib-helpers.nix { inherit (nixpkgs) lib; pkgs = nixpkgs.legacyPackages.${system}; };
-   
    systems = [ "x86_64-linux" ];
    forAllSystems = nixpkgs.lib.genAttrs systems;
  in {
@@ -75,26 +74,32 @@
    });
 
    nixosConfigurations = {
- # 🚀 HOST: FUJITSU Q958 (DEIN SYSTEM)
- nixhome = nixpkgs.lib.nixosSystem {
- system = "x86_64-linux";
- specialArgs = { inherit inputs; myLib = mkMyLib "x86_64-linux"; };
- modules = [
- ./hardware/q958/hardware-configuration.nix
- ./hardware/q958/hardware-profile.nix
- ./configuration.nix # Der horizontale Entrypoint
- ];
- };
+     # 🚀 HOST: FUJITSU Q958 (DEIN SYSTEM)
+     nixhome = nixpkgs.lib.nixosSystem {
+       system = "x86_64-linux";
+       specialArgs = {
+         inherit inputs;
+         myLib = import ./modules/core/lib-helpers.nix { inherit (nixpkgs) lib; };
+       };
+       modules = [
+         ./hardware/q958/hardware-configuration.nix
+         ./hardware/q958/hardware-profile.nix
+         ./configuration.nix # Der horizontale Entrypoint
+       ];
+     };
 
- # 🤝 HOST: FREUNDES-PC (BEISPIEL)
- # freund-pc = nixpkgs.lib.nixosSystem {
- # system = "x86_64-linux";
- # specialArgs = { inherit inputs; myLib = mkMyLib "x86_64-linux"; };
- # modules = [
- # ./hardware/freund/hardware-configuration.nix
- # ./configuration.nix 
- # ];
- # };
- };
+     # 🤝 HOST: FREUNDES-PC (BEISPIEL)
+     # freund-pc = nixpkgs.lib.nixosSystem {
+     #   system = "x86_64-linux";
+     #   specialArgs = {
+     #     inherit inputs;
+     #     myLib = import ./modules/core/lib-helpers.nix { inherit (nixpkgs) lib; };
+     #   };
+     #   modules = [
+     #     ./hardware/freund/hardware-configuration.nix
+     #     ./configuration.nix 
+     #   ];
+     # };
+   };
  };
 }

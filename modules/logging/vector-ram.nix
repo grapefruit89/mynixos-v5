@@ -32,6 +32,12 @@ in
           current_boot_only = false;
         };
 
+        # 📈 Host Metrics (Topic 6)
+        sources.host_metrics = {
+          type = "host_metrics";
+          scrape_interval_secs = 15;
+        };
+
         # 📂 Additional source for traditional logs
         sources.var_log = {
           type = "file";
@@ -41,7 +47,7 @@ in
         # 🛡️ Transformation: Masking & Filtering
         transforms.mask_sensitive = {
           type = "remap";
-          inputs = [ "journald" "var_log" ];
+          inputs = [ "journald" "var_log" "host_metrics" ];
           source = ''
             # Redact paths and keys
             .message = replace(.message, r'/mnt/(media|hdd_pool|tierC)/[^\s]+', "[MEDIA_PATH]")
@@ -78,7 +84,7 @@ in
         sinks.ntfy = lib.mkIf (cfg.ntfyTopic != null) {
           type = "http";
           inputs = [ "error_filter" ];
-          uri = "https://ntfy.sh/${cfg.ntfyTopic}";
+          uri = "${config.my.configs.identity.ntfyUrl}/${cfg.ntfyTopic}";
           method = "post";
           encoding.codec = "text";
           # Immediate dispatch for critical errors

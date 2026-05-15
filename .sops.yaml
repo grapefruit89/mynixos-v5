@@ -7,12 +7,10 @@ creation_rules:
   - path_regex: secrets\.yaml$
     key_groups:
       - age:
-          - age1pjl6xt8zu80p4dpp6yqnk5u53ratgc58sdtnf7c2krlxyt8msgvs9s763s # Emergency Key (Moritz)
           - age1t2uu2un4trvvyhg7ryp8h8tqjxl5vnd0qd48dq4s8yvhc6jwtd4smyet95 # Server Host Key (q958)
-          # --- ADMIN YUBIKEY PLACEHOLDER ---
-          # To retrieve your YubiKey age public key, run: age-plugin-yubikey --list
-          # Then uncomment and add the key below:
           # - &admin_yubikey age1... 
+      - age:
+          - age1pjl6xt8zu80p4dpp6yqnk5u53ratgc58sdtnf7c2krlxyt8msgvs9s763s # Emergency Key (Moritz)
 
 # 🚨 RECOVERY STRATEGY (C-03):
 # For maximum safety, separate keys into independent key_groups.

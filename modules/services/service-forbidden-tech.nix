@@ -1,15 +1,23 @@
-# modules/policy/forbidden-tech.nix
-# =============================================================================
-# NixHome FORBIDDEN TECHNOLOGY WARNINGS ONLY
-# =============================================================================
-# Diese Datei erzeugt AUSSCHLIESSLICH Warnungen im Build-Log.
-# Sie bricht den Build NIEMALS ab.
-# =============================================================================
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-090-POL-FT-001",
+#   "title": "Forbidden Technology Enforcement",
+#   "layer": 90,
+#   "category": "policy/security",
+#   "lastReviewed": "2026-05-14",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 2,
+#   "tags": ["policy", "security", "hardening"],
+#   "description": "Zero-tolerance build-time assertions against forbidden technologies (Docker, Tailscale, etc.)."
+# }
+# ---ENDNIXMETA
 
 { config, lib, ... }:
 
 let
-  inherit (lib) mkOption types optionalString;
+  inherit (lib) mkOption types;
 
   forbiddenReasons = {
     secureBoot = "Secure Boot ist zu riskant. Fehler führen zu permanentem Lockout.";
@@ -23,6 +31,7 @@ let
     cron        = "cron ist veraltet. Ausschließlich systemd-Timer werden verwendet.";
     passwords   = "SSH-Passwort-Authentifizierung ist verboten. Nur hardware-gebundene Keys.";
     dockerSock  = "Der Zugriff auf docker.sock ist gleichbedeutend mit Root-Zugriff.";
+    sftpgo      = "SFTPGo ist verboten. Dateizugriff erfolgt ausschließlich via FileBrowser oder SSH/SFTP.";
   };
 
 in {
@@ -38,39 +47,42 @@ in {
     cron        = mkOption { type = types.bool; default = false; };
     passwords   = mkOption { type = types.bool; default = false; };
     dockerSock  = mkOption { type = types.bool; default = false; };
+    sftpgo      = mkOption { type = types.bool; default = false; };
   };
 
   config = {
     # =========================================================================
-    # NUR WARNUNGEN – KEINE ASSERTIONS, KEIN BUILD-ABBRUCH
+    # ASSERTIONS – BUILD-ABBRUCH BEI VERSTOSS
     # =========================================================================
-    warnings = [
-      # Secure Boot / Lanzaboote
-      (optionalString (config.boot.lanzaboote.enable or false)
-        "⚠️ [POL-001] Secure Boot/Lanzaboote ist NICHT ERWÜNSCHT! Grund: ${forbiddenReasons.secureBoot}")
-
-      # Tailscale
-      (optionalString (config.services.tailscale.enable or false)
-        "⚠️ [POL-002] Tailscale ist NICHT ERWÜNSCHT! Grund: ${forbiddenReasons.tailscale}")
-
-      # Docker
-      (optionalString (config.virtualisation.docker.enable or false)
-        "⚠️ [POL-003] Docker ist NICHT ERWÜNSCHT! Grund: ${forbiddenReasons.docker}")
-
-      # iptables (wenn nftables nicht aktiv)
-      (optionalString (!config.networking.nftables.enable)
-        "⚠️ [POL-004] iptables ist NICHT ERWÜNSCHT! Bitte aktiviere nftables. Grund: ${forbiddenReasons.iptables}")
-
-      # cron
-      (optionalString (config.services.cron.enable or false)
-        "⚠️ [POL-005] cron ist NICHT ERWÜNSCHT! Bitte nutze systemd-Timer. Grund: ${forbiddenReasons.cron}")
-
-      # SSH-Passwörter
-      (optionalString (config.services.openssh.settings.PasswordAuthentication or true)
-        "⚠️ [POL-006] SSH-Passwort-Authentifizierung ist NICHT ERWÜNSCHT! Grund: ${forbiddenReasons.passwords}")
-
-      # No active Tailscale/OliveTin services should exist
-      # Validation handled by absence of modules rather than runtime toggles
+    assertions = [
+      {
+        assertion = !(config.boot.lanzaboote.enable or false);
+        message = "❌ [POL-001] Forbidden Technology Detected: Lanzaboote. ${forbiddenReasons.secureBoot}";
+      }
+      {
+        assertion = !(config.services.tailscale.enable or false);
+        message = "❌ [POL-002] Forbidden Technology Detected: Tailscale. ${forbiddenReasons.tailscale}";
+      }
+      {
+        assertion = !(config.virtualisation.docker.enable or false);
+        message = "❌ [POL-003] Forbidden Technology Detected: Docker. ${forbiddenReasons.docker}";
+      }
+      {
+        assertion = config.networking.nftables.enable;
+        message = "❌ [POL-004] Forbidden Technology Detected: Legacy iptables. Please enable nftables. ${forbiddenReasons.iptables}";
+      }
+      {
+        assertion = !(config.services.cron.enable or false);
+        message = "❌ [POL-005] Forbidden Technology Detected: Cron. Please use systemd timers. ${forbiddenReasons.cron}";
+      }
+      {
+        assertion = !(config.services.openssh.settings.PasswordAuthentication or true);
+        message = "❌ [POL-006] Forbidden Policy Detected: SSH Password Auth enabled. ${forbiddenReasons.passwords}";
+      }
+      {
+        assertion = !(config.services.sftpgo.enable or false);
+        message = "❌ [POL-007] Forbidden Technology Detected: SFTPGo. ${forbiddenReasons.sftpgo}";
+      }
     ];
   };
 }

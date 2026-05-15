@@ -15,15 +15,30 @@ in rec {
   
   # Generates a hardened systemd serviceConfig
   mkSystemdConfig = { name, isHardened, staticUid, requiresPostgres, readWritePaths, extraServiceConfig, finalNetns, appDataDir, appCacheDir, stateDir }: lib.recursiveUpdate {
-    # 🛡️ TITANIUM HARDENING (ADR 001)
+    # --- Hardened Production Baseline (v7.0 Strict - Audit Topic 9) ---
+    # These settings apply to EVERY service wrapped in mkService.
     ProtectSystem = "strict";
     ProtectHome = true;
-    ProtectClock = true;
+    PrivateTmp = true;
+    NoNewPrivileges = true;
     LockPersonality = true;
     RestrictNamespaces = true;
     SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" ];
-    PrivateTmp = true;
-    NoNewPrivileges = true;
+
+    # Kernel Protection
+    ProtectKernelTunables = true;
+    ProtectKernelModules = true;
+    ProtectKernelLogs = true;
+    ProtectControlGroups = true;
+    # Process Isolation
+    ProtectClock = true;
+    ProtectHostname = true;
+    MemoryDenyWriteExecute = true;
+    RestrictRealtime = true;
+    RestrictSUIDSGID = true;
+    # Network & System Sandbox
+    PrivateMounts = true;
+    SystemCallArchitectures = "native";
     
     # 👤 IDENTITY HARDENING (ADR 005)
     DynamicUser = if isHardened then false else true;
@@ -60,12 +75,12 @@ in rec {
     '';
   };
 
-  # 🏆 AVIATION-GRADE SERVICE FACTORY (mkService)
+  # 🏆 HARDENED SERVICE FACTORY (mkService)
   mkService = {
     config,
     name,
     port ? null,
-    description ? "Aviation-Grade Service",
+    description ? "Hardened Production Service",
     useSSO ? true,
     useVPN ? false,
     netns ? null,
@@ -131,7 +146,7 @@ in rec {
     systemd.tmpfiles.rules = lib.optional (finalSocket != null) "d /run/service-sockets 0775 root media -";
   };
 
-  # 🎬 AVIATION-GRADE STREAMER FACTORY
+  # 🎬 HARDENED STREAMER FACTORY
   mkStreamer = {
     config,
     name,

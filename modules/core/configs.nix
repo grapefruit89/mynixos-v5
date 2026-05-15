@@ -28,6 +28,11 @@
         default = "git@m7c5.de";
         description = "Global administrator email";
       };
+      ntfyUrl = lib.mkOption {
+        type = lib.types.str;
+        default = "https://ntfy.nix.m7c5.de";
+        description = "Local ntfy-sh server URL";
+      };
       host = lib.mkOption {
         type = lib.types.str;
         default = "nixhome";

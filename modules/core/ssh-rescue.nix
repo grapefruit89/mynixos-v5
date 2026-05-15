@@ -49,6 +49,7 @@ in {
   };
 
  # Note: Global firewall port 2222 removal confirmed.
- # Access is managed via ListenAddress (Local/Tailscale only).
+ # Access is managed via ListenAddress (Local/WireGuard only).
+
  };
 }

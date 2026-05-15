@@ -60,38 +60,11 @@ while IFS= read -r file; do
         continue
     fi
     
-    # Schema-Like Manual Validation (Field Presence)
-    ERRS_FOUND=0
-    for field in "${REQUIRED_FIELDS[@]}"; do
-        val=$(echo "$json_block" | jq -r ".$field" 2>/dev/null)
-        if [[ "$val" == "null" || -z "$val" ]]; then
-            echo -e "${RED}❌ MISSING FIELD [$field]:${NC} $file"
-            ERRS_FOUND=$((ERRS_FOUND + 1))
-        fi
-    done
-    
-    # Value Constraints
-    STATUS=$(echo "$json_block" | jq -r ".status")
-    LAYER=$(echo "$json_block" | jq -r ".layer")
-    VERSION=$(echo "$json_block" | jq -r ".specVersion")
-    
-    if [[ "$VERSION" != "2.0" ]]; then
-        echo -e "${YELLOW}⚠️  OLD VERSION [$VERSION]:${NC} $file"
-        WARNINGS=$((WARNINGS + 1))
-    fi
-    
-    if ! [[ "$LAYER" =~ ^[0-9]+$ ]] || [ "$LAYER" -lt 0 ] || [ "$LAYER" -gt 99 ]; then
-        echo -e "${RED}❌ INVALID LAYER [$LAYER]:${NC} $file"
-        ERRS_FOUND=$((ERRS_FOUND + 1))
-    fi
-    
-    VALID_STATUS=("draft" "review" "production" "deprecated")
-    if [[ ! " ${VALID_STATUS[@]} " =~ " ${STATUS} " ]]; then
-        echo -e "${RED}❌ UNKNOWN STATUS [$STATUS]:${NC} $file"
-        ERRS_FOUND=$((ERRS_FOUND + 1))
-    fi
-
-    if [ "$ERRS_FOUND" -gt 0 ]; then
+    # JSON Schema Validation
+    if ! echo "$json_block" | jq --argfile schema "$SCHEMA_FILE" -e 'input | $schema' >/dev/null 2>&1; then
+        echo -e "${RED}❌ SCHEMA VIOLATION:${NC} $file"
+        echo -e "   → Details:"
+        echo "$json_block" | jq --argfile schema "$SCHEMA_FILE" 'input | $schema' 2>&1 | head -n 10
         SCHEMA_ERRORS=$((SCHEMA_ERRORS + 1))
         continue
     fi
@@ -100,7 +73,7 @@ while IFS= read -r file; do
     VALID_FILES=$((VALID_FILES + 1))
     
     # Harvest Stats
-    echo "$STATUS" >> "$STATUS_TMP"
+    echo "$json_block" | jq -r ".status" >> "$STATUS_TMP"
     echo "$json_block" | jq -r ".category" >> "$CATEGORIES_TMP"
     echo "$json_block" | jq -r ".tags[]?" >> "$TAGS_TMP"
 

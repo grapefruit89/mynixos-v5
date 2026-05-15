@@ -1,3 +1,19 @@
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-000-COR-IMP-001",
+#   "title": "Impermanence Core",
+#   "layer": 0,
+#   "category": "core/persistence",
+#   "lastReviewed": "2026-05-14",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 3,
+#   "tags": ["persistence", "stateless", "impermanence"],
+#   "description": "System-wide persistence for stateless root-on-RAM setup. Removed /nix/var for v6.0 compliance."
+# }
+# ---ENDNIXMETA
+
 { config, lib, ... }: {
  # 💾 hardened IMPERMANENCE (ADR 852)
  # Verwaltet die systemweiten Persistenz-Pfade für das Stateless-Root (tmpfs).
@@ -8,7 +24,6 @@
     environment.persistence."/persist" = {
       hideMounts = true;
       directories = [
-        "/nix"
         "/var/log"
         "/var/lib/nixos"
         "/var/lib/systemd/coredump"
@@ -42,15 +57,6 @@
       device = "proc";
       fsType = "proc";
       options = [ "nosuid" "nodev" "noexec" "hidepid=2" ];
-    };
-
-    # Metadaten für die Traceability
-    my.meta.impermanence = {
-      id = "NIXH-00-COR-IMP";
-      title = "Impermanence Core";
-      description = "System-wide persistence for stateless root-on-RAM setup. Fixed for v6.0 (removed /nix/var).";
-      layer = 0;
-      audit.last_reviewed = "2026-05-06";
     };
   };
 }

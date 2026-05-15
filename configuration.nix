@@ -26,6 +26,7 @@ in
     # 🛠️ 2. SHARED SYSTEM LOGIC (CORE)
     ./services-spec.nix
     ./modules/core/configs.nix
+    ./modules/core/architecture-rules.nix
     ./modules/core/ports.nix
     ./modules/core/uid-registry.nix
     ./modules/core/users-registry.nix
@@ -36,6 +37,7 @@ in
     ./modules/core/secrets.nix
     ./modules/core/graphics.nix
     ./modules/core/kernel-hardening.nix
+    ./modules/security/hardened-core.nix
     ./modules/core/backup.nix
     ./modules/core/storage-policy.nix
     ./modules/services/service-deferred-ops.nix

@@ -1,22 +1,20 @@
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-010-SRV-GTW-001",
+#   "title": "Caddy Hardened Gateway",
+#   "layer": 10,
+#   "category": "services/gateway",
+#   "lastReviewed": "2026-05-14",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 4,
+#   "tags": ["caddy", "ingress", "sso", "security"],
+#   "description": "Hardened Edge Proxy with GeoIP, SSO, Stealth 444 response, and rate-limiting."
+# }
+# ---ENDNIXMETA
 { config, lib, pkgs, myLib, ... }:
 let
-  # 🚀 NMS v4.2 Metadaten (Aviation-Grade Edge Proxy)
-  # Fragment-Sourcing:
-  # - NIXH-10-GTW-002: Caddy Basis & M1 Abrams Snippets
-  # - Fragment 11429: GeoIP & nftables Integration
-  # - Fragment 2607: Rate Limiting & Stream Optimization
-  # - Fragment 18332: Systemd Sandboxing & LoadCredential
-  nms = {
-    id = "NIXH-01-SRV-CAD-001";
-    title = "Caddy (M1 Abrams v2)";
-    description = "Hardened Edge Proxy with GeoIP, SSO and Rate-Limiting. Decoupled horizontal architecture.";
-    layer = 10;
-    nixpkgs.category = "servers/proxy";
-    capabilities = ["network/ingress" "security/waf" "security/geoip" "automation/dns-01"];
-    audit.last_reviewed = "2026-04-27";
-    audit.complexity = 3;
-  };
-
   cfg = config.my.services.caddy;
   sreConfig = config.my.configs;
   

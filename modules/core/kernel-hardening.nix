@@ -1,3 +1,19 @@
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-000-COR-KER-001",
+#   "title": "Aviation-Grade Kernel Hardening",
+#   "layer": 0,
+#   "category": "core/security",
+#   "lastReviewed": "2026-05-14",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 4,
+#   "tags": ["kernel", "security", "hardening"],
+#   "description": "Comprehensive module blacklist and sysctl security hardening."
+# }
+# ---ENDNIXMETA
+
 { config, lib, pkgs, ... }: {
   # 🛡️ AVIATION-GRADE KERNEL HARDENING (NixHome v6.1)
   # Comprehensive module blacklist and sysctl hardening.
@@ -124,7 +140,7 @@
         Type = "oneshot";
         ExecStart = pkgs.writeShellScript "audit-modules" ''
           # List of allowed modules (merged from initrd, hardware and generic)
-          ALLOWED="nvme ahci xhci_pci usbhid usb_storage sd_mod nct6775 coretemp i915 e1000e ipmi_si tpm_tis usbcore ext4 wireguard veth"
+          ALLOWED="nvme ahci xhci_pci usbhid usb_storage sd_mod nct6775 coretemp i915 e1000e ipmi_si tpm_tis usbcore ext4 wireguard veth bridge tun tap"
           CURRENT=$(lsmod | awk 'NR>1 {print $1}')
           
           for mod in $CURRENT; do

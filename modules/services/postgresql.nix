@@ -1,16 +1,20 @@
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-020-SRV-DB-001",
+#   "title": "PostgreSQL Database Cluster",
+#   "layer": 10,
+#   "category": "services/database",
+#   "lastReviewed": "2026-05-14",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 2,
+#   "tags": ["database", "postgresql", "persistence"],
+#   "description": "Optimized PostgreSQL cluster with socket-first configuration and automated backups."
+# }
+# ---ENDNIXMETA
 { config, lib, pkgs, ... }:
 let
- # 🚀 NMS v4.0 Metadaten
- nms = {
- id = "NIXH-20-INF-002";
- title = "PostgreSQL (SRE Optimized)";
- description = "Optimized database cluster with automated backups and strict sandboxing.";
- layer = 10;
- nixpkgs.category = "services/databases";
- capabilities = [ "database/postgresql" "system/persistence" "maintenance/auto-backup" ];
- audit.last_reviewed = "2026-03-02";
- audit.complexity = 2;
- };
 in
 {
  options.my.meta.postgresql = lib.mkOption {

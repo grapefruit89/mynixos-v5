@@ -1,8 +1,7 @@
 { lib, pkgs, ... }:
 { name, port, stateOption, defaultStateDir, supportsUserGroup ? true, defaultUser ? name, defaultGroup ? "media", statePathSuffix ? null, useVpn ? false, extraServiceConfig ? {} }:
-{ config, ... }:
+{ config, myLib, ... }:
 let
- myLib = import ../core/lib-helpers.nix { inherit lib; };
  cfg = config.my.media.${name};
  sreConfig = config.my.configs;
  srePaths = config.my.configs.paths;

@@ -43,10 +43,13 @@ let
     GEO_V4="$WORKDIR/geo_v4.txt"
     GEO_V6="$WORKDIR/geo_v6.txt"
     DC_BLOCK="$WORKDIR/dc_block.txt"
+    TOR_V4="$WORKDIR/tor_v4.txt"
+    TOR_V6="$WORKDIR/tor_v6.txt"
     
-    touch "$GEO_V4" "$GEO_V6" "$DC_BLOCK"
+    touch "$GEO_V4" "$GEO_V6" "$DC_BLOCK" "$TOR_V4" "$TOR_V6"
 
     # 1. Fetch GeoIP (IPv4)
+    # ... (existing fetch logic) ...
     for cc in ${lib.concatStringsSep " " cfg.allowedCountries}; do
       echo "Fetching GeoIP v4 for $cc..."
       ${pkgs.curl}/bin/curl -sSfL "https://www.ipdeny.com/ipblocks/data/aggregated/$cc-aggregated.zone" >> "$GEO_V4" || echo "Warning: Failed to fetch v4 for $cc"
@@ -64,28 +67,38 @@ let
       ${pkgs.curl}/bin/curl -sSfL "$url" | grep -v "^#" >> "$DC_BLOCK" || echo "Warning: Failed to fetch DC list from $url"
     done
 
-    # 4. Post-processing & Validation
-    # Remove duplicates, empty lines, and sort
+    # 4. Fetch Tor Exit Nodes
+    echo "Fetching Tor exit nodes (v4)..."
+    ${pkgs.curl}/bin/curl -sSfL "https://check.torproject.org/exit-addresses" | grep "ExitAddress" | awk '{print $2}' >> "$TOR_V4" || echo "Warning: Failed to fetch Tor v4"
+    echo "Fetching Tor exit nodes (v6)..."
+    ${pkgs.curl}/bin/curl -sSfL "https://check.torproject.org/exit-addresses" | grep "ExitAddress" | awk '{print $2}' | grep ":" >> "$TOR_V6" || echo "Warning: Failed to fetch Tor v6 (checking v4 list for v6)"
+    # Note: Dedicated Tor v6 lists are rarer, but check.torproject.org includes both.
+
+    # 5. Post-processing & Validation
     sort -u "$GEO_V4" -o "$GEO_V4"
     sort -u "$GEO_V6" -o "$GEO_V6"
     sort -u "$DC_BLOCK" -o "$DC_BLOCK"
+    sort -u "$TOR_V4" -o "$TOR_V4"
+    sort -u "$TOR_V6" -o "$TOR_V6"
 
     # Validation: Ensure we didn't get a completely empty list for Geo
     if [ ! -s "$GEO_V4" ]; then
       echo "Error: GeoIP v4 list is empty. Aborting update."
       ${lib.optionalString (config.my.logging.vector.ntfyTopic != null) ''
-        ${pkgs.curl}/bin/curl -d "GeoIP Update Failed: V4 list empty" https://ntfy.sh/${config.my.logging.vector.ntfyTopic}
+        ${pkgs.curl}/bin/curl -d "GeoIP Update Failed: V4 list empty" ${config.my.configs.identity.ntfyUrl}/${config.my.logging.vector.ntfyTopic}
       ''}
       exit 1
     fi
 
-    # 5. Atomic Update to live filesystem
+    # 6. Atomic Update to live filesystem
     mkdir -p ${geoipDir}
     cp "$GEO_V4" "${geoipDir}/geo_allowed_v4.zone"
     cp "$GEO_V6" "${geoipDir}/geo_allowed_v6.zone"
     cp "$DC_BLOCK" "${geoipDir}/dc_blocked.zone"
+    cp "$TOR_V4" "${geoipDir}/tor_exit_v4.zone"
+    cp "$TOR_V6" "${geoipDir}/tor_exit_v6.zone"
 
-    # 6. Apply to nftables
+    # 7. Apply to nftables
     NFT_FILE="$WORKDIR/apply.nft"
     {
       echo "table inet filter {"
@@ -109,6 +122,16 @@ let
       echo "    type ipv6_addr; flags interval;"
       echo "    elements = { $(grep ":" "$DC_BLOCK" | tr '\n' ',' | sed 's/,$//' | sed 's/^,//') }"
       echo "  }"
+
+      echo "  set tor_exit_nodes {"
+      echo "    type ipv4_addr; flags interval;"
+      echo "    elements = { $(grep -v ":" "$TOR_V4" | tr '\n' ',' | sed 's/,$//') }"
+      echo "  }"
+
+      echo "  set tor_exit_nodes_v6 {"
+      echo "    type ipv6_addr; flags interval;"
+      echo "    elements = { $(grep ":" "$TOR_V4" | tr '\n' ',' | sed 's/,$//' | sed 's/^,//') }"
+      echo "  }"
       
       echo "}"
     } > "$NFT_FILE"
@@ -118,7 +141,7 @@ let
     else
       echo "❌ Failed to apply nftables update."
       ${lib.optionalString (config.my.logging.vector.ntfyTopic != null) ''
-        ${pkgs.curl}/bin/curl -d "nftables update failed: malformed ruleset" https://ntfy.sh/${config.my.logging.vector.ntfyTopic}
+        ${pkgs.curl}/bin/curl -d "nftables update failed: malformed ruleset" ${config.my.configs.identity.ntfyUrl}/${config.my.logging.vector.ntfyTopic}
       ''}
       exit 1
     fi

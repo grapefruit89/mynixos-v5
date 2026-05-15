@@ -15,12 +15,14 @@
     ../modules/core/shell-premium.nix
     ../modules/core/system-stability.nix
     ../modules/core/principles.nix
+    ../modules/core/recovery-usb.nix
     
     # Standard Services
     ../modules/services/caddy.nix
     ../modules/services/blocky.nix
     ../modules/services/postgresql.nix
     ../modules/services/service-gatus.nix
+    ../modules/services/service-ntfy.nix
     ../modules/core/boot-watchdog.nix
   ];
 
@@ -28,6 +30,7 @@
  my.logging.vector.enable = true;
  my.logging.s3Sync.enable = true;
  my.monitoring.gatus.enable = true;
+ my.services.ntfy.enable = true;
  my.services.pocketId.enable = true;
  my.services.caServer.enable = true;
 

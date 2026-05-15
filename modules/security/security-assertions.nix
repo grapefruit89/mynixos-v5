@@ -48,7 +48,7 @@ in
   options.my.security.policy = {
     mode = lib.mkOption {
       type = lib.types.enum [ "warn" "strict" ];
-      default = "warn";
+      default = "strict";
       description = "Policy enforcement mode: 'warn' (non-blocking) or 'strict' (fail build).";
     };
   };
@@ -57,11 +57,13 @@ in
     # 📊 Metadata for Traceability
     my.meta.security_assertions = nms;
 
-    # 🛡️ Dynamic Enforcement
-    # Always use warnings regardless of mode, per user mandate.
-    warnings = map (c: c.msg) (builtins.filter (c: !c.cond) securityChecks);
+    # 🛡️ Hard Policy Enforcement (v6.1 Strict)
+    # Any violation here will block the build to ensure technical integrity.
+    assertions = lib.mkIf (config.my.security.policy.mode == "strict") (map (c: {
+      assertion = c.cond;
+      message = c.msg;
+    }) securityChecks);
 
-    # Keep assertions empty to prevent build aborts
-    assertions = [];
+    warnings = lib.mkIf (config.my.security.policy.mode == "warn") (map (c: c.msg) securityChecks);
   };
 }

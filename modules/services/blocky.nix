@@ -1,3 +1,18 @@
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-010-SRV-DNS-001",
+#   "title": "Blocky DNS Resolver",
+#   "layer": 10,
+#   "category": "services/dns",
+#   "lastReviewed": "2026-05-14",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 2,
+#   "tags": ["dns", "ad-block", "privacy"],
+#   "description": "Hardened DNS resolver with ad-blocking and split-horizon support."
+# }
+# ---ENDNIXMETA
 { config, lib, pkgs, ... }: 
 let
   cfg = config.my.services.blocky;

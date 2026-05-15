@@ -1,22 +1,16 @@
 # ---NIXMETA
 # {
-#   "id": "core/firewall",
-#   "layer": "00-core",
-#   "status": "active",
-#   "hardware_specific": false,
-#   "depends_on_capabilities": [
-#     "network_configuration",
-#     "uid_registry"
-#   ],
-#   "provides_capabilities": [
-#     "zero_trust_outbound_filtering"
-#   ],
-#   "obsidian_tags": [
-#     "firewall",
-#     "nftables",
-#     "core"
-#   ],
-#   "last_reviewed": "2026-05-12"
+#   "specVersion": "2.0",
+#   "id": "NIXH-000-COR-FW-001",
+#   "title": "Zero-Trust nftables Firewall",
+#   "layer": 0,
+#   "category": "core/network",
+#   "lastReviewed": "2026-05-14",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 5,
+#   "tags": ["firewall", "nftables", "security", "zero-trust"],
+#   "description": "Hardened nftables configuration with UID-based outbound filtering and dual-stack parity."
 # }
 # ---ENDNIXMETA
 {
@@ -42,13 +36,6 @@ in {
       default = true;
       description = "Enable kernel-level blocking of Tor exit nodes.";
     };
-  };
-
-  options.my.meta.firewall = lib.mkOption {
-    type = lib.types.attrs;
-    default = nms;
-    readOnly = true;
-    description = "NMS metadata for firewall module";
   };
 
   config = {
