@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# ────────────────────────────────────────────────────────────────────────────────
+# QUELLEN:
+# - giomf/NixoScope (Modul-Abhängigkeitsvisualisierung)
+# ────────────────────────────────────────────────────────────────────────────────
 # Audit: Module Graph Visualization (NixoScope Pattern)
 # Dieses Skript exportiert die Modul-Struktur für visuelle Audits.
 

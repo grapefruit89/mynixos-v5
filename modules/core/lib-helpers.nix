@@ -1,3 +1,10 @@
+# ────────────────────────────────────────────────────────────────────────────────
+# QUELLEN:
+# - Misterio77/nix-config (Systemd-Härtung, modulare Struktur)
+# - andersonjoseph/jailed-agents (PrivateUsers / network Policy)
+# - denful/dendrix (Dendritisches Muster / rekursive Imports)
+# - kiriwalawren/nixflix (Media-Stack Isolation)
+# ────────────────────────────────────────────────────────────────────────────────
 { lib, pkgs, ... }: 
 let
  # 🚀 SSoT Domain Generator

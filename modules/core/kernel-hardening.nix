@@ -1,3 +1,9 @@
+# ────────────────────────────────────────────────────────────────────────────────
+# QUELLEN:
+# - Misterio77/nix-config (Kernel-Sysctls)
+# - vimjoyer/nixconf (Kernel-Boot-Parameter)
+# - saylesss88/nix-book (linux-hardened Kernel Bestätigung)
+# ────────────────────────────────────────────────────────────────────────────────
 # ---NIXMETA
 # {
 #   "specVersion": "2.0",

@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# ────────────────────────────────────────────────────────────────────────────────
+# QUELLEN:
+# - saylesss88/nix-book (systemd-analyze security Inspiration)
+# ────────────────────────────────────────────────────────────────────────────────
 # Audit: Systemd Service Security (v7.0 Strict - Audit Topic 4)
 # Dieses Skript analysiert die Härtung aller systemd-Dienste.
 

@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# ────────────────────────────────────────────────────────────────────────────────
+# QUELLEN:
+# - nix-community/awesome-nix (Tooling Inspiration: statix, deadnix, fmt)
+# ────────────────────────────────────────────────────────────────────────────────
 # Audit: Zero-Trust Code Quality (v7.0 Strict - LH12)
 # Dieses Skript führt Statix, Deadnix und nixpkgs-fmt via transienten nix-shell aus.
 
