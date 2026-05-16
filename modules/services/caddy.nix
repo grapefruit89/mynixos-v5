@@ -143,9 +143,6 @@ in {
             file_server
           }
         }
-
- # 🧱 AUTOMATIC FIREWALL EXPOSURE
- networking.firewall.allowedTCPPorts = [ 443 ];
       '';
     };
 
@@ -259,7 +256,7 @@ in {
             import acme_bypass
             import honeypot
             import hardened_headers
-            respond "Forbidden" 444
+            abort
           '';
         };
       };

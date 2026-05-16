@@ -105,32 +105,38 @@ let
       
       echo "  set geo_allowed {"
       echo "    type ipv4_addr; flags interval;"
-      echo "    elements = { $(tr '\n' ',' < "$GEO_V4" | sed 's/,$//') }"
+      GEO_V4_ELEMS=$(tr '\n' ',' < "$GEO_V4" | sed 's/,$//' || true)
+      [ -n "$GEO_V4_ELEMS" ] && echo "    elements = { $GEO_V4_ELEMS }"
       echo "  }"
       
       echo "  set geo_allowed_v6 {"
       echo "    type ipv6_addr; flags interval;"
-      echo "    elements = { $(tr '\n' ',' < "$GEO_V6" | sed 's/,$//') }"
+      GEO_V6_ELEMS=$(tr '\n' ',' < "$GEO_V6" | sed 's/,$//' || true)
+      [ -n "$GEO_V6_ELEMS" ] && echo "    elements = { $GEO_V6_ELEMS }"
       echo "  }"
 
       echo "  set dc_blocked {"
       echo "    type ipv4_addr; flags interval;"
-      echo "    elements = { $(grep -v ":" "$DC_BLOCK" | tr '\n' ',' | sed 's/,$//') }"
+      DC_V4_ELEMS=$(grep -v ":" "$DC_BLOCK" | tr '\n' ',' | sed 's/,$//' || true)
+      [ -n "$DC_V4_ELEMS" ] && echo "    elements = { $DC_V4_ELEMS }"
       echo "  }"
 
       echo "  set dc_blocked_v6 {"
       echo "    type ipv6_addr; flags interval;"
-      echo "    elements = { $(grep ":" "$DC_BLOCK" | tr '\n' ',' | sed 's/,$//' | sed 's/^,//') }"
+      DC_V6_ELEMS=$(grep ":" "$DC_BLOCK" | tr '\n' ',' | sed 's/,$//' | sed 's/^,//' || true)
+      [ -n "$DC_V6_ELEMS" ] && echo "    elements = { $DC_V6_ELEMS }"
       echo "  }"
 
       echo "  set tor_exit_nodes {"
       echo "    type ipv4_addr; flags interval;"
-      echo "    elements = { $(grep -v ":" "$TOR_V4" | tr '\n' ',' | sed 's/,$//') }"
+      TOR_V4_ELEMS=$(grep -v ":" "$TOR_V4" | tr '\n' ',' | sed 's/,$//' || true)
+      [ -n "$TOR_V4_ELEMS" ] && echo "    elements = { $TOR_V4_ELEMS }"
       echo "  }"
 
       echo "  set tor_exit_nodes_v6 {"
       echo "    type ipv6_addr; flags interval;"
-      echo "    elements = { $(grep ":" "$TOR_V4" | tr '\n' ',' | sed 's/,$//' | sed 's/^,//') }"
+      TOR_V6_ELEMS=$(tr '\n' ',' < "$TOR_V6" | sed 's/,$//' || true)
+      [ -n "$TOR_V6_ELEMS" ] && echo "    elements = { $TOR_V6_ELEMS }"
       echo "  }"
       
       echo "}"
@@ -155,7 +161,7 @@ in {
       description = "Update nftables GeoIP and Datacenter sets";
       after = [ "network-online.target" ];
       wants = [ "network-online.target" ];
-      startAt = "weekly"; # Sonntag 03:00 (default)
+      startAt = "daily"; # Täglich (was weekly)
       path = with pkgs; [ curl nftables gawk sed coreutils gnugrep ];
       
       serviceConfig = {

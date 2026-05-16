@@ -30,8 +30,8 @@ in {
 
   config = lib.mkIf cfg.enable {
     # 🛡️ SYSTEM-LEVEL HARDENING (v6.1 Strict)
-    security.hideProcessInformation = true;
     security.lockKernelModules = cfg.lockdownMode == "strict";
+    security.hideProcessInformation = true;
 
     # 🧹 SERVICE SLIMMING (Eliminating Attack Surface)
     systemd.services = {
@@ -42,7 +42,6 @@ in {
       cups.enable = false;
       bluetooth.enable = false;
       wpa_supplicant.enable = false;
-      pcscd.enable = false;
     };
 
     systemd.maskedUnits = [ 
@@ -51,12 +50,6 @@ in {
     ];
     
     systemd.coredump.enable = false;
-
-    # 📁 PROC PROTECTION
-    fileSystems."/proc" = {
-      fsType = "proc";
-      options = [ "hidepid=2" ];
-    };
 
     # 📊 METADATA INTEGRATION
     my.meta.hardened_core = {

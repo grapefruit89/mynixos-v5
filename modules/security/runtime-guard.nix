@@ -50,13 +50,15 @@ in
           echo "🛑 SECURITY ALERT: Admin-Hangar Alias 127.0.0.2 is MISSING!"
           exit 1
         fi
+      '';
+    };
 
- systemd.timers.security-watchdog = {
- wantedBy = [ "timers.target" ];
- timerConfig = {
- OnCalendar = config.my.security.runtime-guard.interval;
- Persistent = true;
- };
- };
- };
+    systemd.timers.security-watchdog = {
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnCalendar = config.my.security.runtime-guard.interval;
+        Persistent = true;
+      };
+    };
+  };
 }

@@ -20,8 +20,9 @@
         echo "✅ Caddy: ACTIVE & SECURE"
         
         # 2. Pocket-ID Check
+        # LHF-06: Using SSoT port from registry
         systemctl is-active --quiet pocket-id
-        curl -sf http://127.0.0.1:10880/ > /dev/null
+        curl -sf http://127.0.0.1:${toString config.my.services.spec.pocket-id.port}/ > /dev/null
         echo "✅ Pocket-ID: ACTIVE"
         
         # 3. PostgreSQL Check

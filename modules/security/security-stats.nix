@@ -10,7 +10,7 @@ let
     # Helper to count elements in nftables sets
     count_elements() {
       local set_name=$1
-      ${pkgs.nftables}/bin/nft list set inet filter "$set_name" 2>/dev/null | grep -c "elements =" || echo "0"
+      ${pkgs.nftables}/bin/nft -j list set inet filter "$set_name" 2>/dev/null | ${pkgs.jq}/bin/jq '.nftables[].set.elem | length' 2>/dev/null || echo "0"
     }
 
     # Count total dropped packets from specific chains/rules if they have counters
@@ -44,6 +44,7 @@ in {
     systemd.services.collect-security-stats = {
       description = "Collect nftables and security metrics";
       startAt = "hourly";
+      path = [ pkgs.jq ];
       serviceConfig = {
         Type = "oneshot";
         ExecStart = statsScript;

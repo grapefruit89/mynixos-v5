@@ -23,25 +23,25 @@ in {
     enable = lib.mkEnableOption "ntfy-sh Local Server";
   };
 
-  config = lib.mkIf cfg.enable {
-    services.ntfy-sh = {
-      enable = true;
-      settings = {
-        base-url = "https://ntfy.${config.my.configs.identity.subdomain}.${config.my.configs.identity.domain}";
-        listen-http = "127.0.0.1:${toString config.my.ports.ntfy}";
-        behind-proxy = true;
-        # Access control can be added here if needed, but Caddy handles SSO
-      };
-    };
-
-    # 🎬 hardened SERVICE FACTORY
-    my.modules.ntfy = (myLib.mkService {
+  config = lib.mkIf cfg.enable (lib.mkMerge [
+    (myLib.mkService {
       inherit config;
       name = "ntfy";
       port = config.my.ports.ntfy;
       useSSO = true; # Authentication via Pocket-ID/family_auth
       description = "ntfy-sh Local Server";
       persist = true;
-    });
-  };
+    })
+    {
+      services.ntfy-sh = {
+        enable = true;
+        settings = {
+          base-url = "https://ntfy.${config.my.configs.identity.subdomain}.${config.my.configs.identity.domain}";
+          listen-http = "127.0.0.1:${toString config.my.ports.ntfy}";
+          behind-proxy = true;
+          # Access control can be added here if needed, but Caddy handles SSO
+        };
+      };
+    }
+  ]);
 }

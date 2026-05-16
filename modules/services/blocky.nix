@@ -78,9 +78,5 @@ in {
       DNS=127.0.0.1
       Domains=~.
     '';
-
-    # Firewall
-    networking.firewall.allowedTCPPorts = [ 53 ];
-    networking.firewall.allowedUDPPorts = [ 53 ];
   };
 }

@@ -66,10 +66,6 @@
       options = [ "defaults" "size=4G" "mode=755" ];
     };
 
-    fileSystems."/proc" = {
-      device = "proc";
-      fsType = "proc";
-      options = [ "nosuid" "nodev" "noexec" "hidepid=2" ];
-    };
+    users.groups.proc = {}; # Escape-hatch for monitoring
   };
 }

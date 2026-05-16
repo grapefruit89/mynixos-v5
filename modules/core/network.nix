@@ -51,7 +51,8 @@ in {
  # 🛡️ DNS HARDENING (DNS-over-TLS)
  services.resolved = {
  enable = true;
- dnssec = lib.mkForce "allow-downgrade";
+ # LHF-07: Disable resolved DNSSEC as blocky handles validation
+ dnssec = "false";
  domains = ["~."];
  fallbackDns = ["1.1.1.1" "8.8.8.8"];
  extraConfig = ''

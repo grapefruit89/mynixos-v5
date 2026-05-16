@@ -45,13 +45,22 @@ in {
 
  # 🏎️ STORE OPTIMIZATION
  auto-optimise-store = true;
- nix.optimise.automatic = true;
  connect-timeout = 5;
  experimental-features = [ "nix-command" "flakes" "auto-allocate-uids" "cgroups" ];
  
  # 🛡️ SECURITY & USERS
  sandbox = true;
  trusted-users = ["root" config.my.configs.identity.user];
+ };
+
+ # LHF-04: Fix invalid options path (moved outside nix.settings)
+ nix.optimise.automatic = true;
+ 
+ # 🧹 AUTO-GC (Fragment 1035 Alignment)
+ nix.gc = {
+ automatic = true;
+ dates = "weekly";
+ options = "--delete-older-than 14d";
  };
 
  # 🚫 BUILD CONFLICT ASSERTION (Ollama vs max-jobs=0)
@@ -61,13 +70,6 @@ in {
  # 💤 RESOURCE HYGIENE
  nix.daemonCPUSchedPolicy = "idle";
  nix.daemonIOSchedClass = "idle";
-
- # 🧹 AUTO-GC (Fragment 1035 Alignment)
- nix.gc = {
- automatic = true;
- dates = "weekly";
- options = "--delete-older-than 14d";
- };
 
  # 💾 IMPERMANENCE BASH FIX (Fragment 1084)
  # Erzwungener History-Flush vor dem Wipe + Size Limits

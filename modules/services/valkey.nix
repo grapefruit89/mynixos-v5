@@ -13,6 +13,7 @@ let
  };
 in
 {
+ options.my.services.valkey.enable = lib.mkEnableOption "Valkey service";
  options.my.meta.valkey = lib.mkOption {
  type = lib.types.attrs;
  default = nms;
@@ -21,7 +22,7 @@ in
  };
 
 
- config = lib.mkIf (config.my.services.valkey.enable or true) {
+ config = lib.mkIf config.my.services.valkey.enable {
  services.redis.package = pkgs.valkey;
  services.redis.servers.valkey = {
  enable = true; 

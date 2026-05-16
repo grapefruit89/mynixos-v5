@@ -38,7 +38,7 @@ in
     };
     services.caddy.virtualHosts."${host}" = {
       extraConfig = ''
-        import sso_auth
+        import admin_auth
         reverse_proxy 127.0.0.1:${toString config.my.ports.homepage}
       '';
     };

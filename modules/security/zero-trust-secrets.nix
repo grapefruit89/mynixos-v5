@@ -21,7 +21,7 @@ in
       
       serviceConfig = {
         Type = "oneshot";
-        RemainAfterExit = true;
+        RemainAfterExit = false;
         ExecStart = "${pkgs.bash}/bin/bash ${../../scripts/secrets-decryptor.sh}";
         
         # 🛡️ Sandboxing
@@ -29,6 +29,11 @@ in
         ProtectHome = true;
         PrivateTmp = true;
         NoNewPrivileges = true;
+        CapabilityBoundingSet = "";
+        PrivateUsers = true;
+        RestrictAddressFamilies = [ "AF_UNIX" ];
+        SystemCallFilter = [ "@system-service" "~@privileged" "~@mount" "~@swap" ];
+
         # Benötigt Zugriff auf /persist/etc/ssh für den Key und /run/secrets für den Output
         # Sowie Zugriff auf den TPM-Chip
         ReadWritePaths = [ "/run/secrets" ];

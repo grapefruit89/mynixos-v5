@@ -58,5 +58,16 @@ in {
 
     # Enable IP forwarding for NAT and routing
     boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
+
+    # 🛡️ NAT MASQUERADE (KRIT-04)
+    networking.nftables.tables.media-nat = {
+      family = "inet";
+      content = ''
+        chain postrouting {
+          type nat hook postrouting priority 100;
+          ip saddr 10.200.0.0/24 oifname != "veth-media" masquerade
+        }
+      '';
+    };
   };
 }

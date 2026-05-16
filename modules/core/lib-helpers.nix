@@ -58,6 +58,9 @@ in rec {
     ProtectHome = true;
     PrivateTmp = true;
     NoNewPrivileges = true;
+    CapabilityBoundingSet = ""; # LHF-03: Drop all capabilities by default
+    AmbientCapabilities = "";
+    UMask = "0077";             # LHF-03: Restrict file creation permissions
     LockPersonality = true;
     RestrictNamespaces = true;
     SystemCallFilter = [

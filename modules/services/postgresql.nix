@@ -67,6 +67,11 @@ in
  
  systemd.services.postgresql.serviceConfig = { 
    ProtectSystem = "strict"; 
+   ReadWritePaths = [ 
+     "/var/lib/postgresql" 
+     "/run/postgresql" 
+     "${config.my.configs.paths.tierA}/backups/postgresql" 
+   ];
    ProtectHome = true; 
    PrivateTmp = true; 
    PrivateDevices = true; 

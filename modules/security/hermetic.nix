@@ -51,12 +51,6 @@ in {
     services.openssh = {
       # Allow Security Keys (FIDO2/TPM-backed)
       settings.PubkeyAuthentication = "yes";
-      
-      # Strict key restriction if enforced
-      extraConfig = lib.optionalString cfg.enforceHardwareKeys ''
-        # aviation-grade: only allow security-key algorithms
-        PubkeyAcceptedKeyTypes sk-ssh-ed25519@openssh.com
-      '';
     };
 
     # 📦 TOOLS FOR TPM KEY GENERATION & MANAGEMENT

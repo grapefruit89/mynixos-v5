@@ -12,6 +12,7 @@ let
  };
 in
 {
+ options.my.services.clamav.enable = lib.mkEnableOption "ClamAV service";
  options.my.meta.clamav = lib.mkOption {
  type = lib.types.attrs;
  default = nms;
@@ -19,7 +20,7 @@ in
  description = "NMS metadata";
  };
 
- config = lib.mkIf (config.my.services.clamav.enable or true) {
+ config = lib.mkIf config.my.services.clamav.enable {
  services.clamav = {
  daemon.enable = true;
  updater.enable = true;

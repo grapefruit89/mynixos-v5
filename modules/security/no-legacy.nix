@@ -26,8 +26,12 @@ in
       (lib.optionalString config.services.cron.enable (msg "Cron" "systemd.timers"))
       (lib.optionalString config.networking.networkmanager.enable (msg "NetworkManager" "systemd-networkd"))
     ];
-    services.samba.settings.global."server min protocol" = "SMB2_10";
- boot.blacklistedKernelModules = [ "ext2" "ext3" "jfs" "reiserfs" "hfs" "hfsplus" "ntfs" ];
+
+    services.samba.settings.global = lib.mkIf config.services.samba.enable {
+      "server min protocol" = "SMB2_10";
+    };
+
+    boot.blacklistedKernelModules = [ "ext2" "ext3" "jfs" "reiserfs" "hfs" "hfsplus" "ntfs" ];
  networking.nftables.enable = true;
  networking.firewall.enable = lib.mkForce true;
  boot.initrd.compressor = "zstd";

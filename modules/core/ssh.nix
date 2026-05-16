@@ -50,7 +50,13 @@ in {
         KbdInteractiveAuthentication = false;
         AllowUsers = [ user ];
         LogLevel = "VERBOSE";
-        PubkeyAcceptedAlgorithms = [
+        PubkeyAcceptedAlgorithms = let
+          hermetic = config.my.security.hermetic or { enable = false; enforceHardwareKeys = false; };
+          enforce = hermetic.enable && hermetic.enforceHardwareKeys;
+        in if enforce then [
+          "sk-ssh-ed25519@openssh.com"
+          "sk-ssh-ed25519-cert-v01@openssh.com"
+        ] else [
           "ssh-ed25519-cert-v01@openssh.com"
           "ssh-ed25519"
           "sk-ssh-ed25519@openssh.com" # 🛡️ YubiKey Hardware Bound
@@ -85,14 +91,17 @@ in {
  systemd.services.sshd = {
  stopIfChanged = false; # Verhindert SSH-Verlust bei Updates
  serviceConfig = {
- Restart = "always";
- RestartSec = config.my.configs.systemd.restartSec;
- ProtectProc = "invisible";
- ProcSubset = "pid";
- PrivateTmp = true;
- ProtectSystem = "strict";
- ProtectHome = "read-only";
+   Restart = "always";
+   RestartSec = config.my.configs.systemd.restartSec;
+   ProtectProc = "invisible";
+   ProcSubset = "pid";
+   PrivateTmp = true;
+   ProtectSystem = "strict";
+   ProtectHome = "read-only";
  };
  };
+
+ # 🔑 YUBIKEY SUPPORT
+ systemd.services.pcscd.enable = lib.mkForce true;
  };
-}
+ }

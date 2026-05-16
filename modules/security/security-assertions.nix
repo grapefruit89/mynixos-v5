@@ -38,7 +38,7 @@ let
       msg = "⚠️ [SEC-STO-001]: Tier A storage is NOT under /persist! Impermanence integrity at risk.";
     }
     {
-      cond = builtins.elem "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILvttE1EzwLJpzFc/LuuXZP485Ma0mEJQiu3iMXaO58W" config.my.identity.sshKeys;
+      cond = builtins.elem "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILvttE1EzwLJpzFc/LuuXZP485Ma0mEJQiu3iMXaO58W" (config.my.configs.identity.sshKeys or []);
       msg = "❌ [SEC-SSH-001]: Primary SSH Key is missing in identity.nix! Rebuild blocked to prevent lockout.";
     }
   ];

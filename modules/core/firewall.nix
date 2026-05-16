@@ -143,55 +143,46 @@ in {
         } limit rate 20/second accept
       '';
 
-
-      # 🛡️ ZERO-TRUST OUTBOUND FILTERING (ADR 005)
-      # Blocks all outbound traffic from apps (2000-2999) by default.
-      # Whitelist strategy for metadata and required external APIs.
-      extraCommands = let
-        u = config.my.users.registry;
-      in ''
-        # We use a custom table for outbound to not interfere with standard NixOS rules
-        nft 'add table inet outbound_filter'
-        nft 'add chain inet outbound_filter output { type filter hook output priority 0; policy drop; }'
-        nft 'flush chain inet outbound_filter output'
-
-        # 1. Allow System (UID < 2000) & Loopback
-        nft 'add rule inet outbound_filter output meta skuid < 2000 accept'
-        nft 'add rule inet outbound_filter output oifname "lo" accept'
-
-        # 2. Whitelist: Caddy (ACME / Cloudflare API)
-        nft 'add rule inet outbound_filter output meta skuid ${toString u.caddy} accept'
-
-        # 3. Whitelist: Blocky (Upstream DNS over TLS)
-        nft 'add rule inet outbound_filter output meta skuid ${toString u.blocky} tcp dport 853 accept'
-
-        # 4. Whitelist: Media Streamers (Metadata APIs)
-        # Includes: Jellyfin, Navidrome, Audiobookshelf
-        nft 'add rule inet outbound_filter output meta skuid { ${toString u.jellyfin}, ${toString u.navidrome}, ${toString u.audiobookshelf} } accept'
-
-        # 5. Whitelist: Arr-Stack (Indexer / Metadata)
-        nft 'add rule inet outbound_filter output meta skuid { ${toString u.sonarr}, ${toString u.radarr}, ${toString u.prowlarr}, ${toString u.sabnzbd}, ${toString u.lidarr}, ${toString u.readarr} } accept'
-
-        # 6. Whitelist: Monitoring & Management
-        nft 'add rule inet outbound_filter output meta skuid { ${toString u.gatus}, ${toString u.uptime-kuma}, ${toString u.homepage} } accept'
-
-        # Whitelist: Critical Backend
-        # Matrix/Conduit, Vector (if needed), Restic (Backblaze)
-        nft 'add rule inet outbound_filter output meta skuid { ${toString u.matrix}, ${toString u.vector} } accept'
-
-        # 🌐 MEDIA NAMESPACE ISOLATION (Item 3)
-        # Note: Services in 'media-ns' hit the outbound chain via their respective UIDs.
-        # This centralized rule ensures that compromised media apps cannot bypass the DROP policy.
-        nft 'add rule inet outbound_filter output meta skuid 2000-2999 counter log prefix "NFT_OUTBOUND_DROP: "'
-        '';
-
-      extraStopRules = ''
-        nft delete table inet outbound_filter 2>/dev/null || true
-      '';
-
       # 🔍 INTRUSION DETECTION (H-09)
       # Log refused connections for auditing (Portscans, LAN Recon)
       logRefusedConnections = true;
+    };
+
+    # 🛡️ ZERO-TRUST OUTBOUND FILTER (KRIT-01: Persistent via native tables)
+    networking.nftables.tables.outbound_filter = {
+      family = "inet";
+      content = let
+        u = config.my.users.registry;
+      in ''
+        chain output {
+          type filter hook output priority 0; policy drop;
+
+          # 1. Allow System (UID < 2000) & Loopback
+          meta skuid < 2000 accept
+          oifname "lo" accept
+
+          # 2. Whitelist: Caddy (ACME / Cloudflare API)
+          meta skuid ${toString u.caddy} accept
+
+          # 3. Whitelist: Blocky (Upstream DNS over TLS)
+          meta skuid ${toString u.blocky} tcp dport 853 accept
+
+          # 4. Whitelist: Media Streamers (Metadata APIs)
+          meta skuid { ${toString u.jellyfin}, ${toString u.navidrome}, ${toString u.audiobookshelf} } accept
+
+          # 5. Whitelist: Arr-Stack (Indexer / Metadata)
+          meta skuid { ${toString u.sonarr}, ${toString u.radarr}, ${toString u.prowlarr}, ${toString u.sabnzbd}, ${toString u.lidarr}, ${toString u.readarr} } accept
+
+          # 6. Whitelist: Monitoring & Management
+          meta skuid { ${toString u.gatus}, ${toString u.uptime-kuma}, ${toString u.homepage} } accept
+
+          # 7. Whitelist: Critical Backend
+          meta skuid { ${toString u.matrix}, ${toString u.vector} } accept
+
+          # 🌐 MEDIA NAMESPACE ISOLATION
+          meta skuid 2000-2999 counter log prefix "NFT_OUTBOUND_DROP: " drop
+        }
+      '';
     };
   };
 }

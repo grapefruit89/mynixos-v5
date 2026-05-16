@@ -111,6 +111,16 @@ in
  User = "root";
  Nice = 19;
  IOSchedulingClass = "idle";
+ 
+ # 🛡️ Sandboxing (LHF-07)
+ NoNewPrivileges = true;
+ PrivateTmp = true;
+ ProtectSystem = "strict";
+ ReadWritePaths = [ 
+   config.my.configs.paths.tierC 
+   cfg.queueDir 
+ ];
+ InaccessiblePaths = [ "/home" "/etc/ssh" "/persist/etc/ssh" ];
  };
  };
 

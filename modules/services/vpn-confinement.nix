@@ -75,6 +75,16 @@ in {
  # Route all traffic through wg0
  ip netns exec ${nsName} ip route add default dev wg0
  
+ # 🛡️ 2. KILL-SWITCH (KRIT-03)
+ ${lib.optionalString nsCfg.killSwitch ''
+   echo "🛡️ Enforcing Kill-Switch for namespace ${nsName}..."
+   ip netns exec ${nsName} nft add table inet killswitch
+   ip netns exec ${nsName} nft add chain inet killswitch output \
+     "{ type filter hook output priority 0; policy drop; }"
+   ip netns exec ${nsName} nft add rule inet killswitch output \
+     oifname { "wg0", "lo" } accept
+ ''}
+
  # 🛡️ 3. HEALTHCHECK & ALERTING (H-02)
  echo "🔍 Testing VPN connectivity in namespace ${nsName}..."
  if ! ip netns exec ${nsName} ${pkgs.iputils}/bin/ping -c 1 -W 5 1.1.1.1 > /dev/null; then

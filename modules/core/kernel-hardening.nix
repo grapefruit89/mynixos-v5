@@ -1,9 +1,3 @@
-# ────────────────────────────────────────────────────────────────────────────────
-# QUELLEN:
-# - Misterio77/nix-config (Kernel-Sysctls)
-# - vimjoyer/nixconf (Kernel-Boot-Parameter)
-# - saylesss88/nix-book (linux-hardened Kernel Bestätigung)
-# ────────────────────────────────────────────────────────────────────────────────
 # ---NIXMETA
 # {
 #   "specVersion": "2.0",
@@ -101,6 +95,11 @@
       "net.ipv6.conf.all.accept_redirects" = 0;
       "net.ipv4.icmp_echo_ignore_broadcasts" = true;
       "net.ipv4.conf.all.secure_redirects" = false;
+      # Härtungserweiterungen (LHF-02)
+      "net.ipv4.conf.all.log_martians" = 1;
+      "net.ipv4.conf.default.log_martians" = 1;
+      "net.ipv4.tcp_rfc1337" = 1;
+
       # Integrity & Privacy
       "kernel.kptr_restrict" = 2;
       "kernel.dmesg_restrict" = 1;
@@ -108,11 +107,11 @@
       "kernel.unprivileged_bpf_disabled" = 1; 
       "kernel.unprivileged_userns_clone" = 0; # Disables unprivileged user namespaces
       "net.core.bpf_jit_enable" = 1;
-      "net.core.bpf_jit_harden" = 2;
       "kernel.ftrace_enabled" = false;
       "kernel.perf_event_paranoid" = 3;
       "kernel.sysrq" = 0;
       "kernel.kexec_load_disabled" = 1; # Disables kexec (Decision KM-02)
+      "kernel.yama.ptrace_scope" = 2; # Cross-process ptrace restriction (LHF-02)
 
       
       # ASLR & Memory Hardening
@@ -137,7 +136,8 @@
       "randomize_kstack_offset=on" # Randomize kernel stack offset
       "vsyscall=none"         # Disable legacy vsyscall area
       "debugfs=off"           # Disable debugfs
-      "module.sig_enforce=1"  # KM-04: Only load signed modules
+      # KRIT-03: Lockdown integrity is safer than sig_enforce with some modules
+      "lockdown=integrity" 
       "quiet" "splash" "loglevel=3"
     ];
 
