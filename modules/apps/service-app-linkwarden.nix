@@ -48,7 +48,7 @@ in {
  };
 
  services.caddy.virtualHosts."links.${domain}" = {
- extraConfig = "import sso_auth\nreverse_proxy 127.0.0.1:${toString port}";
+ extraConfig = "import family_auth\nreverse_proxy 127.0.0.1:${toString port}";
  };
 
  # 🛡️ SYSTEMD SANDBOXING

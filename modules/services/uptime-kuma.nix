@@ -27,7 +27,7 @@ in
  config = lib.mkIf config.my.services.uptimeKuma.enable {
  services.uptime-kuma = { enable = true; settings.PORT = toString port; };
  services.caddy.virtualHosts."status.${domain}" = {
- extraConfig = "import sso_auth\nreverse_proxy 127.0.0.1:${toString port}";
+ extraConfig = "import family_auth\nreverse_proxy 127.0.0.1:${toString port}";
  };
  systemd.services.uptime-kuma.serviceConfig = {
  ProtectSystem = "strict"; ProtectHome = true; PrivateTmp = true; PrivateDevices = true; NoNewPrivileges = true;

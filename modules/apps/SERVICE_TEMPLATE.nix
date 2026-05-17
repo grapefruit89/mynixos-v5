@@ -27,6 +27,9 @@ in
  # ── SYSTEMD HARDENING ───────────────────────────────────────────────────
  systemd.services.${serviceName}.serviceConfig = {
  NoNewPrivileges = lib.mkForce true;
+ CapabilityBoundingSet = "";
+ AmbientCapabilities = "";
+ UMask = "0077";
  PrivateTmp = lib.mkForce true;
  PrivateDevices = lib.mkForce true;
  ProtectHome = lib.mkForce true;

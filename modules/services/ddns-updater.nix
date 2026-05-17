@@ -39,7 +39,7 @@ in
  };
 
  services.caddy.virtualHosts."nix-ddns.${domain}" = {
- extraConfig = "import sso_auth\nreverse_proxy 127.0.0.1:${toString port}";
+ extraConfig = "import family_auth\nreverse_proxy 127.0.0.1:${toString port}";
  };
  };
 }

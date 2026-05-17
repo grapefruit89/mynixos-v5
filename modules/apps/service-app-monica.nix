@@ -24,7 +24,7 @@ in
    nginx.listen = [ { addr = "127.0.0.1"; port = port; ssl = false; } ]; 
    database.createLocally = true; 
  };
- services.caddy.virtualHosts."monica.${domain}" = { extraConfig = "import sso_auth\nreverse_proxy 127.0.0.1:${toString port}"; };
+ services.caddy.virtualHosts."monica.${domain}" = { extraConfig = "import family_auth\nreverse_proxy 127.0.0.1:${toString port}"; };
  system.activationScripts.monicaAppKeyFile.text = "install -d -m 0750 -o monica -g monica ${stateDir}; if [ ! -s ${appKeyFile} ]; then head -c 32 /dev/urandom | base64 > ${appKeyFile}; fi";
  systemd.services.phpfpm-monica = {
    after = [ "postgresql.service" ];

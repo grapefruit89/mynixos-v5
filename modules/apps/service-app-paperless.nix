@@ -44,16 +44,15 @@ in
 
  config = lib.mkIf cfg.enable (lib.mkMerge [
  
- # 📄 1. hardened DOCUMENT APP FABRIK
- (myLib.mkDocumentApp {
- inherit config;
- name = "paperless";
- port = config.my.ports.paperless or 28981;
- description = "Paperless-ngx Document Management";
- useValkey = true; # 🔥 Nutzt die Open-Source Alternative zu Redis
- usePostgres = true;
- inherit (cfg) secretFile;
- ocrLanguages = [ "deu" "eng" ];
+ # 📄 1. hardened SERVICE FACTORY
+ (myLib.mkService {
+   inherit config;
+   name = "paperless";
+   port = config.my.ports.paperless or 28981;
+   description = "Paperless-ngx Document Management";
+   requiresPostgres = true;
+   persist = true;
+   useSSO = true;
  })
 
  # 🔧 2. PAPERLESS SPECIFICS & ENVIRONMENT
@@ -80,8 +79,8 @@ in
  PAPERLESS_DBHOST = "/run/postgresql";
  PAPERLESS_DBNAME = "paperless";
  PAPERLESS_DBUSER = "paperless";
- # Paperless spricht mit Valkey über den Unix-Socket des fabrik-eigenen Servers
- PAPERLESS_REDIS = "unix://${config.services.redis.servers.paperless.unixSocket}";
+ # LHF-08: Point to correct Valkey socket
+ PAPERLESS_REDIS = "unix://${config.services.redis.servers.valkey.settings.unixsocket}";
  };
  serviceConfig.EnvironmentFile = lib.optional (cfg.secretFile != null) cfg.secretFile;
  };
@@ -95,10 +94,10 @@ in
  config.services.paperless.package
  ];
  };
- }
 
- # Mirror environment to worker for processing
- systemd.services.paperless-worker.environment = config.systemd.services.paperless-web.environment;
+ {
+   # Mirror environment to worker for processing
+   systemd.services.paperless-worker.environment = config.systemd.services.paperless-web.environment;
  }
  ]);
 }

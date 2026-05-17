@@ -34,7 +34,7 @@ in
                     "--retries 3 " +
                     "--low-level-retries 10 " +
                     "--stats 1m " +
-                    "--verbose";
+                    "--log-level ERROR"; # KRIT-01: Remove --verbose
         # Standard Hardening
         ProtectSystem = "strict";
         ProtectHome = true;
@@ -42,6 +42,10 @@ in
         PrivateDevices = true;
         NoNewPrivileges = true;
         CapabilityBoundingSet = "";
+        
+        # LHF-07: Enable rclone cache
+        CacheDirectory = "rclone-s3-sync";
+        CacheDirectoryMode = "0700";
       };
     };
 

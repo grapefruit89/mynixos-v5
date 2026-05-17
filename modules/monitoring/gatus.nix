@@ -11,12 +11,12 @@ let
       web = { port = cfg.port; address = "127.0.0.1"; };
       endpoints = cfg.endpoints;
     };
-  in pkgs.writeText "gatus.yaml" (builtins.toJSON yamlStruct);
+  in (pkgs.formats.yaml {}).generate "gatus.yaml" yamlStruct;
 
 in {
   options.my.monitoring.gatus = {
     enable = lib.mkEnableOption "Gatus Health Dashboard";
-    port = lib.mkOption { type = lib.types.port; default = 8080; };
+    port = lib.mkOption { type = lib.types.port; default = config.my.ports.gatus; };
     endpoints = lib.mkOption {
       type = lib.types.listOf lib.types.attrs;
       default = [];
@@ -24,9 +24,8 @@ in {
     };
   };
 
-  config = lib.mkIf cfg.enable {
-    # 🎬 hardened SERVICE FACTORY
-    systemd.services.gatus = (myLib.mkService {
+  config = lib.mkIf cfg.enable (lib.mkMerge [
+    (myLib.mkService {
       inherit config;
       name = "gatus";
       port = cfg.port;
@@ -36,11 +35,12 @@ in {
       extraServiceConfig = {
         ExecStart = lib.mkForce "${pkgs.gatus}/bin/gatus --config \"${gatusConfig}\"";
       };
-    }).systemd.services.gatus;
-
-    # 🔧 GATUS SPECIFICS
-    systemd.tmpfiles.rules = [
-      "d ${srePaths.stateDir}/gatus 0750 gatus media -"
-    ];
-  };
+    })
+    {
+      # 🔧 GATUS SPECIFICS
+      systemd.tmpfiles.rules = [
+        "d ${srePaths.stateDir}/gatus 0750 gatus media -"
+      ];
+    }
+  ]);
 }

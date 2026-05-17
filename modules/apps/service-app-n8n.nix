@@ -82,7 +82,7 @@ in
  useSSO = true;
  description = "n8n Workflow Automation";
  persist = true;
- readWritePaths = [ cfg.dataDir ];
+ readWritePaths = [ cfg.stateDir cfg.cacheDir ];
  extraServiceConfig = {
    IPAddressAllow = "any";
  };
@@ -133,10 +133,11 @@ in
  Group = cfg.group;
  
  # 🔑 SECRET ISOLATION (Source: Fragment 3331)
- # We use a wrapper or LoadCredential approach
- # Note: n8n usually expects N8N_ENCRYPTION_KEY in env.
- # SRE-Fix: Load via Credential and wrap in ExecStart or EnvironmentFile
- LoadCredential = lib.optional (cfg.encryptionKeyFile != null) "N8N_ENCRYPTION_KEY:${toString cfg.encryptionKeyFile}";
+ # Note: n8n expects N8N_ENCRYPTION_KEY in env.
+ ExecStart = lib.mkForce (pkgs.writeShellScript "n8n-start" ''
+   export N8N_ENCRYPTION_KEY=$(cat ${cfg.encryptionKeyFile})
+   exec ${pkgs.n8n}/bin/n8n
+ '');
 
  # 🛡️ hardening (Source: Fragment 3108)
  MemoryMax = cfg.memoryMax;

@@ -33,7 +33,7 @@ in
      root = config.my.configs.paths.storagePool; 
    }; 
  };
- services.caddy.virtualHosts."files.${domain}" = { extraConfig = "import sso_auth\nreverse_proxy 127.0.0.1:${toString port}"; };
+ services.caddy.virtualHosts."files.${domain}" = { extraConfig = "import family_auth\nreverse_proxy 127.0.0.1:${toString port}"; };
  systemd.services.filebrowser.serviceConfig = { 
    ProtectSystem = "strict"; 
    ProtectHome = true; 

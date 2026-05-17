@@ -35,7 +35,7 @@ let
    in
      if type == "directory" then
        recursiveImportDir path
-     else if type == "regular" && lib.hasSuffix ".nix" name && name != "default.nix" then
+     else if type == "regular" && lib.hasSuffix ".nix" name && name != "default.nix" && !(lib.hasPrefix "_" name) then
        [ path ]
      else
        [];

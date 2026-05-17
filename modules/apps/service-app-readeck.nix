@@ -33,7 +33,7 @@ in
 
  config = lib.mkIf config.my.services.readeck.enable {
  services.readeck = { enable = true; settings = { server.host = "127.0.0.1"; server.port = port; log.level = "info"; }; environmentFile = config.sops.secrets.readeck_env.path; };
- services.caddy.virtualHosts."read.${domain}" = { extraConfig = "import sso_auth\nreverse_proxy 127.0.0.1:${toString port}"; };
+ services.caddy.virtualHosts."read.${domain}" = { extraConfig = "import family_auth\nreverse_proxy 127.0.0.1:${toString port}"; };
  systemd.services.readeck.serviceConfig = { 
    DynamicUser = true; 
    StateDirectory = "readeck";

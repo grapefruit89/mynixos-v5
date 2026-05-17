@@ -50,7 +50,12 @@ in {
  systemd.sockets.vaultwarden = {
  description = "Vaultwarden Socket";
  wantedBy = ["sockets.target"];
- listenStreams = [(toString port)];
+ listenStreams = [ "/run/vaultwarden/vaultwarden.sock" ];
+ socketConfig = {
+   SocketMode = "0660";
+   SocketUser = "vaultwarden";
+   SocketGroup = "caddy";
+ };
  };
 
  systemd.services.vaultwarden = {
@@ -58,6 +63,7 @@ in {
     requires = ["vaultwarden.socket"];
     after = ["vaultwarden.socket"];
     serviceConfig = {
+      RuntimeDirectory = "vaultwarden";
       ProtectSystem = lib.mkForce "strict";
       ProtectHome = true;
       ReadWritePaths = ["${config.my.configs.paths.stateDir}/vaultwarden"];

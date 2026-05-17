@@ -26,7 +26,7 @@ in
 
  services.caddy.virtualHosts."${host}" = { 
    extraConfig = ''
-     import sso_auth
+     import family_auth
      reverse_proxy 127.0.0.1:${toString port}
    '';
  };

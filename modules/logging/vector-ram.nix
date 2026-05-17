@@ -49,9 +49,11 @@ in
           type = "remap";
           inputs = [ "journald" "var_log" "host_metrics" ];
           source = ''
-            # Redact paths and keys
+            # Redact paths and keys (LHF-05)
             .message = replace(.message, r'/mnt/(media|hdd_pool|tierC)/[^\s]+', "[MEDIA_PATH]")
-            .message = replace(.message, r'[A-Za-z0-9]{32,}', "[API_KEY_REDACTED]")
+            .message = replace(.message, r'Bearer\s+[A-Za-z0-9\-_\.]{20,}', "Bearer [REDACTED]")
+            .message = replace(.message, r'[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}', "[UUID_REDACTED]")
+            .message = replace(.message, r'(?i)(api[_-]?key|token|secret|password)\s*[=:]\s*\S+', "[CREDENTIAL_REDACTED]")
           '';
         };
 
@@ -63,33 +65,38 @@ in
         };
 
         # 📂 Sink 1: SSD (Tier B) with RAM-to-Chunking
-        sinks.file = {
-          type = "file";
-          inputs = [ "mask_sensitive" ];
-          path = "${logDir}/journal-%Y-%m-%d.log";
-          encoding.codec = "ndjson";
-          compression = "gzip";
-          
-          # 🚀 CHUNKING LOGIC: Buffer in RAM, write in large sequential blocks
-          batch.max_bytes = 128 * 1024 * 1024; # 128MB per flush
-          batch.timeout_secs = 3600;           # Max 1 hour delay (safety against crash)
-          
-          buffer.type = "memory";              # Explicit RAM buffer
-          buffer.max_size = 256 * 1024 * 1024; # 256MB capacity
-          
-          healthcheck = true;
-        };
-
-        # 📱 Sink 2: NTFY (Emergency Alerts)
-        sinks.ntfy = lib.mkIf (cfg.ntfyTopic != null) {
-          type = "http";
-          inputs = [ "error_filter" ];
-          uri = "${config.my.configs.identity.ntfyUrl}/${cfg.ntfyTopic}";
-          method = "post";
-          encoding.codec = "text";
-          # Immediate dispatch for critical errors
-          batch.max_events = 1;
-        };
+        sinks = {
+          file = {
+            type = "file";
+            inputs = [ "mask_sensitive" ];
+            path = "${logDir}/journal-%Y-%m-%d.log";
+            encoding.codec = "ndjson";
+            compression = "gzip";
+            
+            # 🚀 CHUNKING LOGIC: Buffer in RAM, write in large sequential blocks
+            batch.max_bytes = 128 * 1024 * 1024; # 128MB per flush
+            batch.timeout_secs = 300;           # KRIT-02: Reduced timeout (5 min)
+            
+            buffer = {
+              type = "memory";              # Explicit RAM buffer
+              max_size = 256 * 1024 * 1024; # 256MB capacity
+              when_full = "block";          # KRIT-02: Prevent silent log loss
+            };
+            
+            healthcheck = true;
+          };
+        } // (lib.optionalAttrs (cfg.ntfyTopic != null) {
+          # 📱 Sink 2: NTFY (Emergency Alerts) - LHF-06
+          ntfy = {
+            type = "http";
+            inputs = [ "error_filter" ];
+            uri = "${config.my.configs.identity.ntfyUrl}/${cfg.ntfyTopic}";
+            method = "post";
+            encoding.codec = "text";
+            # Immediate dispatch for critical errors
+            batch.max_events = 1;
+          };
+        });
       };
     };
 
@@ -100,18 +107,24 @@ in
         Type = "oneshot";
         Nice = 19;
         IOSchedulingClass = "idle";
+        User = "root";
+        NoNewPrivileges = true;
+        ProtectSystem = "strict";
+        ReadWritePaths = [ logDir ];
+        CapabilityBoundingSet = "";
+        PrivateTmp = true;
         ExecStart = pkgs.writeShellScript "rotate-vector-logs" ''
           set -euo pipefail
           # 1. Age-based deletion
           ${pkgs.findutils}/bin/find "${logDir}" -name "*.log.gz" -type f -mtime +${toString cfg.retentionDays} -delete
 
-          # 2. Size-based deletion (Target: ${toString maxTotalSizeMB}MB)
+          # 2. Size-based deletion (Target: ${toString maxTotalSizeMB}MB) - LHF-04
           if [ -d "${logDir}" ]; then
             CURRENT_SIZE=$(${pkgs.coreutils}/bin/du -sm "${logDir}" | ${pkgs.coreutils}/bin/cut -f1)
             if [ "$CURRENT_SIZE" -gt ${toString maxTotalSizeMB} ]; then
               echo "Log directory size ($CURRENT_SIZE MB) exceeds limit (${toString maxTotalSizeMB} MB). Cleaning up..."
               # Delete oldest files first until under limit
-              ${pkgs.coreutils}/bin/ls -tr "${logDir}"/*.gz 2>/dev/null | while read -r file; do
+              ${pkgs.findutils}/bin/find "${logDir}" -name "*.log.gz" -type f -printf "%T+ %p\n" | sort | awk '{print $2}' | while read -r file; do
                 rm -f -- "$file"
                 CURRENT_SIZE=$(${pkgs.coreutils}/bin/du -sm "${logDir}" | ${pkgs.coreutils}/bin/cut -f1)
                 [ "$CURRENT_SIZE" -le ${toString maxTotalSizeMB} ] && break
