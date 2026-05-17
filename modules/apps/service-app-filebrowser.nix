@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, myLib, ... }:
 let
  # 🚀 NMS v4.0 Metadaten
  nms = {
@@ -23,26 +23,30 @@ in
  description = "NMS metadata for filebrowser module";
  };
 
+ options.my.services.filebrowser = {
+   enable = lib.mkEnableOption "Filebrowser Web-UI";
+ };
 
- config = lib.mkIf config.my.services.filebrowser.enable {
- services.filebrowser = { 
-   enable = true; 
-   settings = { 
-     port = port; 
-     address = "127.0.0.1"; 
-     root = config.my.configs.paths.storagePool; 
-   }; 
- };
- services.caddy.virtualHosts."files.${domain}" = { extraConfig = "import family_auth\nreverse_proxy 127.0.0.1:${toString port}"; };
- systemd.services.filebrowser.serviceConfig = { 
-   ProtectSystem = "strict"; 
-   ProtectHome = true; 
-   PrivateTmp = true; 
-   PrivateDevices = true; 
-   ReadWritePaths = [ "${config.my.configs.paths.stateDir}/filebrowser" config.my.configs.paths.storagePool ]; 
-   NoNewPrivileges = true; 
-   SystemCallFilter = [ "@system-service" "~@privileged" ]; 
-   OOMScoreAdjust = 500;
- };
- };
+ config = lib.mkIf config.my.services.filebrowser.enable (lib.mkMerge [
+   (myLib.mkService {
+     inherit config;
+     name = "filebrowser";
+     port = port;
+     useSSO = true;
+     description = "Filebrowser Web-Manager";
+     persist = true;
+     readWritePaths = [ config.my.configs.paths.storagePool ];
+   })
+   {
+     services.filebrowser = { 
+       enable = true; 
+       settings = { 
+         port = port; 
+         address = "127.0.0.1"; 
+         root = config.my.configs.paths.storagePool; 
+       }; 
+     };
+     services.caddy.virtualHosts."files.${domain}" = { extraConfig = "import family_auth\nreverse_proxy 127.0.0.1:${toString port}"; };
+   }
+ ]);
 }

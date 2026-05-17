@@ -1,0 +1,32 @@
+name: "Validate & Quality Gates"
+
+on:
+  pull_request:
+    paths:
+      - '**.nix'
+      - 'flake.*'
+      - 'scripts/**'
+  push:
+    branches: [ main ]
+
+jobs:
+  validate:
+    name: "Titan-Guard Audit"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v4
+
+      - name: "Install Nix"
+        uses: determinate-systems/nix-installer-action@v16
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Check Flake Integrity"
+        run: nix flake check --all-systems
+
+      - name: "Run Titan-Guard Audit"
+        run: bash scripts/audit-code-quality.sh

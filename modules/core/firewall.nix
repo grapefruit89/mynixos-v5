@@ -44,6 +44,10 @@ in {
       { address = "127.0.0.1"; prefixLength = 8; }
       { address = "127.0.0.2"; prefixLength = 32; }
     ];
+    networking.interfaces.lo.ipv6.addresses = [
+      { address = "::1"; prefixLength = 128; }
+      { address = "::2"; prefixLength = 128; }
+    ];
 
     networking.nftables.enable = true;
     networking.firewall = {
@@ -91,8 +95,9 @@ in {
         tcp dport ${toString sshPort} ct state new meter ssh_meter_v6 { ip6 saddr limit rate over 5/minute burst 5 packets } counter drop
 
         # 🛡️ EAST-WEST ISOLATION (Zone: Admin Loopback)
-        # Only Caddy is allowed to talk to the Admin Loopback Alias (127.0.0.2)
+        # Only Caddy is allowed to talk to the Admin Loopback Alias (127.0.0.2 / ::2)
         ip daddr 127.0.0.2 meta skuid != ${toString u.caddy} counter drop
+        ip6 daddr ::2 meta skuid != ${toString u.caddy} counter drop
 
         # 🛡️ DATABASE ISOLATION (Loopback Protection)
         # Authorized: Caddy (Proxy), Postgres (Self), Valkey (Self)

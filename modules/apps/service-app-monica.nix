@@ -5,7 +5,7 @@
 # status: "hardened"
 # tier_strategy: "ABC-v5.1"
 # ---
-{ config, lib, pkgs, ... }:
+{ config, lib, myLib, ... }:
 let
  nms = { id = "NIXH-60-APP-006"; title = "Monica"; description = "Personal CRM."; layer = 60; nixpkgs.category = "services/web-apps"; capabilities = [ "web/crm" ]; audit.last_reviewed = "2026-03-02"; audit.complexity = 3; };
  port = config.my.ports.monica;
@@ -15,26 +15,39 @@ let
 in
 {
  options.my.meta.monica = lib.mkOption { type = lib.types.attrs; default = nms; readOnly = true; };
- config = lib.mkIf config.my.services.monica.enable {
- services.monica = { 
-   enable = true; 
-   hostname = "monica.${domain}"; 
-   appURL = "https://monica.${domain}"; 
-   inherit appKeyFile; 
-   nginx.listen = [ { addr = "127.0.0.1"; port = port; ssl = false; } ]; 
-   database.createLocally = true; 
+ 
+ options.my.services.monica = {
+   enable = lib.mkEnableOption "Monica CRM";
  };
- services.caddy.virtualHosts."monica.${domain}" = { extraConfig = "import family_auth\nreverse_proxy 127.0.0.1:${toString port}"; };
- system.activationScripts.monicaAppKeyFile.text = "install -d -m 0750 -o monica -g monica ${stateDir}; if [ ! -s ${appKeyFile} ]; then head -c 32 /dev/urandom | base64 > ${appKeyFile}; fi";
- systemd.services.phpfpm-monica = {
-   after = [ "postgresql.service" ];
-   serviceConfig = { 
-     ProtectSystem = lib.mkForce "strict"; 
-     ProtectHome = true; 
-     PrivateTmp = true; 
-     PrivateDevices = true; 
-     ReadWritePaths = [ stateDir ]; 
-   };
- };
- };
+
+ config = lib.mkIf config.my.services.monica.enable (lib.mkMerge [
+   (myLib.mkService {
+     inherit config;
+     name = "monica";
+     port = port;
+     useSSO = true;
+     description = "Monica Personal CRM";
+     requiresPostgres = true;
+     persist = true;
+     readWritePaths = [ stateDir ];
+   })
+   {
+     services.monica = { 
+       enable = true; 
+       hostname = "monica.${domain}"; 
+       appURL = "https://monica.${domain}"; 
+       inherit appKeyFile; 
+       nginx.listen = [ { addr = "127.0.0.1"; port = port; ssl = false; } ]; 
+       database.createLocally = true; 
+     };
+     services.caddy.virtualHosts."monica.${domain}" = { extraConfig = "import family_auth\nreverse_proxy 127.0.0.1:${toString port}"; };
+     system.activationScripts.monicaAppKeyFile.text = "install -d -m 0750 -o monica -g monica ${stateDir}; if [ ! -s ${appKeyFile} ]; then head -c 32 /dev/urandom | base64 > ${appKeyFile}; fi";
+     
+     systemd.services.phpfpm-monica = {
+       after = [ "postgresql.service" ];
+       # Additional paths for phpfpm instance
+       serviceConfig.ReadWritePaths = [ stateDir ];
+     };
+   }
+ ]);
 }

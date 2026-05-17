@@ -8,7 +8,7 @@
 {
  config,
  lib,
- pkgs,
+ myLib,
  ...
 }: let
  nms = {
@@ -38,39 +38,40 @@ in {
  enable = lib.mkEnableOption "Linkwarden";
  };
 
- config = lib.mkIf config.my.services.linkwarden.enable {
- services.linkwarden = {
- enable = true;
- environmentFile = secretEnv;
- environment = {
- NEXTAUTH_URL = "https://links.${domain}/api/v1/auth";
- };
- };
+ config = lib.mkIf config.my.services.linkwarden.enable (lib.mkMerge [
+   (myLib.mkService {
+     inherit config;
+     name = "linkwarden";
+     port = port;
+     useSSO = true;
+     description = "Linkwarden Bookmark Manager";
+     requiresPostgres = true;
+     persist = true;
+     extraServiceConfig = {
+       DynamicUser = lib.mkForce true;
+       StateDirectory = "linkwarden";
+     };
+   })
+   {
+     services.linkwarden = {
+       enable = true;
+       environmentFile = secretEnv;
+       environment = {
+         NEXTAUTH_URL = "https://links.${domain}/api/v1/auth";
+       };
+     };
 
- services.caddy.virtualHosts."links.${domain}" = {
- extraConfig = "import family_auth\nreverse_proxy 127.0.0.1:${toString port}";
- };
+     services.caddy.virtualHosts."links.${domain}" = {
+       extraConfig = "import family_auth\nreverse_proxy 127.0.0.1:${toString port}";
+     };
 
- # 🛡️ SYSTEMD SANDBOXING
- systemd.services.linkwarden = {
- after = [ "postgresql.service" ];
- serviceConfig = {
- DynamicUser = true;
- ProtectSystem = "strict";
- ProtectHome = true;
- PrivateTmp = true;
- PrivateDevices = true;
- SystemCallFilter = ["@system-service" "~@privileged"];
- OOMScoreAdjust = 300;
- StateDirectory = "linkwarden";
- };
- };
-
- systemd.services.linkwarden.restartTriggers = [
- config.services.linkwarden.package
- config.services.linkwarden.environmentFile
- ];
- }
+     systemd.services.linkwarden.restartTriggers = [
+       config.services.linkwarden.package
+       config.services.linkwarden.environmentFile
+     ];
+   }
+ ]);
+}
 ;
 }
 /**

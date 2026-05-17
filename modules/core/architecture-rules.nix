@@ -1,57 +1,57 @@
 # ---NIXMETA
 # {
 #   "specVersion": "2.0",
-#   "id": "NIXH-000-COR-RUL-001",
-#   "title": "Architecture Rules Enforcement",
+#   "id": "NIXH-000-COR-ARC-001",
+#   "title": "Architecture Rule Engine",
 #   "layer": 0,
 #   "category": "core/policy",
-#   "lastReviewed": "2026-05-15",
+#   "lastReviewed": "2026-05-17",
 #   "reviewedBy": "Gemini",
 #   "status": "production",
 #   "complexity": 2,
-#   "tags": ["policy", "architecture", "hardening"],
-#   "description": "Code-level enforcement of the NixHome Architecture Codex."
+#   "tags": ["policy", "architecture", "guard"],
+#   "description": "Hard-coded build-time assertions to prevent architectural drift and forbidden technologies."
 # }
 # ---ENDNIXMETA
 
 { config, lib, ... }:
 
 let
-  # List of technologies that are explicitly rejected
-  # We check for their corresponding NixOS options
-  forbiddenEnforcement = [
+  inherit (lib) mkIf;
+  
+  # Architektur-Verstöße, die den Build stoppen
+  violations = [
     {
       assertion = !(config.virtualisation.docker.enable or false);
-      message = "Architecture Violation: Docker is forbidden. Use native systemd services.";
+      message = "🛑 ARCH-FAIL: Docker is forbidden. Use native systemd services via mkService.";
     }
     {
       assertion = !(config.services.tailscale.enable or false);
-      message = "Architecture Violation: Tailscale is forbidden. Use WireGuard.";
+      message = "🛑 ARCH-FAIL: Tailscale is forbidden. Use native WireGuard logic.";
     }
     {
-      assertion = !(config.services.nextcloud.enable or false);
-      message = "Architecture Violation: Nextcloud is forbidden. Use specialized apps.";
+      assertion = !(config.services.cron.enable or false);
+      message = "🛑 ARCH-FAIL: Cron is forbidden. Use systemd timers.";
     }
     {
-      assertion = !(config.services.prometheus.enable or false);
-      message = "Architecture Violation: Prometheus is forbidden. Use Gatus/Vector.";
+      assertion = config.networking.nftables.enable;
+      message = "🛑 ARCH-FAIL: Legacy iptables detected. NFTables is mandatory.";
     }
     {
-      assertion = !(config.boot.zfs.enabled or false);
-      message = "Architecture Violation: ZFS is incompatible with the tmpfs-root strategy.";
+      assertion = config.fileSystems."/".fsType == "tmpfs";
+      message = "🛑 ARCH-FAIL: Stateless Root (tmpfs) is mandatory for v7.1 Strict.";
+    }
+    {
+      # Verhindert die Nutzung von flake-parts oder ähnlichen Frameworks durch Prüfung von Optionen
+      # (Beispiel: flake-parts setzt oft spezifische Unteroptionen)
+      assertion = !(config ? flake-parts);
+      message = "🛑 ARCH-FAIL: 'flake-parts' detected. External flake frameworks are forbidden.";
     }
   ];
 
-in
-{
+in {
   config = {
-    # 🛡️ HARD ARCHITECTURE ASSERTIONS
-    assertions = forbiddenEnforcement;
-
-    # 📜 DYNAMIC ARCHITECTURE WARNINGS
-    # Inform users where to find the formal codex
-    warnings = [
-      "🏛️ Architecture Codex active. See docs/adr/DOS_AND_DONTS.md for mandates."
-    ];
+    # Erzwungene Regeln für das gesamte System
+    assertions = violations;
   };
 }

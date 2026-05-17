@@ -8,6 +8,7 @@
 {
  config,
  lib,
+ myLib,
  ...
 }: let
  # 🚀 NMS v4.1 Metadaten
@@ -33,54 +34,57 @@ in {
  description = "NMS metadata for vaultwarden module";
  };
 
- config = lib.mkIf config.my.services.vaultwarden.enable {
- services.vaultwarden = {
- enable = true;
- config = {
- ROCKET_ADDRESS = "127.0.0.1";
- ROCKET_PORT = port;
- SIGNUPS_ALLOWED = false;
- INVITATIONS_ALLOWED = true;
- SHOW_PASSWORD_HINT = false;
- DATABASE_MAX_CONNS = 10;
- };
- environmentFile = secretEnv;
+ options.my.services.vaultwarden = {
+   enable = lib.mkEnableOption "Vaultwarden Password Manager";
  };
 
- systemd.sockets.vaultwarden = {
- description = "Vaultwarden Socket";
- wantedBy = ["sockets.target"];
- listenStreams = [ "/run/vaultwarden/vaultwarden.sock" ];
- socketConfig = {
-   SocketMode = "0660";
-   SocketUser = "vaultwarden";
-   SocketGroup = "caddy";
- };
- };
+ config = lib.mkIf config.my.services.vaultwarden.enable (lib.mkMerge [
+   (myLib.mkService {
+     inherit config;
+     name = "vaultwarden";
+     port = port;
+     useSSO = true;
+     description = "Vaultwarden Password Vault";
+     persist = true;
+     extraServiceConfig = {
+       wantedBy = lib.mkForce []; # Handled by socket activation
+       requires = ["vaultwarden.socket"];
+       after = ["vaultwarden.socket"];
+       RuntimeDirectory = "vaultwarden";
+       MemoryDenyWriteExecute = lib.mkForce true;
+     };
+   })
+   {
+     services.vaultwarden = {
+       enable = true;
+       config = {
+         ROCKET_ADDRESS = "127.0.0.1";
+         ROCKET_PORT = port;
+         SIGNUPS_ALLOWED = false;
+         INVITATIONS_ALLOWED = true;
+         SHOW_PASSWORD_HINT = false;
+         DATABASE_MAX_CONNS = 10;
+       };
+       environmentFile = secretEnv;
+     };
 
- systemd.services.vaultwarden = {
-    wantedBy = lib.mkForce [];
-    requires = ["vaultwarden.socket"];
-    after = ["vaultwarden.socket"];
-    serviceConfig = {
-      RuntimeDirectory = "vaultwarden";
-      ProtectSystem = lib.mkForce "strict";
-      ProtectHome = true;
-      ReadWritePaths = ["${config.my.configs.paths.stateDir}/vaultwarden"];
-      MemoryDenyWriteExecute = lib.mkForce true;
-      RestrictAddressFamilies = lib.mkForce ["AF_INET" "AF_UNIX"];
-      SystemCallFilter = lib.mkForce ["@system-service" "~@privileged" "~@resources"];
-      NoNewPrivileges = lib.mkForce true;
-      PrivateDevices = lib.mkForce true;
-      PrivateTmp = lib.mkForce true;
-      OOMScoreAdjust = 300;
-    };
-    restartTriggers = [
-      config.services.vaultwarden.package
-      config.services.vaultwarden.environmentFile
-    ];
-  };
- };
+     systemd.sockets.vaultwarden = {
+       description = "Vaultwarden Socket";
+       wantedBy = ["sockets.target"];
+       listenStreams = [ "/run/vaultwarden/vaultwarden.sock" ];
+       socketConfig = {
+         SocketMode = "0660";
+         SocketUser = "vaultwarden";
+         SocketGroup = "caddy";
+       };
+     };
+
+     systemd.services.vaultwarden.restartTriggers = [
+       config.services.vaultwarden.package
+       config.services.vaultwarden.environmentFile
+     ];
+   }
+ ]);
 }
 /**
 * ---

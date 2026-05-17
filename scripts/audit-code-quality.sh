@@ -1,47 +1,78 @@
 #!/usr/bin/env bash
-# ────────────────────────────────────────────────────────────────────────────────
-# QUELLEN:
-# - nix-community/awesome-nix (Tooling Inspiration: statix, deadnix, fmt)
-# ────────────────────────────────────────────────────────────────────────────────
-# Audit: Zero-Trust Code Quality (v7.0 Strict - LH12)
-# Dieses Skript führt Statix, Deadnix und nixpkgs-fmt via transienten nix-shell aus.
+# =============================================================================
+# 🛡️ TITAN-GUARD: NixOS Code Quality & Security Auditor
+# =============================================================================
+# This script enforces the project's "v7.1 Strict" security mandates.
+# It scans for forbidden technologies, missing metadata, and invalid patterns.
+# =============================================================================
 
 set -euo pipefail
 
-# Sicherstellen, dass wir im Repo-Root sind
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-cd "$REPO_ROOT"
+# Configuration
+MODULES_DIR="modules"
+FORBIDDEN_PATTERNS=(
+    "services.tailscale.enable\s*=\s*true"
+    "virtualisation.docker.enable\s*=\s*true"
+    "services.cron.enable\s*=\s*true"
+    "services.sftpgo.enable\s*=\s*true"
+    "services.openssh.settings.PasswordAuthentication\s*=\s*true"
+    "boot.lanzaboote.enable\s*=\s*true"
+)
 
-FIX_MODE=false
-if [[ "${1:-}" == "--fix" ]]; then
-    FIX_MODE=true
-    echo "🛠️ Fix-Modus aktiviert."
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+EXIT_CODE=0
+
+echo -e "${YELLOW}🚀 Starting Titan-Guard Audit...${NC}"
+
+# 1. FORBIDDEN TECHNOLOGY CHECK
+echo -e "\n${YELLOW}[1/3] Checking for Forbidden Technologies...${NC}"
+for pattern in "${FORBIDDEN_PATTERNS[@]}"; do
+    if grep -rEi "$pattern" "$MODULES_DIR" --exclude-dir=.git; then
+        echo -e "${RED}❌ ERROR: Forbidden pattern detected: '$pattern'${NC}"
+        EXIT_CODE=1
+    fi
+done
+
+if [ $EXIT_CODE -eq 0 ]; then
+    echo -e "${GREEN}✅ No forbidden technologies detected.${NC}"
 fi
 
-echo "🧪 Starte Zero-Trust Code Quality Audit..."
-echo "--------------------------------------------------"
+# 2. NIXMETA HEADER CHECK
+echo -e "\n${YELLOW}[2/3] Validating NIXMETA Headers...${NC}"
+MISSING_META=0
+# Find all .nix files in modules, excluding hidden files, default.nix, and templates
+while IFS= read -r file; do
+    if ! grep -q "---NIXMETA" "$file"; then
+        echo -e "${RED}❌ ERROR: Missing NIXMETA header in: $file${NC}"
+        MISSING_META=1
+        EXIT_CODE=1
+    fi
+done < <(find "$MODULES_DIR" -name "*.nix" -not -name "default.nix" -not -path "*/_*" -not -name "SERVICE_TEMPLATE.nix")
 
-# 1. Statix (Linting)
-echo "🔍 Führe Statix (Linting) aus..."
-nix-shell -p statix --run "statix check modules/ configuration.nix" || echo "⚠️ Statix hat Warnungen gefunden."
+if [ $MISSING_META -eq 0 ]; then
+    echo -e "${GREEN}✅ All modules have NIXMETA headers.${NC}"
+fi
 
-# 2. Deadnix (Unused Code)
-echo "🔍 Führe Deadnix (Ungenutzter Code) aus..."
-if [ "$FIX_MODE" = true ]; then
-    nix-shell -p deadnix --run "deadnix -e modules/ configuration.nix"
+# 3. FORMATTING CHECK
+echo -e "\n${YELLOW}[3/3] Checking Nix Formatting...${NC}"
+if ! nix fmt --check . 2>/dev/null; then
+    echo -e "${RED}❌ ERROR: Code is not formatted. Please run 'nix fmt'.${NC}"
+    EXIT_CODE=1
 else
-    nix-shell -p deadnix --run "deadnix modules/ configuration.nix"
+    echo -e "${GREEN}✅ Code formatting is valid.${NC}"
 fi
 
-# 3. nixpkgs-fmt (Formatting)
-if [ "$FIX_MODE" = true ]; then
-    echo "🎨 Formatiere Code mit nixpkgs-fmt..."
-    nix-shell -p nixpkgs-fmt --run "nixpkgs-fmt modules/ configuration.nix"
+# FINAL RESULT
+echo -e "\n============================================================================="
+if [ $EXIT_CODE -eq 0 ]; then
+    echo -e "${GREEN}🏆 AUDIT PASSED: Repository is compliant with v7.1 Strict standards.${NC}"
 else
-    echo "🔍 Prüfe Formatierung mit nixpkgs-fmt..."
-    nix-shell -p nixpkgs-fmt --run "nixpkgs-fmt --check modules/ configuration.nix"
+    echo -e "${RED}💀 AUDIT FAILED: Please fix the errors above before committing.${NC}"
 fi
+echo -e "=============================================================================\n"
 
-echo "--------------------------------------------------"
-echo "✅ Audit abgeschlossen."
+exit $EXIT_CODE

@@ -34,14 +34,22 @@
 let
  # 🗺️ SSoT: Schema to SOPS Transformation
  # Derives sops.secrets entries from the read-only schema.
- schemaKeys = lib.attrNames config.my.secrets.schema;
- sopsEntries = lib.genAttrs schemaKeys (name: {
+ infraKeys = config.my.secrets.categories.infra;
+ mediaKeys = config.my.secrets.categories.media;
+
+ sopsEntries = lib.genAttrs (infraKeys ++ mediaKeys) (name: {
    # Passwords need users access
    neededForUsers = lib.hasSuffix "_password" name;
+   # Assign to correct file based on category
+   sopsFile = if lib.elem name infraKeys 
+              then ../../secrets/infra.yaml 
+              else ../../secrets/media.yaml;
  });
 in {
  # 🔐 SOPS GLOBAL CONFIG
  sops = {
+   # defaultSopsFile is now deprecated by explicit sopsFile per secret
+   # but kept as fallback for unknown keys
    defaultSopsFile = ../../secrets/secrets.yaml;
    age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
    secrets = sopsEntries;

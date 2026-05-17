@@ -19,43 +19,50 @@
 let
   inherit (lib) mkOption types;
 
-  # 🔐 THE IMMUTABLE KEY LIST
-  # Add new keys here first if you want to use them in the project.
-  schema = {
-    # Identity
-    user_password = "";
-    freund_password = "";
-
-    # Infrastructure
-    cloudflare_token = "";
-    github_token = "";
-    wireguard_admin_private_key = "";
+  # 🔐 THE CATEGORIZED KEY LIST
+  # Secrets are split into files to minimize blast radius (Decision SEC-005)
+  categories = {
+    infra = [
+      "user_password"
+      "freund_password"
+      "cloudflare_token"
+      "github_token"
+      "wireguard_admin_private_key"
+      "restic_password"
+      "backblaze_access_key"
+      "backblaze_secret_key"
+    ];
     
-    # Automation & Apps
-    paperless_secret_key = "";
-    vaultwarden_env = "";
-    miniflux_admin_password = "";
-    readeck_env = "";
-    linkwarden_env = "";
-    n8n_enc_key = "";
-    
-    # Media Stack
-    sonarr_api_key = "";
-    radarr_api_key = "";
-    readarr_api_key = "";
-
-    # Backup & Storage
-    restic_password = "";
-    backblaze_access_key = "";
-    backblaze_secret_key = "";
+    media = [
+      "paperless_secret_key"
+      "vaultwarden_env"
+      "miniflux_admin_password"
+      "readeck_env"
+      "linkwarden_env"
+      "n8n_enc_key"
+      "sonarr_api_key"
+      "radarr_api_key"
+      "readarr_api_key"
+    ];
   };
 
+  # Flattened list for the schema option
+  schema = lib.genAttrs (categories.infra ++ categories.media) (name: "");
+
 in {
-  options.my.secrets.schema = mkOption {
-    type = types.attrsOf types.str;
-    default = schema;
-    readOnly = true;
-    description = "Hardened schema for allowed SOPS secret keys.";
+  options.my.secrets = {
+    schema = mkOption {
+      type = types.attrsOf types.str;
+      default = schema;
+      readOnly = true;
+      description = "Hardened schema for allowed SOPS secret keys.";
+    };
+    categories = mkOption {
+      type = types.attrsOf (types.listOf types.str);
+      default = categories;
+      readOnly = true;
+      description = "Categorized secret keys for file mapping.";
+    };
   };
 
   config = {

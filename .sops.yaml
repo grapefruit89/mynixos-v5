@@ -1,14 +1,28 @@
 # ⚠️ MULTI-KEY SETUP (Decision S-01)
-# Add your offline keys here after generating them:
-#   admin key: age-keygen -o admin-key.txt
-#   yubikey:   age-plugin-yubikey --generate
-# Then add:  - &admin_key age1...  and  - &recovery_key age1...
+# Standard Operation: Server Key + Admin Key
+# Emergency: Recovery Key (independent group)
 creation_rules:
+  # 🌐 CORE INFRASTRUCTURE (Cloudflare, Backup, Users)
+  - path_regex: secrets/infra\.yaml$
+    key_groups:
+      - age:
+          - age1t2uu2un4trvvyhg7ryp8h8tqjxl5vnd0qd48dq4s8yvhc6jwtd4smyet95 # Server Host Key (q958)
+      - age:
+          - age1pjl6xt8zu80p4dpp6yqnk5u53ratgc58sdtnf7c2krlxyt8msgvs9s763s # Emergency Key (Moritz)
+
+  # 🎬 MEDIA & SERVICES (Arr-Stack, Paperless, etc.)
+  - path_regex: secrets/media\.yaml$
+    key_groups:
+      - age:
+          - age1t2uu2un4trvvyhg7ryp8h8tqjxl5vnd0qd48dq4s8yvhc6jwtd4smyet95 # Server Host Key (q958)
+      - age:
+          - age1pjl6xt8zu80p4dpp6yqnk5u53ratgc58sdtnf7c2krlxyt8msgvs9s763s # Emergency Key (Moritz)
+
+  # 📦 LEGACY / FALLBACK
   - path_regex: secrets\.yaml$
     key_groups:
       - age:
           - age1t2uu2un4trvvyhg7ryp8h8tqjxl5vnd0qd48dq4s8yvhc6jwtd4smyet95 # Server Host Key (q958)
-          # - &admin_yubikey age1... 
       - age:
           - age1pjl6xt8zu80p4dpp6yqnk5u53ratgc58sdtnf7c2krlxyt8msgvs9s763s # Emergency Key (Moritz)
 
