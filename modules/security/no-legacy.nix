@@ -31,6 +31,7 @@ in
       "server min protocol" = "SMB2_10";
     };
 
+    # ✂️ KERNEL SURGICAL DIET (anchor: kernel-diet)
     boot.blacklistedKernelModules = [ "ext2" "ext3" "jfs" "reiserfs" "hfs" "hfsplus" "ntfs" ];
  networking.nftables.enable = true;
  networking.firewall.enable = lib.mkForce true;

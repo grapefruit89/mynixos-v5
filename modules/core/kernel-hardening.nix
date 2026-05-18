@@ -84,7 +84,7 @@
       # Strikte Whitelist-Technik: Verhindert automatisches Laden ungenutzter Module
     '';
 
-    # 🏎️ SYSCTL SECURITY HARDENING
+    # 🏎️ SYSCTL SECURITY HARDENING (anchor: kernel-hardening)
     boot.kernel.sysctl = {
       # Network Hardening
       "net.ipv4.tcp_syncookies" = 1;

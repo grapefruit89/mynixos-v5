@@ -33,6 +33,7 @@ in {
 
    config = lib.mkIf config.my.services.fail2ban.enable {
 
+ # 🛡️ FAIL2BAN HARDENING (anchor: fail2ban-hardening)
  services.fail2ban = {
  enable = true;
  # 🛡️ GLOBAL HARDENING (NFTables Standard)

@@ -33,7 +33,7 @@ in {
     security.lockKernelModules = cfg.lockdownMode == "strict";
     security.hideProcessInformation = true;
 
-    # 🧹 SERVICE SLIMMING (Eliminating Attack Surface)
+    # 🧹 SERVICE SLIMMING (anchor: service-slimming)
     services.pcscd.enable = true; # Required for YubiKey / Hardware Keys
 
     systemd.services = {

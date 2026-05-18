@@ -49,6 +49,7 @@ in {
       { address = "::2"; prefixLength = 128; }
     ];
 
+    # 🛡️ NFTABLES MASTERY (anchor: nftables-mastery)
     networking.nftables.enable = true;
     networking.firewall = {
       enable = true; # Production Hardened: Firewall ALWAYS active.
