@@ -77,7 +77,7 @@ let
       user = lib.mkOption { type = lib.types.str; default = name; };
       group = lib.mkOption { type = lib.types.str; default = "media"; };
       
-      # 💾 PATH STRATEGY (ABC-Tiering)
+      # 💾 PATH STRATEGY (ABC-Tiering) (anchor: arr-tiering)
       stateDir = lib.mkOption { 
         type = lib.types.str; 
         default = "${srePaths.stateDir}/${name}/.config/${stateDirName}"; 

@@ -54,6 +54,7 @@ in
  extraGroups = [ "media" ];
  };
 
+ # 🎵 NAVIDROME STREAMING (anchor: navidrome-streaming)
  services.navidrome = {
  enable = true;
  user = cfg.user;

@@ -45,6 +45,7 @@ in
  default = "${srePaths.stateDir}/audiobookshelf"; 
  description = "Database and metadata (Tier A/Persist)";
  };
+ # 📚 AUDIOBOOK LIBRARY (anchor: abs-library)
  audiobookDir = lib.mkOption {
  type = lib.types.str;
  default = "${srePaths.mediaLibrary}/audiobooks";

@@ -74,7 +74,7 @@ in
  group = "media";
  };
 
- # 🚀 RAM-DISK FÜR TRANSCODING (Anti-HDD-Spinup)
+ # 🚀 RAM-DISK FÜR TRANSCODING (anchor: jellyfin-transcode)
  systemd.mounts = [
  {
  where = "/run/jellyfin-transcode";
