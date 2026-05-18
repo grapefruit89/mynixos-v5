@@ -10,7 +10,7 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # 🏎️ MergerFS Mounts für den Media-Stack (v7.1 Hardened)
+    # 🏎️ MergerFS Mounts (anchor: mergerfs-pool)
     systemd.mounts = [
       {
         description = "Unified Storage Pool (MergerFS)";

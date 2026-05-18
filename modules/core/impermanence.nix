@@ -15,8 +15,8 @@
 # ---ENDNIXMETA
 
 { config, lib, ... }: {
- # 💾 hardened IMPERMANENCE (ADR 852)
- # Verwaltet die systemweiten Persistenz-Pfade für das Stateless-Root (tmpfs).
+  # 💾 HARDENED IMPERMANENCE (anchor: persistence-core)
+  # Verwaltet die systemweiten Persistenz-Pfade für das Stateless-Root (tmpfs).
  # App-spezifische Pfade werden automatisch via mkService (lib-helpers) registriert.
 
   options.my.persistence = {

@@ -9,6 +9,7 @@ let
    text = ''
      set -euo pipefail
 
+     # 📦 SMART STORAGE TIERING (anchor: storage-tiering)
      echo "--- 📦 Smart Mover 2.0 Initialized (v6.1 Strict) ---"
 
      # --- 1. TIER A -> B (NVMe Pressure Relief) ---

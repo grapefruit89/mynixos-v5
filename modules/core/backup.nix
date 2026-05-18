@@ -15,6 +15,7 @@ in
       # Die Rclone-Config enthält Cloud-Credentials und wird hardware-gebunden geschützt.
     };
 
+    # 🔐 RESTIC BACKUP (anchor: restic-backup)
     services.restic.backups.daily = {
       initialize = true;
       repository = localRepo;
