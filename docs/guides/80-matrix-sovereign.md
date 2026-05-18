@@ -1,106 +1,79 @@
-# 💬 Cluster 80: Matrix Sovereign
-
-Dieses Dokument konsolidiert alle Informationen zur souveränen Kommunikation via Matrix in mynixos, einschließlich Conduit, Matrix-Orchestrierung und allgemeiner Matrix-Standards.
-
-### Inhalt aus `GUIDE-Conduit-Master-Config.md`
-
 ---
-title: 🦀 Conduit Master-Config (Aviation-Grade Matrix)
-category: architecture/communications
+title: 80-matrix-sovereign
+category: architecture/consolidated
 status: [ACTIVE-SSoT]
-capabilities: [rust-performance, embedded-db, matrix-federation]
-sources: [https://github.com/girlbossceo/conduit, NixOS Manual]
+last_reviewed: 2026-05-18
+nix_modules:
+  - path: modules/apps/service-app-matrix-conduit.nix
+    anchor: matrix-conduit
+    github_url: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/apps/service-app-matrix-conduit.nix
+  - path: modules/apps/service-app-matrix-conduit.nix
+    anchor: matrix-federation
+    github_url: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/apps/service-app-matrix-conduit.nix
 ---
 
-# 🦀 Conduit: Dein Matrix-Server in Rust
+# Cluster 80: Matrix & Sovereign Communication
 
-In mynixos ist Conduit der SSoT-Kommunikations-Server. Er ist hocheffizient und wartungsfrei.
-
-## 🏛️ Architektur-Entscheidungen (Efficiency Standard)
-1.  **Sprache:** Rust (Binary-Mandat erfüllt).
-2.  **Datenbank:** Eingebettet (Sled). Keine externe PostgreSQL nötig (RAM-Ersparnis).
-3.  **Sicherheit:** Läuft als `DynamicUser` mit minimalen Berechtigungen.
-
-## ⚙️ Deklarative Nix-Konfiguration
-Hier ist das Muster für deinen Dendriten (`modules/30-services/matrix.nix`):
-
-```nix
-services.matrix-conduit = {
-  enable = true;
-  settings.global = {
-    server_name = "m7c5.de";
-    port = 6167;
-    allow_registration = false; # Sicherheit geht vor!
-    allow_federation = true;
-    database_backend = "rocksdb"; # Oder standard sled
-  };
-};
-```
-
-## 🛡️ SRE-Hardening
-- **Port-Isolation:** Der Dienst hört nur auf `127.0.0.1`.
-- **Ingress:** Caddy (Layer 20) übernimmt das TLS-Offloading und die `/_matrix/` Routen.
-- **Secrets:** Das JWT-Secret wird via `services.matrix-conduit.secretFile` aus Sops eingebunden.
-
-### Inhalt aus `GUIDE-Matrix-Orchestration-CLI.md`
+Dieses Dokument beschreibt die souveräne Kommunikations-Architektur von mynixos. Wir nutzen das Matrix-Protokoll als Rückgrat für Chat, System-Alerting und Föderation.
 
 ---
-title: 🤖 Matrix Orchestration & Alerting (Layer 30-automation)
-category: architecture/automation
-status: [ACTIVE-SSoT]
-capabilities: [e2ee-alerting, system-voice, automated-logs, cli-matrix]
-sources: [nixpkgs/pkgs/applications/networking/instant-messengers/matrix-commander, matrix-hook]
+
+## 🦀 Conduit: Matrix Homeserver in Rust (anchor: matrix-conduit)
+
+Conduit ist unser primärer Matrix-Server. Er ist in Rust geschrieben und besticht durch extreme Effizienz und minimale Ressourcen-Anforderungen.
+
+- **Konfiguration**: `modules/apps/service-app-matrix-conduit.nix`.
+- **Datenbank**: Nutzt das eingebettete `rocksdb` Backend für maximale Performance bei geringem RAM-Verbrauch.
+- **Sicherheit**: Läuft als isolierter Dienst, ist aber von der SSO-Authentifizierung (Pocket-ID) ausgenommen, um Client-Kompatibilität (Element, FluffyChat) zu gewährleisten.
+
 ---
 
-# 🤖 System-Kommunikation: Der Tower spricht
+## 🌐 Federation & Discovery (anchor: matrix-federation)
 
-In mynixos ist der Matrix-Homeserver (Conduit) nicht nur zum Chatten da. Er ist die zentrale Pipeline für alle SRE-Warnungen und System-Statusberichte.
+Um mit anderen Matrix-Servern weltweit zu kommunizieren, nutzt mynixos die automatische Discovery via Caddy.
 
-## 🏛️ 1. Das Alerting-Konzept (Aviation-Grade)
-Wir trennen zwischen zwei Workflows:
-- **Matrix-Hook (High-Speed):** Für einfache Status-Messages via `curl`.
-- **Matrix-Commander (Secure):** Für verschlüsselte (E2EE) Berichte und Datei-Uploads (z.B. Backup-Logs).
+- **Well-known Endpoints**: Caddy exponiert automatisch `/.well-known/matrix/server` und `client`, um die Föderation zu ermöglichen.
+- **In-Memory Performance**: TLS-Termination erfolgt durch Caddy, Conduit verarbeitet nur den bereinigten Traffic.
 
-## ⚙️ 2. Matrix-Commander (The Secure Voice)
-- **Tool:** `pkgs.matrix-commander`.
-- **Anwendung:**
+---
+
+## 🤖 System Voice: Matrix-Commander
+
+Der Matrix-Server ist die "Stimme" des Fujitsu Q958 Towers. Wir nutzen den `matrix-commander` für automatisiertes Alerting.
+
+- **E2EE Alerting**: Administrative Nachrichten werden Ende-zu-Ende verschlüsselt in private SRE-Räume gesendet.
+- **Workflows**:
+  - **Backup-Status**: Benachrichtigung nach Restic-Runs.
+  - **Security-Alerts**: Sofortige Meldung bei Fail2ban-Sperren oder kritischen Kernel-Audit-Events.
+
+---
+
+## ✅ Verifizierung
+
 ```bash
-matrix-commander --message "🚨 SRE Alert: SMART Check auf Tier-C HDD fehlgeschlagen!"
+# 1. Prüfe Conduit Service Status
+systemctl status conduit
+
+# 2. Teste Client Discovery Endpoint
+curl -s https://matrix.m7c5.de/.well-known/matrix/client | jq
+
+# 3. Teste Server Federation Endpoint
+curl -s https://matrix.m7c5.de/.well-known/matrix/server | jq
+
+# 4. Sende eine Test-Nachricht via Matrix-Commander (erfordert Setup)
+matrix-commander --message "TEST: Mynixos Matrix-Voice Initialized"
 ```
-- **SRE-Vorteil:** Unterstützt native Verschlüsselung. Deine kritischen System-Interna verlassen den Tower niemals im Klartext. ✅
-
-## 🏷️ 3. Integration in Layer 80 (Monitoring)
-Wir binden den Commander in unsere systemd-Timer ein:
-- **Backup-Success:** Sendet eine grüne Nachricht nach jedem erfolgreichen Restic-Run.
-- **Fail2ban-Alert:** Sendet die IP-Adresse bei einer permanenten Sperrung.
-- **Update-Check:** Informiert über neue NixOS-Releases.
-
-## 🚀 SRE-Anwendung
-Der Matrix-Commander folgt dem **Headless-Gesetz (ADR-010)**. Er benötigt keinen Desktop und ist die stabilste Schnittstelle zwischen deinem Server und deinem Smartphone.
-
-### Inhalt aus `GUIDE-Sovereign-Communication-Matrix.md`
 
 ---
-title: 💬 Sovereign Communication (Matrix Standard)
-category: architecture/communications
-status: [ACTIVE-SSoT]
-capabilities: [matrix-protocol, decentralized-chat, sre-alerting]
-sources: [https://github.com/matrix-org/matrix-spec, https://github.com/matrix-org/dendrite]
----
 
-# 💬 Sovereign Communication: Der Matrix Standard
+## 🔗 Quellen & Verweise
 
-In mynixos ist Matrix nicht nur ein Chat, sondern die zentrale Nervenbahn für System-Events, Alerts und sichere Kommunikation.
+### Externe Repositories
+- [girlbossceo/conduit](https://github.com/girlbossceo/conduit) - Matrix Homeserver
+- [matrix-org/matrix-spec](https://github.com/matrix-org/matrix-spec) - Protokoll-Spezifikation
 
-## 🚀 Warum Matrix?
-- **Souveränität:** Du besitzt deine Daten und deine Identität.
-- **Interoperabilität:** Föderation erlaubt Kommunikation mit anderen Servern.
-- **SRE-Ready:** Native Webhooks (`matrix-hook`) erlauben einfaches Alerting.
+### Context7 Observability
+<!-- context7: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/apps/service-app-matrix-conduit.nix -->
 
-## 🏛️ Architektur-Wahl (Efficiency Gate)
-Wir nutzen **Dendrite (Go)** oder **Conduit (Rust)**.
-- **Vorteil:** Bruchteil des Ressourcenverbrauchs von Synapse (Python).
-- **Hardening:** Die Datenbank wird via Sops-Secrets angebunden.
-
-## 🧩 Modul-Integration (Layer 30-services)
-Der Matrix-Dienst wird als Dendrit in `modules/30-services/matrix.nix` deklariert und injiziert seinen eigenen Caddy-Proxy (Ingress).
+### Nix MCP Index
+<!-- mcp: repo_v5/modules/apps/service-app-matrix-conduit.nix -->

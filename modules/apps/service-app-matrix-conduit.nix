@@ -48,6 +48,7 @@ in
  };
  };
  systemd.services.conduit = { serviceConfig = lib.mkMerge [ serviceBase.systemd.services.matrix.serviceConfig { StateDirectory = lib.mkForce "matrix-conduit"; ReadWritePaths = lib.mkForce [ "${config.my.configs.paths.stateDir}/matrix-conduit" ]; MemoryDenyWriteExecute = lib.mkForce false; CPUWeight = lib.mkForce 50; MemoryMax = lib.mkForce "1G"; } ]; };
+ # 🌐 MATRIX FEDERATION (anchor: matrix-federation)
  services.caddy.virtualHosts."${serverName}".extraConfig = lib.mkAfter ''
  handle /.well-known/matrix/server {
  header Content-Type application/json
