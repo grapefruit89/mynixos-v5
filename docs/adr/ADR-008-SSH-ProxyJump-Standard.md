@@ -10,6 +10,8 @@ nix_modules:
 sources: [https://blog.ktz.me/ssh-tips-and-why-proxyjump-is-awesome/]
 ---
 
+<!-- context7: repo_v5/modules/core/ssh.nix -->
+
 # 🏛️ ADR-008: Aviation-Grade SSH Management
 
 ## Kontext

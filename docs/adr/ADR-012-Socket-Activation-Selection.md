@@ -9,6 +9,8 @@ nix_modules:
 sources: [User Feedback, Connectivity Audit]
 ---
 
+<!-- context7: repo_v5/modules/core/ssh.nix -->
+
 # 🏛️ ADR-012: Pragmatische Socket-Activation (v2.0)
 
 ## Kontext

@@ -10,6 +10,9 @@ nix_modules:
 sources: [User Mandate, Manifest v7.1]
 ---
 
+<!-- context7: repo_v5/modules/security/security-assertions.nix -->
+<!-- context7: repo_v5/modules/services/service-forbidden-tech.nix -->
+
 # 🏛️ ADR-010: Das Headless-Gesetz
 
 ## Kontext

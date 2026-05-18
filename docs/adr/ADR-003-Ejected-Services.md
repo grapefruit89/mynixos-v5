@@ -7,8 +7,12 @@ last_reviewed: 2026-05-18
 nix_modules:
   - path: modules/services/service-forbidden-tech.nix
   - path: modules/core/architecture-rules.nix
+    anchor: architecture-violations
 sources: [User Rauswurf-Liste, GEMINI.md V2026]
 ---
+
+<!-- context7: repo_v5/modules/services/service-forbidden-tech.nix -->
+<!-- context7: repo_v5/modules/core/architecture-rules.nix -->
 
 # 🏛️ ADR-003: Exkommunikation ineffizienter Dienste
 

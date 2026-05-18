@@ -6,10 +6,13 @@ capabilities: [vpn-namespaces, hardware-transcoding, dendritic-purity]
 last_reviewed: 2026-05-18
 nix_modules:
   - path: modules/services/vpn-confinement.nix
+    anchor: netns-setup
   - path: modules/apps/_arr-factory.nix
   - path: modules/core/hardware-configuration.nix
 sources: [nixarr, nixflix, Internal SRE Audit]
 ---
+
+<!-- context7: repo_v5/modules/services/vpn-confinement.nix -->
 
 # 🏛️ ADR-004: Die mynixos Media Engine
 

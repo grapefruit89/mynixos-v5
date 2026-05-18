@@ -5,8 +5,13 @@ category: architecture/decision
 last_reviewed: 2026-05-18
 nix_modules:
   - path: modules/apps/service-media-sabnzbd.nix
+    anchor: sabnzbd-resource-priority
   - path: modules/apps/service-media-jellyfin.nix
+    anchor: jellyfin-resource-priority
 ---
+
+<!-- context7: repo_v5/modules/apps/service-media-sabnzbd.nix -->
+<!-- context7: repo_v5/modules/apps/service-media-jellyfin.nix -->
 
 # 🏛️ ADR-013: Ressourcen-Hierarchie (Revision v2.0)
 

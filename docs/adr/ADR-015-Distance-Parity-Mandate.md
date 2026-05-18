@@ -9,6 +9,8 @@ nix_modules:
   - path: modules/core/backup.nix
 ---
 
+<!-- context7: repo_v5/modules/core/storage-policy.nix -->
+
 # 🏛️ ADR-015: Distanz ist die bessere Parität
 
 ## Kontext

@@ -115,6 +115,7 @@ in
  ];
 
  # 🛡️ hardening (Source: Fragment 3108)
+ # anchor: sabnzbd-resource-priority
  MemoryMax = "2G";
  CPUWeight = 40; # Lower priority than Jellyfin
  OOMScoreAdjust = 500; # Kill SABnzbd before Core services

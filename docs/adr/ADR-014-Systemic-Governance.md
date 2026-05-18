@@ -6,9 +6,12 @@ capabilities: [evaluation-performance, dependency-integrity, security-purity]
 last_reviewed: 2026-05-18
 nix_modules:
   - path: modules/core/architecture-rules.nix
+    anchor: architecture-violations
   - path: modules/security/security-assertions.nix
 sources: [Nixpkgs Maintainer Guide, Manifest v7.1]
 ---
+
+<!-- context7: repo_v5/modules/core/architecture-rules.nix -->
 
 # 🏛️ ADR-014: Systemic Governance
 

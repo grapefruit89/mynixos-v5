@@ -19,13 +19,16 @@
 let
   inherit (lib) mkIf;
   
+  # anchor: architecture-violations
   # Architektur-Verstöße, die den Build stoppen
   violations = [
     {
+      # anchor: docker-ban
       assertion = !(config.virtualisation.docker.enable or false);
       message = "🛑 ARCH-FAIL: Docker is forbidden. Use native systemd services via mkService.";
     }
     {
+      # anchor: tailscale-ban
       assertion = !(config.services.tailscale.enable or false);
       message = "🛑 ARCH-FAIL: Tailscale is forbidden. Use native WireGuard logic.";
     }
@@ -38,10 +41,12 @@ let
       message = "🛑 ARCH-FAIL: Legacy iptables detected. NFTables is mandatory.";
     }
     {
+      # anchor: stateless-root
       assertion = config.fileSystems."/".fsType == "tmpfs";
       message = "🛑 ARCH-FAIL: Stateless Root (tmpfs) is mandatory for v7.1 Strict.";
     }
     {
+      # anchor: flake-parts-ban
       # Verhindert die Nutzung von flake-parts oder ähnlichen Frameworks durch Prüfung von Optionen
       # (Beispiel: flake-parts setzt oft spezifische Unteroptionen)
       assertion = !(config ? flake-parts);

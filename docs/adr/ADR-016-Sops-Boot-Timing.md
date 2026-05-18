@@ -7,6 +7,8 @@ nix_modules:
   - path: modules/core/secrets.nix
 ---
 
+<!-- context7: repo_v5/modules/core/secrets.nix -->
+
 # 🏛️ ADR-016: Sops-Nix Boot-Reihenfolge
 
 ## Kontext

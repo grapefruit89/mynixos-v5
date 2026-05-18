@@ -10,6 +10,8 @@ nix_modules:
 sources: [nixarr, user-feedback, Internal SRE Audit]
 ---
 
+<!-- context7: repo_v5/modules/apps/_arr-factory.nix -->
+
 # 🏛️ ADR-009: Der konsolidierte Media Stack (Simplicity Edition)
 
 ## Kontext

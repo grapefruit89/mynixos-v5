@@ -51,6 +51,7 @@ in
  config = lib.mkIf cfg.enable (lib.mkMerge [
  
  # 🎬 1. hardened STREAMER FABRIK (Updated Spec)
+ # anchor: jellyfin-resource-priority
  (myLib.mkStreamer {
  inherit config;
  name = "jellyfin";
