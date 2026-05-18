@@ -102,3 +102,119 @@ Wir hinterlegen eine `SECURITY.md` im Repo-Root.
 
 ## 🚀 SRE-Anwendung
 Diese Einstellungen werden in den GitHub Repository-Settings unter "Security" permanent aktiviert. Sie bilden das externe Qualitäts-Tor 6 für mynixos.
+
+---
+
+### Offene SSO-Aufgaben
+
+| ID | Quelle | Beschreibung | Betroffene Dateien | Priorität | Status | Notizen |
+|----|--------|--------------|--------------------|-----------|--------|---------|
+| TODO-001 | AUDIT_MASTER_TRACKER, CURRENT_STATUS | Implementiere WAL/SHM Exclusions im Storage Mover Script. | `repo_v5/modules/storage/storage-mover.nix` | hoch | erledigt | |
+| TODO-002 | AUDIT_MASTER_TRACKER | Lokale ntfy-Instanz statt ntfy.sh implementieren. | `repo_v5/modules/monitoring/gatus.nix` | mittel | offen | |
+| TODO-003 | HARDENING_OPTIMIZATIONS_AUDIT | **KRITISCH:** Systemd-Härtung für Blocky DNS implementieren. | `repo_v5/modules/services/blocky.nix` | hoch | erledigt | |
+| TODO-004 | HARDENING_OPTIMIZATIONS_AUDIT | Ergänzung fehlender Härtungs-Flags für Pocket-ID. | `repo_v5/modules/services/pocket-id.nix` | hoch | erledigt | |
+| TODO-005 | HARDENING_OPTIMIZATIONS_AUDIT | Globale mkService Härtungs-Flags vervollständigen. | `repo_v5/modules/core/lib-helpers.nix` | hoch | erledigt | ProtectKernelLogs, ProtectKernelModules etc. bereits vorhanden. |
+| TODO-006 | HARDENING_OPTIMIZATIONS_AUDIT | API Rate-Limiting via Caddy & Fail2ban (L7). | `repo_v5/modules/services/caddy.nix` | niedrig | offen | |
+| TODO-007 | HARDENING_OPTIMIZATIONS_AUDIT | Auto-Block von Honeypot-Hits via Fail2ban/nftables. | `repo_v5/modules/services/caddy.nix`, `firewall.nix` | mittel | offen | |
+| TODO-016 | TECHNICAL_DEBT [C-03] | Physischen USB-Key mit Age-Fallback erstellen und in `secrets.nix` final einbinden. | `secrets.nix` | hoch | offen | |
+| TODO-019 | TECHNICAL_DEBT [M-08] | Implementierung eines PoW-Verfahrens (z.B. Hashcash) in der Challenge-Seite. | `repo_v5/modules/services/caddy.nix` | mittel | offen | |
+| TODO-020 | TECHNICAL_DEBT [M-09] | Token-basierte Whitelist für bekannte API-Clients in Caddy. | `repo_v5/modules/services/caddy.nix` | niedrig | offen | |
+| TODO-021 | TECHNICAL_DEBT [M-10] | WebDAV für Obsidian via Caddy (SSO-protected) nachrüsten. | `repo_v5/modules/services/caddy.nix` | niedrig | offen | |
+
+---
+
+### Determinate Systems Tools (für NixHome)
+
+Diese Dokumentation fasst die relevanten Tools von Determinate Systems zusammen, die in der NixHome CI oder optional genutzt werden können.
+
+## Nix Installer (GitHub Actions)
+Wir verwenden `determinate-systems/nix-installer-action` in unserer CI (`.github/workflows/validate.yml`), um Nix auf dem GitHub-Runner zu installieren.  
+Die manuelle Installation auf dem Host ist nicht nötig – NixOS wird separat gemanagt.
+
+## Magic Nix Cache (optional)
+Kann die CI beschleunigen, indem es Build-Artefakte zwischen verschiedenen Runs teilt.  
+**Aktivierung:** Füge nach dem Nix-Installer folgende Zeile hinzu:
+```yaml
+- uses: DeterminateSystems/magic-nix-cache-action@main
+```
+Aktuell ist der Cache nicht aktiviert, könnte aber bei langsamen Workflows helfen.
+
+## flake-checker (optional)
+Prüft die `flake.lock` auf bekannte Sicherheitslücken (CVEs) und veraltete Inputs.  
+Kann manuell ausgeführt werden:
+```bash
+nix run github:DeterminateSystems/flake-checker
+```
+Oder als systemd-Timer auf dem Host (nicht aktiv).
+
+## Nicht verwendete Enterprise-Features
+- **FlakeHub** (wir beziehen `nixpkgs` direkt von GitHub)
+- **Private Flakes / Secure Packages** (nicht benötigt)
+- **SBOMs / Nixd** (Overkill für Homelab)
+
+---
+
+### 🛠️ Sovereign Git Mastery (Layer 30-automation)
+
+---
+title: 🛠️ Sovereign Git Mastery (Layer 30-automation)
+category: architecture/core
+status: [ACTIVE-SSoT]
+capabilities: [self-hosted-git, ssh-only-forge, automated-dumps, code-sovereignty]
+sources: [nixpkgs/pkgs/applications/version-management, forgejo docs, soft-serve]
+---
+
+# 🛠️ Code-Souveränität: Deine private Git-Infrastruktur
+
+In mynixos sind wir nicht auf externe Plattformen angewiesen. Wir hosten unsere kritischen Repositories (Flakes, Secrets, ADRs) selbst.
+
+## 🏛️ 1. Die SSoT-Wahl: Forgejo (The Full Forge)
+Wir nutzen Forgejo als hocheffizienten GitHub-Ersatz.
+- **Dienst:** `services.forgejo.enable = true;`
+- **Nugget:** Wir nutzen `services.forgejo.database.type = "sqlite3"` für minimalen RAM-Verbrauch (Layer 20).
+- **Backup:** `services.forgejo.dump.enable = true` schiebt tägliche Git-Snapshots auf Tier A (NVMe). ✅
+
+## 💎 2. Der SRE-Weg: Soft-serve (SSH Only)
+Für Puristen und extrem schnelle Workflows.
+- **Konzept:** Ein Git-Server ohne HTTP-Overhead. Alles läuft über SSH.
+- **Anwendung:** Ideal für die Synchronisation deiner `mynixos-knowledge-base` zwischen Server und Laptop.
+
+## 🛡️ 3. Repo-Hygiene (Git-Filter-Repo)
+Unser Werkzeug für den Ernstfall (SRE Tor 6).
+- **Tool:** `pkgs.git-filter-repo`.
+- **Anwendung:** Chirurgische Entfernung von sensiblen Daten aus der gesamten Git-Historie, falls Sops-Secrets versehentlich im Klartext committed wurden.
+
+## 🚀 SRE-Vorteil
+Eigene Git-Server folgen dem **Headless-Gesetz (ADR-010)** und dem **Efficiency-Mandat**. Sie geben dir die volle Kontrolle über deine geistige Arbeit.
+
+
+---
+### Inhalt aus SSO-TODO.md
+# Zentrale To-Do-Liste â€“ alle offenen Aufgaben
+
+Diese Datei ist die Single Source of Truth (SSoT) fÃ¼r alle Aufgaben, Verbesserungen und HÃ¤rtungen im Distiller-Projekt (NixHome v6.0).
+
+| ID | Quelle | Beschreibung | Betroffene Dateien | PrioritÃ¤t | Status | Notizen |
+|----|--------|--------------|--------------------|-----------|--------|---------|
+| TODO-001 | AUDIT_MASTER_TRACKER, CURRENT_STATUS | Implementiere WAL/SHM Exclusions im Storage Mover Script. | `repo_v5/modules/storage/storage-mover.nix` | hoch | erledigt | |
+| TODO-002 | AUDIT_MASTER_TRACKER | Lokale ntfy-Instanz statt ntfy.sh implementieren. | `repo_v5/modules/monitoring/gatus.nix` | mittel | offen | |
+| TODO-003 | HARDENING_OPTIMIZATIONS_AUDIT | **KRITISCH:** Systemd-HÃ¤rtung fÃ¼r Blocky DNS implementieren. | `repo_v5/modules/services/blocky.nix` | hoch | erledigt | |
+| TODO-004 | HARDENING_OPTIMIZATIONS_AUDIT | ErgÃ¤nzung fehlender HÃ¤rtungs-Flags fÃ¼r Pocket-ID. | `repo_v5/modules/services/pocket-id.nix` | hoch | erledigt | |
+| TODO-005 | HARDENING_OPTIMIZATIONS_AUDIT | Globale mkService HÃ¤rtungs-Flags vervollstÃ¤ndigen. | `repo_v5/modules/core/lib-helpers.nix` | hoch | erledigt | ProtectKernelLogs, ProtectKernelModules etc. bereits vorhanden. |
+| TODO-006 | HARDENING_OPTIMIZATIONS_AUDIT | API Rate-Limiting via Caddy & Fail2ban (L7). | `repo_v5/modules/services/caddy.nix` | niedrig | offen | |
+| TODO-007 | HARDENING_OPTIMIZATIONS_AUDIT | Auto-Block von Honeypot-Hits via Fail2ban/nftables. | `repo_v5/modules/services/caddy.nix`, `firewall.nix` | mittel | offen | |
+| TODO-008 | HARDENING_OPTIMIZATIONS_AUDIT | TPM PCR Measurements (Hardware Integrity) in Boot-Watchdog. | `repo_v5/modules/services/boot-watchdog.nix` | mittel | offen | |
+| TODO-009 | MAINTAINABILITY_UX_AUDIT | SFTPGo als Multi-Protokoll Gateway (WebDAV/SFTP). | â€” | niedrig | abgelehnt | Laut `forbidden-tech.nix` und ADR explizit abgelehnt (KISS). |
+| TODO-010 | MAINTAINABILITY_UX_AUDIT | Host-Metriken (Disk, CPU, Mem) in Vector integrieren. | `repo_v5/modules/services/vector.nix` | hoch | offen | |
+| TODO-011 | MAINTAINABILITY_UX_AUDIT | RFC1918 Hardcoded IP Detector (Assertion). | `repo_v5/modules/security/security-assertions.nix` | mittel | offen | |
+| TODO-012 | MAINTAINABILITY_UX_AUDIT | Warnung fÃ¼r `mkForce` Missbrauch in App-Modulen. | `repo_v5/modules/security/security-assertions.nix` | mittel | offen | |
+| TODO-013 | MAINTAINABILITY_UX_AUDIT, GROK_AUDIT | Legacy Tech Cleanup (Entferne Tailscale/ZFS Reste). | `repo_v5/modules/core/lib-helpers.nix`, `BACKEND.md` | mittel | offen | Reste wie `tailscaleOnly` in Factory noch vorhanden. |
+| TODO-014 | MAINTAINABILITY_UX_AUDIT | Batch Update aller NMS-BlÃ¶cke auf v4.2 Schema. | diverse in `repo_v5/` | mittel | teilweise | |
+| TODO-015 | AUDIT_MASTER_TRACKER | IPv6 Parity in nftables (ssh_meter_v6, ICMPv6 ND). | `repo_v5/modules/security/firewall.nix` | mittel | erledigt | Bereits in `firewall.nix` vorhanden. |
+| TODO-016 | TECHNICAL_DEBT [C-03] | Physischen USB-Key mit Age-Fallback erstellen und in `secrets.nix` final einbinden. | `secrets.nix` | hoch | offen | |
+| TODO-017 | TECHNICAL_DEBT [H-09] | Integration von `geoip-shell` oder einem systemd-timer fÃ¼r nftables Geoblock. | `repo_v5/modules/security/firewall.nix` | mittel | offen | |
+| TODO-018 | TECHNICAL_DEBT [H-07] | Kontinuierliche Spiegelung aller IPv4 nftables Sets nach IPv6. | `repo_v5/modules/security/firewall.nix` | mittel | offen | |
+| TODO-019 | TECHNICAL_DEBT [M-08] | Implementierung eines PoW-Verfahrens (z.B. Hashcash) in der Challenge-Seite. | `repo_v5/modules/services/caddy.nix` | mittel | offen | |
+| TODO-020 | TECHNICAL_DEBT [M-09] | Token-basierte Whitelist fÃ¼r bekannte API-Clients in Caddy. | `repo_v5/modules/services/caddy.nix` | niedrig | offen | |
+| TODO-021 | TECHNICAL_DEBT [M-10] | WebDAV fÃ¼r Obsidian via Caddy (SSO-protected) nachrÃ¼sten. | `repo_v5/modules/services/caddy.nix` | niedrig | offen | |
+

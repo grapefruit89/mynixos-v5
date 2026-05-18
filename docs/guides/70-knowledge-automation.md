@@ -235,3 +235,71 @@ sources: [https://github.com/paperless-ngx/paperless-ngx (Source Code Extraction
 # 📚 Paperless-ngx: Vollständige Variablen-Referenz
 
 ... (Gekürzt für Übersicht, enthält Paperless-Variablen) ...
+
+---
+
+### SearXNG: Die private Suche (Layer 50)
+
+In mynixos nutzen wir SearXNG als Standard-Metasuchmaschine.
+
+```nix
+services.searx = {
+  enable = true;
+  settings = {
+    server.secret_key = "@SEARX_KEY@"; # Sops injection
+    engines = [ { name = "google"; engine = "google"; } ];
+  };
+};
+```
+
+
+---
+### Inhalt aus MASTER-CONFIG-VAULTWARDEN.md
+---
+title: ðŸ“š Vaultwarden MASTER-CONFIG (v1.0)
+category: architecture/reference
+status: [ACTIVE-SSoT]
+sources: [https://github.com/dani-garcia/vaultwarden]
+---
+
+# ðŸ“š Vaultwarden: Passwort-Sicherheit
+
+Vaultwarden nutzt eine zentrale Environment-Datei zur Konfiguration.
+
+## âš™ï¸ SRE-Anwendung
+In NixOS nutzen wir \`services.vaultwarden\`.
+- **Datenbank:** Standard SQLite (Aviation-Grade Efficiency).
+- **Hardening:** \`services.vaultwarden.config\` erlaubt das Setzen aller Variablen (z.B. \`SIGNUPS_ALLOWED = false\`).
+
+---
+### Inhalt aus MASTER-HA-INTERFACES.md
+---
+title: ðŸ¤– Home Assistant MASTER-INTERFACE-LIST (v1.0)
+category: architecture/reference
+status: [ACTIVE-SSoT]
+capabilities: [rest-api, websocket-api, oidc-integration, native-orchestrierung]
+sources: [https://developers.home-assistant.io/, https://github.com/home-assistant/architecture]
+---
+
+# ðŸ¤– Home Assistant: Schnittstellen & Orchestrierung
+
+In mynixos nutzen wir Home Assistant als zentralen Hub, steuern ihn aber rein deklarativ.
+
+## ðŸ“¡ 1. REST API (Layer 80 Trigger)
+Perfekt fÃ¼r System-Benachrichtigungen.
+- **Endpunkt:** \`/api/states/<entity_id>\`
+- **Authentifizierung:** Long-Lived Access Token (in Sops gesichert).
+- **Beispiel:** Tower meldet niedrigen Festplattenplatz direkt an HA.
+
+## ðŸ”„ 2. WebSocket API (Real-Time)
+Wird von unserem Dashboard (Homepage) genutzt, um Live-Daten anzuzeigen.
+- **Endpunkt:** \`/api/websocket\`
+
+## ðŸ” 3. OIDC Authentication (Layer 40 Link)
+Wir binden HA an unseren PocketID-Provider an.
+- **Konfiguration:** Erfolgt via \`auth_providers\` in der \`configuration.yaml\`.
+
+## ðŸ›¡ï¸ SRE-Regel: No Supervisor
+Da wir in NixOS arbeiten, sind wir unser eigener Supervisor.
+- **Add-ons:** Alle Dienste (Mosquitto, Zigbee2MQTT, InfluxDB) werden als separate NixOS-Dienste (Dendriten) in \`modules/30-services/\` oder \`20-server/\` deklariert.
+- **Kommunikation:** AusschlieÃŸlich via Netzwerk (MQTT / API). Keine physischen AbhÃ¤ngigkeiten zwischen den Containern/Diensten.

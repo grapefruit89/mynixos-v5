@@ -242,3 +242,304 @@ Wenn dein Datenbestand auf Tier C (Medien) die 5TB Grenze überschreitet, reicht
 Wir priorisieren **Integrität vor Watt**, sobald die Datenmenge kritisch wird. Btrfs ist der sicherste nächste Schritt. Bcachefs bleibt im Monitoring-Status.
 
 ---
+
+### Disaster Recovery
+
+This guide provides step-by-step instructions for recovering the system from a total hardware failure or catastrophic data loss.
+
+## 📦 Backup Sources
+1.  **Local Archive:** `/mnt/archive/.restic-vault` (SSD/HDD)
+2.  **Remote Cloud:** Backblaze B2 (Bucket: `nixhome-backup`)
+
+## 🛠️ Recovery Scenarios
+
+### Scenario 1: Reinstalling on New Hardware
+1.  **Flash NixOS:** Use a standard NixOS Flake installer.
+2.  **Clone Repo:** `git clone https://github.com/grapefruit89/mynixos-v5.git`
+3.  **Restore Secrets:**
+    -   You need your `age` master key or the original `secrets.yaml` source.
+    -   If the `age` key is lost, you MUST use your emergency backup key from Tier B (if accessible).
+4.  **Initial Build:** `nixos-rebuild switch --flake .#nixhome`
+
+### Scenario 2: Restoring Persistent Data (/persist)
+If the NVMe drive failed but the backup is safe:
+1.  **Install Restic:** `nix-shell -p restic`
+2.  **Configure B2 Credentials:**
+    ```bash
+    export B2_ACCOUNT_ID="<your-id>"
+    export B2_ACCOUNT_KEY="<your-key>"
+    export RESTIC_REPOSITORY="s3:s3.eu-central-003.backblazeb2.com/nixhome-backup"
+    export RESTIC_PASSWORD_FILE="/path/to/restic-password"
+    ```
+3.  **Restore Files:**
+    ```bash
+    restic restore latest --target /
+    ```
+4.  **Reboot:** Since the root is stateless, the restored `/persist` will be picked up automatically.
+
+### Scenario 3: Restoring Pocket-ID Database
+Pocket-ID state is stored in `/var/lib/pocket-id` (persisted).
+1.  Stop the service: `systemctl stop pocket-id`
+2.  Restore the directory from restic (see Scenario 2).
+3.  Fix permissions: `chown -R pocket-id:pocket-id /var/lib/pocket-id`
+4.  Start the service: `systemctl start pocket-id`
+
+## 🛡️ Verification
+-   Check logs: `journalctl -u restic-backups-daily`
+-   Verify Gatus dashboard for service health.
+
+---
+
+### Pro-Tools: Attic & Aria2 (Layer 80/20)
+
+In mynixos nutzen wir spezialisierte Dienste für maximale Effizienz.
+
+## ⚙️ Attic: Der Binär-Cache (Layer 80)
+Attic erlaubt es uns, Build-Artefakte zwischen Tower und Clients zu teilen.
+```nix
+services.atticd = {
+  enable = true;
+  settings = {
+    database.url = "postgres:///atticd";
+    storage.type = "s3"; # Oder local
+  };
+};
+```
+
+## 📥 Aria2: Pro-Downloader (Layer 20)
+Ein hocheffizienter Daemon für alle Download-Arten.
+```nix
+services.aria2 = {
+  enable = true;
+  settings = {
+    rpc-listen-port = 6800;
+    rpc-secret = "@ARIA_KEY@";
+  };
+};
+```
+
+
+---
+### Inhalt aus MASTER-CONFIG-RCLONE.md
+---
+title: ðŸ“š Rclone MASTER-VARIABLE-LIST (v1.0)
+category: architecture/reference
+status: [ACTIVE-SSoT]
+capabilities: [cloud-sync, multi-provider, vfs-cache, performance-tuning]
+sources: [https://github.com/rclone/rclone (Code Extraction)]
+---
+
+# ðŸ“š Rclone: Die Cloud-Schnittstelle
+
+Rclone bietet hunderte Variablen zur Optimierung des Datentransfers.
+
+RCLONE_ALIAS_DESCRIPTION
+RCLONE_ALIAS_REMOTE
+RCLONE_ARCHIVE_DESCRIPTION
+RCLONE_ARCHIVE_REMOTE
+RCLONE_AUTH_KEY
+RCLONE_AZUREBLOB_ACCESS_TIER
+RCLONE_AZUREBLOB_ACCOUNT
+RCLONE_AZUREBLOB_ARCHIVE_TIER_DELETE
+RCLONE_AZUREBLOB_CHUNK_SIZE
+RCLONE_AZUREBLOB_CLIENT_CERTIFICATE_PASSWORD
+RCLONE_AZUREBLOB_CLIENT_CERTIFICATE_PATH
+RCLONE_AZUREBLOB_CLIENT_ID
+RCLONE_AZUREBLOB_CLIENT_SECRET
+RCLONE_AZUREBLOB_CLIENT_SEND_CERTIFICATE_CHAIN
+RCLONE_AZUREBLOB_CONNECTION_STRING
+RCLONE_AZUREBLOB_COPY_CONCURRENCY
+RCLONE_AZUREBLOB_COPY_CUTOFF
+RCLONE_AZUREBLOB_DELETE_SNAPSHOTS
+RCLONE_AZUREBLOB_DESCRIPTION
+RCLONE_AZUREBLOB_DIRECTORY_MARKERS
+RCLONE_AZUREBLOB_DISABLE_CHECKSUM
+RCLONE_AZUREBLOB_DISABLE_INSTANCE_DISCOVERY
+RCLONE_AZUREBLOB_ENCODING
+RCLONE_AZUREBLOB_ENDPOINT
+RCLONE_AZUREBLOB_ENV_AUTH
+RCLONE_AZUREBLOB_KEY
+RCLONE_AZUREBLOB_LIST_CHUNK
+RCLONE_AZUREBLOB_MEMORY_POOL_FLUSH_TIME
+RCLONE_AZUREBLOB_MEMORY_POOL_USE_MMAP
+RCLONE_AZUREBLOB_MSI_CLIENT_ID
+RCLONE_AZUREBLOB_MSI_MI_RES_ID
+RCLONE_AZUREBLOB_MSI_OBJECT_ID
+RCLONE_AZUREBLOB_NO_CHECK_CONTAINER
+RCLONE_AZUREBLOB_NO_HEAD_OBJECT
+RCLONE_AZUREBLOB_PASSWORD
+RCLONE_AZUREBLOB_PUBLIC_ACCESS
+RCLONE_AZUREBLOB_SAS_URL
+RCLONE_AZUREBLOB_SERVICE_PRINCIPAL_FILE
+RCLONE_AZUREBLOB_TENANT
+RCLONE_AZUREBLOB_UPLOAD_CONCURRENCY
+RCLONE_AZUREBLOB_UPLOAD_CUTOFF
+RCLONE_AZUREBLOB_USE_AZ
+RCLONE_AZUREBLOB_USE_COPY_BLOB
+RCLONE_AZUREBLOB_USE_EMULATOR
+RCLONE_AZUREBLOB_USE_MSI
+RCLONE_AZUREBLOB_USERNAME
+RCLONE_AZUREFILES_ACCOUNT
+RCLONE_AZUREFILES_CHUNK_SIZE
+RCLONE_AZUREFILES_CLIENT_CERTIFICATE_PASSWORD
+RCLONE_AZUREFILES_CLIENT_CERTIFICATE_PATH
+RCLONE_AZUREFILES_CLIENT_ID
+RCLONE_AZUREFILES_CLIENT_SECRET
+RCLONE_AZUREFILES_CLIENT_SEND_CERTIFICATE_CHAIN
+RCLONE_AZUREFILES_CONNECTION_STRING
+RCLONE_AZUREFILES_DESCRIPTION
+RCLONE_AZUREFILES_DISABLE_INSTANCE_DISCOVERY
+RCLONE_AZUREFILES_ENCODING
+RCLONE_AZUREFILES_ENDPOINT
+RCLONE_AZUREFILES_ENV_AUTH
+RCLONE_AZUREFILES_KEY
+RCLONE_AZUREFILES_MAX_STREAM_SIZE
+RCLONE_AZUREFILES_MSI_CLIENT_ID
+RCLONE_AZUREFILES_MSI_MI_RES_ID
+RCLONE_AZUREFILES_MSI_OBJECT... (GekÃ¼rzt fÃ¼r Ãœbersicht)
+
+## ðŸš€ SRE-Anwendung
+In NixOS nutzen wir Rclone primÃ¤r als BrÃ¼cke fÃ¼r Restic. Die Variablen werden via \`services.restic.backups.<name>.rcloneConfig\` gesetzt.
+
+---
+### Inhalt aus MASTER-CONFIG-RESTIC.md
+---
+title: ðŸ“š Restic MASTER-VARIABLE-LIST (v1.0)
+category: architecture/reference
+status: [ACTIVE-SSoT]
+capabilities: [encrypted-backup, deduplication, cloud-storage, automation]
+sources: [https://github.com/restic/restic (Code Extraction)]
+---
+
+# ðŸ“š Restic: Konfigurations-Referenz
+
+Diese Variablen steuern das Verhalten von Restic und kÃ¶nnen in NixOS via \`services.restic.backups.<name>.extraOptions\` oder \`EnvironmentFile\` genutzt werden.
+
+RESTIC_ACTIVE_HELP
+RESTIC_AWS_ASSUME_ROLE_ARN
+RESTIC_AWS_ASSUME_ROLE_EXTERNAL_ID
+RESTIC_AWS_ASSUME_ROLE_POLICY
+RESTIC_AWS_ASSUME_ROLE_REGION
+RESTIC_AWS_ASSUME_ROLE_SESSION_NAME
+RESTIC_AWS_ASSUME_ROLE_STS_ENDPOINT
+RESTIC_AZURE_TEST_LARGE_UPLOAD
+RESTIC_BAR
+RESTIC_BENCH_DIR
+RESTIC_CACERT
+RESTIC_CACHE_DIR
+RESTIC_COMPRESSION
+RESTIC_DEBUG_STACKTRACE_SIGINT
+RESTIC_FEATURES
+RESTIC_FROM_KEY_HINT
+RESTIC_FROM_PASSWORD
+RESTIC_FROM_PASSWORD_COMMAND
+RESTIC_FROM_PASSWORD_FILE
+RESTIC_FROM_REPOSITORY
+RESTIC_FROM_REPOSITORY_FILE
+RESTIC_HOST
+RESTIC_HTTP_USER_AGENT
+RESTIC_KEY_HINT
+RESTIC_KEY_HINT2
+RESTIC_PACK_SIZE
+RESTIC_PASSWORD
+RESTIC_PASSWORD2
+RESTIC_PASSWORD_COMMAND
+RESTIC_PASSWORD_COMMAND2
+RESTIC_PASSWORD_FILE
+RESTIC_PASSWORD_FILE2
+RESTIC_PROGRESS_FPS
+RESTIC_READ_CONCURRENCY
+RESTIC_REPOSITORY
+RESTIC_REPOSITORY2
+RESTIC_REPOSITORY_FILE
+RESTIC_REPOSITORY_FILE2
+RESTIC_REST_PASSWORD
+RESTIC_REST_USERNAME
+RESTIC_TEST_
+RESTIC_TEST_AZURE_ACCOUNT_KEY
+RESTIC_TEST_AZURE_ACCOUNT_NAME
+RESTIC_TEST_AZURE_ACCOUNT_SAS
+RESTIC_TEST_AZURE_CONTAINER_SAS
+RESTIC_TEST_AZURE_REPOSITORY
+RESTIC_TEST_B2_ACCOUNT_ID
+RESTIC_TEST_B2_ACCOUNT_KEY
+RESTIC_TEST_B2_REPOSITORY
+RESTIC_TEST_CLEANUP
+RESTIC_TEST_DISALLOW_SKIP
+RESTIC_TEST_FUSE
+RESTIC_TEST_GS_APPLICATION_CREDENTIALS_B64
+RESTIC_TEST_GS_PROJECT_ID
+RESTIC_TEST_GS_REPOSITORY
+RESTIC_TEST_INTEGRATION
+RESTIC_TEST_OS_AUTH_URL
+RESTIC_TEST_OS_PASSWORD
+RESTIC_TEST_OS_REGION_NAME
+RESTIC_TEST_OS_TENANT_NAME
+RESTIC_TEST_OS_USERNAME
+RESTIC_TEST_PASSWORD
+RESTIC_TEST_PATH
+RESTIC_TEST_REPO
+RESTIC_TEST_REST_REPOSITORY
+RESTIC_TEST_REST_SERVER
+RESTIC_TEST_S3_KEY
+RESTIC_TEST_S3_REPOSITORY
+RESTIC_TEST_S3_SECRET
+RESTIC_TEST_S3_SERVER
+RESTIC_TEST_SFTPPATH
+RESTIC_TEST_SWIFT
+RESTIC_TEST_TMPDIR
+RESTIC_TLS_CLIENT_CERT
+
+## ðŸš€ SRE-Anwendung
+Der Standard fÃ¼r mynixos ist:
+- **Repository:** \`rclone:remote:path\`
+- **Password:** Via Sops-Nix injiziert.
+- **Pruning:** Automatisiert Ã¼ber den systemd-Timer.
+
+---
+### Inhalt aus DISASTER_RECOVERY.md
+# ðŸš¨ Disaster Recovery Runbook (NixHome v6.0)
+
+This guide provides step-by-step instructions for recovering the system from a total hardware failure or catastrophic data loss.
+
+## ðŸ“¦ Backup Sources
+1.  **Local Archive:** `/mnt/archive/.restic-vault` (SSD/HDD)
+2.  **Remote Cloud:** Backblaze B2 (Bucket: `nixhome-backup`)
+
+## ðŸ› ï¸ Recovery Scenarios
+
+### Scenario 1: Reinstalling on New Hardware
+1.  **Flash NixOS:** Use a standard NixOS Flake installer.
+2.  **Clone Repo:** `git clone https://github.com/grapefruit89/mynixos-v5.git`
+3.  **Restore Secrets:**
+    -   You need your `age` master key or the original `secrets.yaml` source.
+    -   If the `age` key is lost, you MUST use your emergency backup key from Tier B (if accessible).
+4.  **Initial Build:** `nixos-rebuild switch --flake .#nixhome`
+
+### Scenario 2: Restoring Persistent Data (/persist)
+If the NVMe drive failed but the backup is safe:
+1.  **Install Restic:** `nix-shell -p restic`
+2.  **Configure B2 Credentials:**
+    ```bash
+    export B2_ACCOUNT_ID="<your-id>"
+    export B2_ACCOUNT_KEY="<your-key>"
+    export RESTIC_REPOSITORY="s3:s3.eu-central-003.backblazeb2.com/nixhome-backup"
+    export RESTIC_PASSWORD_FILE="/path/to/restic-password"
+    ```
+3.  **Restore Files:**
+    ```bash
+    restic restore latest --target /
+    ```
+4.  **Reboot:** Since the root is stateless, the restored `/persist` will be picked up automatically.
+
+### Scenario 3: Restoring Pocket-ID Database
+Pocket-ID state is stored in `/var/lib/pocket-id` (persisted).
+1.  Stop the service: `systemctl stop pocket-id`
+2.  Restore the directory from restic (see Scenario 2).
+3.  Fix permissions: `chown -R pocket-id:pocket-id /var/lib/pocket-id`
+4.  Start the service: `systemctl start pocket-id`
+
+## ðŸ›¡ï¸ Verification
+-   Check logs: `journalctl -u restic-backups-daily`
+-   Verify Gatus dashboard for service health.
+
