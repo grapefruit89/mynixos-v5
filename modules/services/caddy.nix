@@ -49,6 +49,7 @@ in {
       enable = true;
       
       # 🛠️ GLOBAL OPTIONS (Source: Fragment 2526 / Performance Kick)
+      # 🛡️ CADDY HARDENING (anchor: caddy-hardening)
       globalConfig = ''
         admin unix//run/caddy/admin.sock
         
@@ -119,14 +120,14 @@ in {
           respond "Forbidden: Admin access restricted to LAN" 403
         }
 
-        # --- FAMILY AUTH (Pocket-ID) ---
+        # --- FAMILY AUTH (Pocket-ID) (anchor: family-auth)
         (family_auth) {
           @needs_auth {
             not remote_ip 127.0.0.1
             not header_regexp host ^auth\.
             not path /.well-known/*
           }
-          # FW-NEW-01 FIX: Fallback to TCP listener for Pocket-ID
+          # FW-NEW-01 FIX: Fallback to TCP listener for Pocket-ID (anchor: forward-auth)
           forward_auth @needs_auth 127.0.0.1:${toString config.my.ports."pocket-id" or 8089} {
             uri /api/auth/verify
             copy_headers X-Forwarded-User

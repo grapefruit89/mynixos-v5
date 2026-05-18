@@ -30,7 +30,9 @@ in {
  };
 
  config = {
+ # 🛡️ SSH HARDENING (anchor: ssh-hardening)
  services.openssh = {
+
  enable = true;
  openFirewall = false; # 🛡️ Firewall wird separat in firewall.nix geregelt
  ports = [ sshPort ]; # 💎 Nur der Custom Port aus SSoT erlaubt

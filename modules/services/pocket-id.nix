@@ -34,7 +34,8 @@ in {
     # but we can include it here for self-containment if needed, 
     # though it's better to manage imports centrally.
     
-    services.pocket-id = {
+    # 🆔 POCKET-ID SSO (anchor: pocket-id-sso)
+  services.pocket-id = {
       enable = true;
       dataDir = "${config.my.configs.paths.stateDir}/pocket-id";
       settings = {
