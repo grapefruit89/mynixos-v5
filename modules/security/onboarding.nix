@@ -1,5 +1,6 @@
 { lib, config, ... }:
 {
+  # 🚀 ONBOARDING STATUS (anchor: onboarding-complete)
   options.my.system.onboardingComplete = lib.mkOption {
     type = lib.types.bool;
     default = false;

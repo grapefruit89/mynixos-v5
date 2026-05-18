@@ -24,7 +24,9 @@ in {
  };
 
  config = {
+ # ⚙️ NIX SETTINGS (anchor: nix-settings)
  nix.settings = {
+
  # 🛡️ TRUSTED SUBSTITUTERS
  substituters = [
  "https://cache.nixos.org"

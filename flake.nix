@@ -13,7 +13,8 @@
  # - SOPS-nix:     /mic92/sops-nix
 
  inputs = {
- nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
+   # 🗓️ NIXPKGS CHANNEL (anchor: nixpkgs-version)
+   nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
  
  sops-nix.url = "github:Mic92/sops-nix";
  sops-nix.inputs.nixpkgs.follows = "nixpkgs";

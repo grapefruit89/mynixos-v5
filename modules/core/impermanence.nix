@@ -34,7 +34,8 @@
 
   config = {
     # 🛡️ SYSTEM PERSISTENCE (Tier A: NVMe State)
-    environment.persistence."/persist" = {
+    # 🧹 BLANK SNAPSHOT (anchor: blank-snapshot)
+  environment.persistence."/persist" = {
       hideMounts = true;
       directories = [
         "/var/log"

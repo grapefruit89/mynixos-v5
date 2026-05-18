@@ -146,8 +146,9 @@ in rec {
     '';
   };
 
-  # 🏆 HARDENED SERVICE FACTORY (mkService)
+  # 🏆 HARDENED SERVICE FACTORY (anchor: mkHardenedService)
   mkService = {
+
     config,
     name,
     port ? null,
