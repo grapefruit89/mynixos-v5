@@ -35,6 +35,7 @@ in {
     # though it's better to manage imports centrally.
     
     # 🆔 POCKET-ID SSO (anchor: pocket-id-sso)
+    # 🔑 PASSKEY SUPPORT (anchor: passkey-support)
   services.pocket-id = {
       enable = true;
       dataDir = "${config.my.configs.paths.stateDir}/pocket-id";

@@ -7,12 +7,6 @@ nix_modules:
   - path: modules/services/caddy.nix
     anchor: caddy-hardening
     github_url: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/services/caddy.nix
-  - path: modules/services/caddy.nix
-    anchor: family-auth
-    github_url: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/services/caddy.nix
-  - path: modules/services/pocket-id.nix
-    anchor: pocket-id-sso
-    github_url: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/services/pocket-id.nix
   - path: modules/core/ssh.nix
     anchor: ssh-hardening
     github_url: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/core/ssh.nix
@@ -20,7 +14,7 @@ nix_modules:
 
 # Cluster 10: Ingress & Caddy
 
-Dieses Dokument bündelt alle Architektur- und Operations-Standards für den Ingress-Layer (Caddy) und das Identity-Management (Pocket-ID). Es dient als "Knowledge Cell" für den sicheren Zugriff auf den Fujitsu Q958 Tower.
+Dieses Dokument bündelt alle Architektur- und Operations-Standards für den Ingress-Layer (Caddy). Die Authentifizierung wurde in den dedizierten **[Guide 50 (Identity & Authentication)](./50-identity-authentication.md)** ausgelagert.
 
 ---
 
@@ -36,17 +30,8 @@ Die Konfiguration erfolgt modular in `modules/services/caddy.nix`.
 ### ⚡ 2. Zero-Downtime Updates (Graceful Reload)
 Wir nutzen die nativen Caddy-Reload-Signale (`systemctl reload caddy`), um aktive Streams (Jellyfin/Navidrome) bei Konfigurations-Updates zu schützen.
 
-### 🛡️ 3. Forward-Auth (anchor: family-auth)
-Wir nutzen `forward_auth` (anchor: forward-auth), um den Zugriff auf interne Dienste über **Pocket-ID** abzusichern.
-
----
-
-## 🆔 Pocket-ID (OIDC Provider) (anchor: pocket-id-sso)
-
-Self-hosted OIDC Identity Provider für sicheres SSO. Die Konfiguration erfolgt in `modules/services/pocket-id.nix`.
-
-- **Issuer**: `https://auth.${subdomain}.${domain}`
-- **Integration**: Caddy nutzt das `(family_auth)` Snippet für die Verifizierung.
+### 🛡️ 3. Identity Integration
+Caddy fungiert als Gatekeeper für alle Dienste. Details zur SSO-Integration und Forward-Auth findest du in **[Guide 50](./50-identity-authentication.md)**.
 
 ---
 

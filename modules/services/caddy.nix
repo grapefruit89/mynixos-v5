@@ -121,6 +121,7 @@ in {
         }
 
         # --- FAMILY AUTH (Pocket-ID) (anchor: family-auth)
+        # 🛡️ FORWARD-AUTH (anchor: forward-auth)
         (family_auth) {
           @needs_auth {
             not remote_ip 127.0.0.1
