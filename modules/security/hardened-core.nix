@@ -34,6 +34,8 @@ in {
     security.hideProcessInformation = true;
 
     # 🧹 SERVICE SLIMMING (Eliminating Attack Surface)
+    services.pcscd.enable = true; # Required for YubiKey / Hardware Keys
+
     systemd.services = {
       accounts-daemon.enable = false;
       ModemManager.enable = false;

@@ -38,15 +38,6 @@ in {
     # 🧬 METADATA
     my.meta.hermetic = nms;
 
-    # 🛠️ TPM SYSTEM REQUIREMENTS
-    # (Redundant check but ensures consistency)
-    security.tpm2 = {
-      enable = true;
-      pkcs11.enable = true;
-      abrmd.enable = true; # Userspace Resource Manager
-      tctiEnvironment.enable = true;
-    };
-
     # 🔑 SSH HARDENING
     services.openssh = {
       # Allow Security Keys (FIDO2/TPM-backed)
@@ -55,9 +46,6 @@ in {
 
     # 📦 TOOLS FOR TPM KEY GENERATION & MANAGEMENT
     environment.systemPackages = with pkgs; [
-      tpm2-tools
-      tpm2-tss
-      tpm2-pkcs11
       openssh
       openssl
     ];

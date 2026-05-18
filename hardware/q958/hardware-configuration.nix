@@ -51,7 +51,7 @@ in {
     boot.initrd.systemd.tpm2.enable = true; # Enable TPM2 support in initrd
 
     boot.initrd.luks.devices."cryptroot" = {
-      device = "/dev/disk/by-uuid/CHANGE_ME_TO_PARTITION_UUID"; # The UUID of the physical partition
+      # device = "/dev/disk/by-uuid/REAL_UUID";  # Replace with actual UUID during first boot. Use scripts/setup-luks-tpm.sh to enroll TPM and get the correct UUID.
       preLVM = true;
     };
 
@@ -59,12 +59,12 @@ in {
     # We only define the persistent stores here.
 
     fileSystems."/nix" = {
-      device = "/dev/disk/by-uuid/CHANGE_ME_NIX_UUID";
+      # device = "/dev/disk/by-uuid/REAL_UUID";  # Replace with actual UUID during first boot. Use scripts/setup-luks-tpm.sh to enroll TPM and get the correct UUID.
       fsType = "ext4";
     };
 
     fileSystems."/persist" = {
-      device = "/dev/disk/by-uuid/CHANGE_ME_PERSIST_UUID";
+      # device = "/dev/disk/by-uuid/REAL_UUID";  # Replace with actual UUID during first boot. Use scripts/setup-luks-tpm.sh to enroll TPM and get the correct UUID.
       fsType = "ext4";
       neededForBoot = true;
     };

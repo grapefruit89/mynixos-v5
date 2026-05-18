@@ -39,7 +39,7 @@ in {
       # Passwort via Sops (Hardened Security)
       hashedPasswordFile = config.sops.secrets.user_password.path;
       
-      openssh.authorizedKeys.keys = config.my.identity.sshKeys;
+      openssh.authorizedKeys.keys = config.my.configs.identity.sshKeys;
       
       shell = pkgs.bashInteractive;
     };

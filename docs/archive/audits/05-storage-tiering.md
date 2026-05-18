@@ -1,0 +1,15 @@
+### Topic 5: Storage Mover & ABC Tiering
+- **Expected from Chat**: Expand `storage-policy.nix` structural scan to check `ExecStart*` and `EnvironmentFile` for Tier C paths; simplify brittle `storage-mover.nix` bash script.
+- **Status After This Run**: PARTIALLY IMPLEMENTED
+- **Files Investigated**: 
+  - `repo_v5/modules/core/storage-policy.nix`
+  - `repo_v5/modules/services/service-storage-mover.nix`
+- **Detailed Findings**: 
+  - **Storage Policy Scan**: `repo_v5/modules/core/storage-policy.nix` implements a structural scan in `unauthorizedTierCServices` (L23-L27). However, it only checks `ReadWritePaths`, `BindPaths`, and `BindReadOnlyPaths`. It **does not** check `ExecStart*` or `EnvironmentFile` fields for unauthorized Tier C (HDD) paths as requested.
+  - **Storage Mover Script**: `repo_v5/modules/services/service-storage-mover.nix` contains a "Smart Mover 2.0" script (L7-L91). While it is more robust than a basic `mv` script—using `lsof` to check for open files and excluding database/WAL files—it is still a 90-line inline bash script within a Nix file. The request was to "simplify" it, which may imply moving it to a standalone tool or further reducing its logic to core primitives. It currently handles Tier A -> B (placeholder) and Tier B -> C (active).
+- **Gaps Identified**: 
+  - `storage-policy.nix` lacks the `ExecStart*` and `EnvironmentFile` path checks.
+  - The mover script remains a complex bash implementation rather than a simplified or more declarative alternative.
+- **Remaining Work**: 
+  - Update `repo_v5/modules/core/storage-policy.nix` to include `svc.serviceConfig.ExecStart`, `svc.serviceConfig.ExecStartPre`, `svc.serviceConfig.ExecStartPost`, and `svc.serviceConfig.EnvironmentFile` in the `usesTierC` check.
+  - Refactor the mover script in `repo_v5/modules/services/service-storage-mover.nix` to be more modular or use a dedicated helper package.

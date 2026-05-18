@@ -53,7 +53,7 @@ in
             .message = replace(.message, r'/mnt/(media|hdd_pool|tierC)/[^\s]+', "[MEDIA_PATH]")
             .message = replace(.message, r'Bearer\s+[A-Za-z0-9\-_\.]{20,}', "Bearer [REDACTED]")
             .message = replace(.message, r'[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}', "[UUID_REDACTED]")
-            .message = replace(.message, r'(?i)(api[_-]?key|token|secret|password)\s*[=:]\s*\S+', "[CREDENTIAL_REDACTED]")
+            .message = replace(.message, r'(?i)("?api[_-]?key"?"?|"token"?"?|"secret"?"?|"password"?"?)\s*[=:]\s*["'']?\S+["'']?', "[CREDENTIAL_REDACTED]")
           '';
         };
 

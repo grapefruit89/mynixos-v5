@@ -57,6 +57,7 @@ in rec {
     ProtectSystem = "strict";
     ProtectHome = true;
     PrivateTmp = true;
+    PrivateIPC = true;
     NoNewPrivileges = true;
     CapabilityBoundingSet = ""; # LHF-03: Drop all capabilities by default
     AmbientCapabilities = "";

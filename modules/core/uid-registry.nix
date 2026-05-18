@@ -24,6 +24,7 @@
       sabnzbd = 2106;
       lidarr = 2107;
       readarr = 2108;
+      amp = 2109;
 
       # 📄 Document & Tooling (2200-2299)
       paperless = 2200;

@@ -15,10 +15,12 @@ let
 
     echo "--- 📦 Starting Capacity-Based Smart Mover ---"
 
-    # Check if HDD is active
+    # 1. Check if HDD is active (Don't wake up if not critical)
     IS_AWAKE=0
     for dev in "''${PHYSICAL_HDDS[@]}"; do
-      if ${pkgs.hdparm}/bin/hdparm -C "$dev" 2>/dev/null | grep -q "active/idle"; then
+      # Fix KRIT-02: Don't fail if grep finds nothing
+      HD_STATE=$(${pkgs.hdparm}/bin/hdparm -C "$dev" 2>/dev/null || true)
+      if echo "$HD_STATE" | grep -q "active/idle"; then
         IS_AWAKE=$((IS_AWAKE + 1))
       fi
     done
@@ -31,15 +33,52 @@ let
     elif [ "$FREE_GB" -lt "$LOW_THRESHOLD_GB" ] && [ "$IS_AWAKE" -gt 0 ]; then
       echo "⚖️ LOW SPACE ($FREE_GB GB) and HDD is AWAKE. Starting move."
     else
-      echo "💤 Conditions not met for move. Skipping."
+      echo "💤 Conditions not met for move (Free: $FREE_GB GB, Awake: $IS_AWAKE). Skipping."
       exit 0
     fi
 
-    # Logic for finding and moving oldest files (truncated for brevity in template)
-    # ... (Smart Finder logic from draft repository)
+    # 2. Robust Transactional Move (KRIT-01/03)
     echo "🚚 Moving files from $SOURCE_DIR to $TARGET_DIR..."
-    # Transactional Move via Rsync
-    ${pkgs.rsync}/bin/rsync -a --remove-source-files "$SOURCE_DIR/" "$TARGET_DIR/"
+    
+    # Find files, oldest first (excluding SQLite temporary files to prevent corruption)
+    find "$SOURCE_DIR" -type f ! -name "*-wal" ! -name "*-shm" ! -name "*-journal" -printf '%T@ %p\n' | sort -n | awk '{print $2}' | \
+    while IFS= read -r src_file; do
+      # Calculate destination path
+      rel_path="''${src_file#$SOURCE_DIR/}"
+      dst_file="$TARGET_DIR/$rel_path"
+      
+      echo "  -> Processing: $rel_path"
+      
+      if [ "$DRY_RUN" = "1" ]; then
+        echo "  [DRY-RUN] Would move $src_file to $dst_file"
+      else
+        mkdir -p "$(dirname "$dst_file")"
+        
+        # Transfer with checksum
+        if ${pkgs.rsync}/bin/rsync -a --checksum "$src_file" "$dst_file"; then
+          # Verify integrity before deletion
+          src_hash=$(${pkgs.coreutils}/bin/sha256sum "$src_file" | cut -d' ' -f1)
+          dst_hash=$(${pkgs.coreutils}/bin/sha256sum "$dst_file" | cut -d' ' -f1)
+          
+          if [ "$src_hash" = "$dst_hash" ]; then
+            rm -f -- "$src_file"
+            echo "  ✅ Verified and removed source."
+          else
+            echo "  ❌ HASH MISMATCH for $rel_path! Keeping source." >&2
+          fi
+        else
+          echo "  ❌ Rsync FAILED for $rel_path!" >&2
+        fi
+      fi
+
+      # Check if we reached the target free space
+      CURRENT_FREE=$(${pkgs.coreutils}/bin/df --output=avail "$SOURCE_DIR" | tail -1)
+      CURRENT_FREE_GB=$((CURRENT_FREE / 1024 / 1024))
+      if [ "$CURRENT_FREE_GB" -ge "$TARGET_FREE_GB" ]; then
+        echo "✅ Target free space reached ($CURRENT_FREE_GB GB). Stopping."
+        break
+      fi
+    done
     
     echo "--- ✅ Mover finished. ---"
   '';
@@ -78,6 +117,7 @@ in
       wantedBy = [ "timers.target" ];
       timerConfig = {
         OnCalendar = "daily";
+        RandomizedDelaySec = "4h";
         Persistent = true;
       };
     };

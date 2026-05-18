@@ -68,6 +68,22 @@ in {
     # 👤 Static UID from registry
     users.users.blocky.uid = config.my.users.registry.blocky;
 
+    systemd.services.blocky.serviceConfig = {
+      # 🛡️ Hardening (v7.1 Strict)
+      ProtectSystem = "strict";
+      ProtectHome = true;
+      PrivateTmp = true;
+      PrivateDevices = true;
+      PrivateNetwork = false; # Needs network for DNS
+      NoNewPrivileges = true;
+      CapabilityBoundingSet = [ "CAP_NET_BIND_SERVICE" ];
+      AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
+      RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" ];
+      SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" ];
+      MemoryHigh = "200M";
+      MemoryMax = "500M";
+    };
+
     systemd.services.blocky.restartTriggers = [
       (builtins.toJSON config.services.blocky.settings)
     ];

@@ -1,0 +1,12 @@
+### Topic 3: IPv6 Parity in nftables (H-07)
+- **Expected from Chat**: Implement `ssh_meter_v6`; synchronize Geo-Blocking and Tor-Blocking for IPv6; add ICMPv6 Neighbor Discovery protections.
+- **Status After This Run**: FULLY IMPLEMENTED
+- **Files Investigated**: 
+  - `repo_v5/modules/core/firewall.nix`
+- **Detailed Findings**: 
+  - `ssh_meter_v6` is implemented at line 91 in `firewall.nix` to limit SSH port connections over IPv6 to 5/minute (Dual-Stack Parity).
+  - Geo-Blocking sets (`geo_allowed_v6` and `dc_blocked_v6`) are implemented and evaluated against incoming IPv6 traffic on port 443 at lines 104 and 108.
+  - Tor-Blocking is synchronized for IPv6, evaluating against `@tor_exit_nodes_v6` at line 114.
+  - ICMPv6 Neighbor Discovery protections are applied at line 132, rate limiting critical ICMPv6 types to 20/second.
+- **Gaps Identified**: None.
+- **Remaining Work**: None.

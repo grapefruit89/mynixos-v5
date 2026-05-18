@@ -147,6 +147,7 @@ in {
     };
 
     # 🛡️ SYSTEMD SANDBOXING (Aviation-Grade / Source: Fragment 2833)
+    users.users.caddy.uid = config.my.users.registry.caddy;
     systemd.services.caddy = {
       # Source: Fragment 18333
       serviceConfig = {

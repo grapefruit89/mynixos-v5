@@ -4,7 +4,7 @@
 
   imports = [
     ../modules/apps/service-media-jellyfin.nix
-    ../modules/apps/service-media-seerr.nix
+    # ../modules/apps/service-media-seerr.nix
     ../modules/apps/service-media-sonarr.nix
     ../modules/apps/service-media-sonarr-setup.nix # 🔥 API-Setup PoC
     ../modules/apps/service-media-radarr.nix
@@ -14,11 +14,11 @@
     ../modules/apps/service-media-readarr.nix
     ../modules/apps/service-media-lidarr.nix
     ../modules/apps/service-media-sabnzbd.nix
-    ../modules/apps/service-media-recyclarr.nix
-    ../modules/apps/service-app-audiobookshelf.nix
+    # ../modules/apps/service-media-recyclarr.nix
+    # ../modules/apps/service-app-audiobookshelf.nix
     ../modules/apps/service-app-navidrome.nix
     ../modules/apps/media-stack.nix
-    ../modules/core/storage.nix
+    # ../modules/core/storage.nix
   ];
 
  # Standard-Metadaten für das Profil

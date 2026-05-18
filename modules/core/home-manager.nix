@@ -36,7 +36,7 @@ in {
  backupFileExtension = "hm-backup";
  
  users.${user} = { pkgs, ... }: {
- home.stateVersion = "24.05"; # 💎 Stable anchor
+ home.stateVersion = "24.05"; # 💎 Stable anchor. # see docs/NIXOS_VERSION_INFO.md – this is the current stable channel, not future music.
  
  # Importiert user-moritz-home.nix
  imports = [ (./user-${user}-home.nix) ];

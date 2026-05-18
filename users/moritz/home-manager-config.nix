@@ -20,7 +20,6 @@ in {
  };
 
  config = {
- home.stateVersion = "24.11";
  home.packages = with pkgs; [ micro neofetch htop ncdu btop dust ];
  programs.bash = { enable = true; historySize = 50000; historyFileSize = 100000; historyControl = [ "ignoredups" "ignorespace" ]; };
  programs.htop = { enable = true; settings = { color_scheme = 0; delay = 15; highlight_base_name = 1; highlight_megabytes = 1; highlight_threads = 1; show_program_path = 0; }; };

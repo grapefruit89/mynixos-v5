@@ -49,6 +49,8 @@ in
     environment.systemPackages = [ pkgs.mcp-nixos ];
 
     # 🚩 GLOBAL TOGGLES (Aus der Registry)
+    my.system.onboardingComplete = false; # Set to true after initial setup verification
+
     my.services = {
       blocky.enable = true;
       shell.premium.enable = true;
@@ -57,6 +59,7 @@ in
       postgresql.enable = true;
       wireguard-admin.enable = true;
       vector.enable = true;
+      amp.enable = false; # 🎮 Game Server Manager (Native FHS)
     };
   };
 }

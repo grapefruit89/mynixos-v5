@@ -1,0 +1,26 @@
+### Topic 4: Policy & Architecture Enforcement
+- **Expected from Chat**: Upgrade `forbidden-tech.nix` and `security-assertions.nix` from warnings to hard `lib.asserts`; eliminate duplicate modules (`hardened-core.nix`, `firewall.nix`); remove broad `mkForce` usage.
+- **Status After This Run**: PARTIALLY IMPLEMENTED
+- **Files Investigated**: 
+  - `repo_v5/modules/security/security-assertions.nix`
+  - `repo_v5/modules/services/service-forbidden-tech.nix`
+  - `repo_v5/modules/core/firewall.nix`
+  - `repo_v5/modules/core/kernel-hardening.nix`
+  - `repo_v5/profiles/security-hardened.nix`
+  - `temp_mynixos/modules/security/hardened-core.nix` (Legacy source)
+  - `temp_mynixos/modules/security/firewall.nix` (Duplicate)
+- **Detailed Findings**: 
+  - **Security Assertions**: `repo_v5/modules/security/security-assertions.nix` currently uses a `warnings` mapping and explicitly keeps the `assertions` list empty, stating it follows a "user mandate" for non-blocking warnings. This directly contradicts the v6.1 goal of hard enforcement.
+  - **Forbidden Tech**: `repo_v5/modules/services/service-forbidden-tech.nix` correctly uses `assertions` for most checks (L65-L91), but some legacy checks might still be missing or only present in `no-legacy.nix` as warnings.
+  - **Duplicate/Missing Modules**: `hardened-core.nix` is missing from `repo_v5` entirely but is referenced in `profiles/security-hardened.nix` (L28) and `security-assertions.nix` (L29). The implementation currently lives in `temp_mynixos/modules/security/hardened-core.nix`, making the `repo_v5` configuration incomplete/broken regarding the `my.security.hardened` options.
+  - **Firewall Duplication**: Duplicate `firewall.nix` files exist in `temp_mynixos`, while the canonical one is in `repo_v5/modules/core/firewall.nix`.
+  - **mkForce Usage**: There are 67 instances of `lib.mkForce` in `repo_v5`. While many are justifiable for overriding NixOS defaults in hardened templates (e.g., `SERVICE_TEMPLATE.nix`), others in `system.nix` and `network.nix` could be replaced with `lib.mkDefault` or higher-priority assignments to improve modularity and reduce override-conflicts.
+- **Gaps Identified**: 
+  - `security-assertions.nix` is non-blocking (uses warnings).
+  - `hardened-core.nix` module definition is missing from the active repository (`repo_v5`).
+  - High volume of `mkForce` usage hinders modular overrides.
+- **Remaining Work**: 
+  - Convert `security-assertions.nix` from `warnings` to `assertions`.
+  - Port `temp_mynixos/modules/security/hardened-core.nix` into `repo_v5/modules/security/`, resolving overlaps with `kernel-hardening.nix`.
+  - Clean up `temp_mynixos` duplicates.
+  - Audit and reduce `mkForce` usage across the core modules.

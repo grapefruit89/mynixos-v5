@@ -50,6 +50,14 @@ in {
       ProtectHome = true;
       PrivateTmp = true;
       PrivateDevices = true;
+      ProtectClock = true;
+      ProtectKernelLogs = true;
+      ProtectKernelModules = true;
+      ProtectControlGroups = true;
+      RestrictNamespaces = true;
+      MemoryDenyWriteExecute = true;
+      LockPersonality = true;
+      SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" ];
       Restart = "always";
       RestartSec = config.my.configs.systemd.restartSec;
       OOMScoreAdjust = -900;

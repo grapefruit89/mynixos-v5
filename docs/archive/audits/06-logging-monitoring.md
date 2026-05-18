@@ -1,0 +1,20 @@
+### Topic 6: Logging & Monitoring Enhancements (M-11)
+- **Expected from Chat**: Switch Gatus health checks to Unix sockets; add `host_metrics` (CPU/Mem/Disk) to Vector; replace public `ntfy.sh` with local authenticated instance.
+- **Status After This Run**: PARTIALLY IMPLEMENTED
+- **Files Investigated**: 
+  - `repo_v5/modules/services/service-gatus.nix`
+  - `repo_v5/modules/services/vector.nix`
+  - `repo_v5/modules/logging/vector-ram.nix`
+  - `repo_v5/modules/security/geoip-update.nix`
+- **Detailed Findings**: 
+  - **Gatus Sockets**: `service-gatus.nix` already uses Unix sockets for 7 out of 8 default endpoints (Gatus, Caddy, Jellyfin, Navidrome, Pocket-ID, Postgres, Valkey). The only remaining HTTP check is for `Blocky DNS` (`http://127.0.0.1:4000/metrics`).
+  - **Vector Metrics**: Neither `vector.nix` nor `vector-ram.nix` includes the `host_metrics` source. Vector is currently limited to `journald` and log file aggregation.
+  - **ntfy Server**: All services currently reference the public `https://ntfy.sh` instance. There is no local `ntfy-sh` server configuration in `repo_v5`.
+- **Gaps Identified**: 
+  - Blocky DNS check is not socket-first.
+  - `host_metrics` missing in Vector configuration.
+  - Local `ntfy-sh` server is missing; clients still point to the public server.
+- **Remaining Work**: 
+  - Investigate if Blocky supports a Unix socket for metrics (or wrap it).
+  - Add `host_metrics` source to `vector.nix` or `vector-ram.nix`.
+  - Implement a local `ntfy-sh` server module (preferably socket-first or behind Caddy) and update all clients to use the local URI.

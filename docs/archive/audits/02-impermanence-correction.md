@@ -1,0 +1,11 @@
+### Topic 2: Impermanence Correction
+- **Expected from Chat**: Remove `/nix` from `/persist` directories in `impermanence.nix` to preserve pure tmpfs root; validate ext4 mount for `/nix`.
+- **Status After This Run**: FULLY IMPLEMENTED
+- **Files Investigated**: 
+  - `repo_v5/modules/core/impermanence.nix`
+  - `repo_v5/hardware/q958/hardware-configuration.nix`
+  - `repo_v5/profiles/base-server.nix`
+  - `repo_v5/configuration.nix`
+- **Changes Made**: No changes needed – already compliant.
+- **Gaps Identified**: None.
+- **Remaining Work**: None. Topic is already addressed as per v6.0/v6.1 standards. The `/nix` directory is correctly mounted on its own ext4 partition and is absent from the persistence directories, ensuring no configuration drift or persistence of build artifacts on the tmpfs root.

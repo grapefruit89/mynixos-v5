@@ -36,7 +36,7 @@ in {
  backupFileExtension = "hm-backup";
  
  users.${user} = { pkgs, ... }: {
- home.stateVersion = "24.05"; # 💎 Stable anchor
+ home.stateVersion = "24.05"; # 💎 Stable anchor. # see docs/NIXOS_VERSION_INFO.md – this is the current stable channel, not future music.
  
  # Importiert die Home-Manager Logik
  imports = [ ./home-manager-config.nix ./preferences.nix ];
@@ -62,10 +62,10 @@ in {
  # 🏎️ SHELL & ENVIRONMENT
  programs.bash = {
  enable = true;
- shellAliases = {
- # Gemini Godmode (Aligned with Project Path)
- godmode = "gemini --yolo --include-directories /etc/nixos,$(pwd)";
- };
+      shellAliases = {
+        # Gemini Godmode (Aligned with Project Path)
+        godmode = "gemini --yolo --include-directories /persist/etc/nixos,$(pwd)";
+      };
  };
  };
  };

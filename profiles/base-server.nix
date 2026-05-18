@@ -21,6 +21,7 @@
     ../modules/services/caddy.nix
     ../modules/services/blocky.nix
     ../modules/services/postgresql.nix
+    ../modules/services/pocket-id.nix
     ../modules/services/service-gatus.nix
     ../modules/services/service-ntfy.nix
     ../modules/core/boot-watchdog.nix

@@ -1,0 +1,23 @@
+### Topic 9: mkService Factory Hardening (M-12)
+- **Expected from Chat**: Inject missing systemd flags (`ProtectClock`, `ProtectHostname`); enforce strict static UID sourcing; wrap auxiliary services (`s3-sync`, `blocky`) in full `mkService`.
+- **Status After This Run**: PARTIALLY IMPLEMENTED
+- **Files Investigated**: 
+  - `repo_v5/modules/core/lib-helpers.nix`
+  - `repo_v5/modules/services/blocky.nix`
+  - `repo_v5/modules/core/backup.nix`
+  - `repo_v5/modules/services/service-app-zigbee-stack.nix`
+  - `repo_v5/modules/services/service-gatus.nix`
+- **Detailed Findings**: 
+  - **Systemd Flags**: `lib-helpers.nix` correctly injects `ProtectClock = true;` (L30) in `mkSystemdConfig`. However, `ProtectHostname` is **missing** from the base hardening set.
+  - **Static UID Sourcing**: `mkService` correctly uses `config.my.users.registry.${name}` to source static UIDs (L108). This is enforced for all services using the factory.
+  - **Auxiliary Service Wrapping**: 
+    - `blocky` (`modules/services/blocky.nix`) is **not** wrapped in `mkService`. It uses the upstream `services.blocky` module and manually sets the UID.
+    - `s3-sync` (part of `modules/core/backup.nix` as `backupCleanupCommand` rclone sync) is **not** wrapped in `mkService`. It runs as part of the restic service.
+    - Other services like `zigbee2mqtt` and `gatus` are correctly wrapped in `mkService`.
+- **Gaps Identified**: 
+  - `ProtectHostname` is missing from the global `mkSystemdConfig` template.
+  - `blocky` and `s3-sync` (rclone) are not using the `mkService` factory, missing out on standard hardening and metadata generation.
+- **Remaining Work**: 
+  - Add `ProtectHostname = true;` to `mkSystemdConfig` in `repo_v5/modules/core/lib-helpers.nix`.
+  - Refactor `modules/services/blocky.nix` to use `myLib.mkService`.
+  - Consider extracting the `rclone sync` part of the backup into its own `s3-sync` service wrapped in `mkService` for better visibility and hardening.

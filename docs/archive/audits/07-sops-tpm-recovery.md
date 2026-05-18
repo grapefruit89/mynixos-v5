@@ -1,0 +1,24 @@
+### Topic 7: SOPS Deadlock & Recovery (C-03)
+- **Expected from Chat**: Enforce existing Multi-Key validation (Host, Admin, Recovery); establish a physical LUKS USB recovery key flow; create a strict `sops-recovery-validation.timer` to prevent deadlocks.
+- **Status After This Run**: PARTIALLY IMPLEMENTED
+- **Files Investigated**: 
+  - `repo_v5/modules/core/secrets.nix`
+  - `repo_v5/.sops.yaml`
+  - `docs/obsidian_release/adr/disaster-recovery-strategy.md`
+  - `repo_v5/scripts/setup-luks-tpm.sh`
+- **Detailed Findings**: 
+  - **Multi-Key Validation**: `secrets.nix` implements `sops-key-sync` (backing up SSH host key to Tier B) and a `sops-recovery-validation` timer. It defines a `multiKey` option but it's mostly for warnings.
+  - **Key Hierarchy**: `.sops.yaml` contains an "Emergency Key" and "Server Host Key". It mentions splitting keys into `key_groups` in comments, but the actual implementation uses a single flat group.
+  - **Recovery Timer**: `sops-recovery-validation.timer` exists and runs weekly. However, the service (`sops-recovery-validation.service`) incorrectly tries to run `sops --decrypt` on `/run/secrets/sops-recovery-test`, which is the *already decrypted* output of `sops-nix`. This will fail to validate the actual decryption keys.
+  - **Physical LUKS USB**: The "Master-USB-Stick" with LUKS-encrypted "Ignition-Seed" is well-documented in `adr/disaster-recovery-strategy.md`, but there is no corresponding Nix implementation for mounting or utilizing this stick during boot/recovery in `repo_v5`.
+  - **Impermanence Race**: `sops.age.sshKeyPaths` is NOT explicitly set to `/persist/etc/ssh/...` in the code, which violates the architectural decision in `ADR-016-Sops-Boot-Timing.md`.
+- **Gaps Identified**: 
+  - `sops-recovery-validation.service` is logically flawed (attempts to decrypt plain text).
+  - Missing implementation of the physical USB recovery flow in Nix modules.
+  - `.sops.yaml` key groups are not split as intended.
+  - `sops.age.sshKeyPaths` missing, risking race conditions with Impermanence.
+- **Remaining Work**: 
+  - Fix `sops-recovery-validation.service` to point to the encrypted source file.
+  - Implement `sops.age.sshKeyPaths = [ "/persist/etc/ssh/ssh_host_ed25519_key" ];` in `secrets.nix`.
+  - Align `.sops.yaml` with the split `key_groups` strategy.
+  - (Optional but recommended) Scaffolding for the USB recovery mount in `initrd` or a dedicated recovery module.

@@ -37,6 +37,7 @@ in
 
 
  config = lib.mkIf config.my.services.postgresql.enable {
+ users.users.postgres.uid = config.my.users.registry.postgresql;
  services.postgresql = {
  enable = true;
  package = pkgs.postgresql_17;

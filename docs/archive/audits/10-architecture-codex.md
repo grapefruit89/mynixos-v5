@@ -1,0 +1,17 @@
+### Topic 10: Architecture Codex
+- **Expected from Chat**: Establish `docs/adr/DOS_AND_DONTS.md` and `modules/core/architecture-rules.nix` to formally reject SFTPGo, Tailscale, Docker, and other anti-patterns.
+- **Status After This Run**: NOT IMPLEMENTED
+- **Files Investigated**: 
+  - `docs/adr/DOS_AND_DONTS.md` (Checked for existence)
+  - `repo_v5/modules/core/architecture-rules.nix` (Checked for existence)
+  - `repo_v5/` (Grep search for SFTPGo, Tailscale, Docker)
+- **Detailed Findings**: 
+  - Neither the Markdown codex (`DOS_AND_DONTS.md`) nor the Nix enforcement module (`architecture-rules.nix`) exist in the current repository.
+  - A project-wide grep search for the forbidden technologies (SFTPGo, Tailscale, Docker) yielded no results in the active codebase, which is good for compliance but indicates that the formal rejection of these patterns hasn't been codified yet.
+- **Gaps Identified**: 
+  - Missing documentation of project anti-patterns.
+  - Missing Nix-level assertions or documentation in a dedicated architecture rules module.
+- **Remaining Work**: 
+  - Create `docs/adr/DOS_AND_DONTS.md` with a clear list of rejected technologies and the reasoning behind each.
+  - Create `repo_v5/modules/core/architecture-rules.nix` (or similar) to potentially use `lib.asserts` or simply provide inline documentation of the architectural mandates.
+  - Link these new files in the project's root `README.md` or `GEMINI.md`.

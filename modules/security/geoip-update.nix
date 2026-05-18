@@ -68,11 +68,10 @@ let
     done
 
     # 4. Fetch Tor Exit Nodes
-    echo "Fetching Tor exit nodes (v4)..."
-    ${pkgs.curl}/bin/curl -sSfL "https://check.torproject.org/exit-addresses" | grep "ExitAddress" | awk '{print $2}' >> "$TOR_V4" || echo "Warning: Failed to fetch Tor v4"
-    echo "Fetching Tor exit nodes (v6)..."
-    ${pkgs.curl}/bin/curl -sSfL "https://check.torproject.org/exit-addresses" | grep "ExitAddress" | awk '{print $2}' | grep ":" >> "$TOR_V6" || echo "Warning: Failed to fetch Tor v6 (checking v4 list for v6)"
-    # Note: Dedicated Tor v6 lists are rarer, but check.torproject.org includes both.
+    echo "Fetching Tor exit nodes (Dual-Stack)..."
+    TOR_DATA=$(${pkgs.curl}/bin/curl -sSfL "https://check.torproject.org/exit-addresses")
+    echo "$TOR_DATA" | ${pkgs.gnugrep}/bin/grep "ExitAddress" | ${pkgs.gawk}/bin/awk '{print $2}' | ${pkgs.gnugrep}/bin/grep -v ":" > "$TOR_V4" || true
+    echo "$TOR_DATA" | ${pkgs.gnugrep}/bin/grep "ExitAddress" | ${pkgs.gawk}/bin/awk '{print $2}' | ${pkgs.gnugrep}/bin/grep ":" > "$TOR_V6" || true
 
     # 5. Post-processing & Validation
     sort -u "$GEO_V4" -o "$GEO_V4"
@@ -105,37 +104,37 @@ let
       
       echo "  set geo_allowed {"
       echo "    type ipv4_addr; flags interval;"
-      GEO_V4_ELEMS=$(tr '\n' ',' < "$GEO_V4" | sed 's/,$//' || true)
+      GEO_V4_ELEMS=$(${pkgs.coreutils}/bin/tr '\n' ',' < "$GEO_V4" | ${pkgs.gnused}/bin/sed 's/,$//' || true)
       [ -n "$GEO_V4_ELEMS" ] && echo "    elements = { $GEO_V4_ELEMS }"
       echo "  }"
       
       echo "  set geo_allowed_v6 {"
       echo "    type ipv6_addr; flags interval;"
-      GEO_V6_ELEMS=$(tr '\n' ',' < "$GEO_V6" | sed 's/,$//' || true)
+      GEO_V6_ELEMS=$(${pkgs.coreutils}/bin/tr '\n' ',' < "$GEO_V6" | ${pkgs.gnused}/bin/sed 's/,$//' || true)
       [ -n "$GEO_V6_ELEMS" ] && echo "    elements = { $GEO_V6_ELEMS }"
       echo "  }"
 
       echo "  set dc_blocked {"
       echo "    type ipv4_addr; flags interval;"
-      DC_V4_ELEMS=$(grep -v ":" "$DC_BLOCK" | tr '\n' ',' | sed 's/,$//' || true)
+      DC_V4_ELEMS=$(${pkgs.gnugrep}/bin/grep -v ":" "$DC_BLOCK" | ${pkgs.coreutils}/bin/tr '\n' ',' | ${pkgs.gnused}/bin/sed 's/,$//' || true)
       [ -n "$DC_V4_ELEMS" ] && echo "    elements = { $DC_V4_ELEMS }"
       echo "  }"
 
       echo "  set dc_blocked_v6 {"
       echo "    type ipv6_addr; flags interval;"
-      DC_V6_ELEMS=$(grep ":" "$DC_BLOCK" | tr '\n' ',' | sed 's/,$//' | sed 's/^,//' || true)
+      DC_V6_ELEMS=$(${pkgs.gnugrep}/bin/grep ":" "$DC_BLOCK" | ${pkgs.coreutils}/bin/tr '\n' ',' | ${pkgs.gnused}/bin/sed 's/,$//' | ${pkgs.gnused}/bin/sed 's/^,//' || true)
       [ -n "$DC_V6_ELEMS" ] && echo "    elements = { $DC_V6_ELEMS }"
       echo "  }"
 
       echo "  set tor_exit_nodes {"
       echo "    type ipv4_addr; flags interval;"
-      TOR_V4_ELEMS=$(grep -v ":" "$TOR_V4" | tr '\n' ',' | sed 's/,$//' || true)
+      TOR_V4_ELEMS=$(${pkgs.gnugrep}/bin/grep -v ":" "$TOR_V4" | ${pkgs.coreutils}/bin/tr '\n' ',' | ${pkgs.gnused}/bin/sed 's/,$//' || true)
       [ -n "$TOR_V4_ELEMS" ] && echo "    elements = { $TOR_V4_ELEMS }"
       echo "  }"
 
       echo "  set tor_exit_nodes_v6 {"
       echo "    type ipv6_addr; flags interval;"
-      TOR_V6_ELEMS=$(tr '\n' ',' < "$TOR_V6" | sed 's/,$//' || true)
+      TOR_V6_ELEMS=$(${pkgs.gnugrep}/bin/grep ":" "$TOR_V6" | ${pkgs.coreutils}/bin/tr '\n' ',' | ${pkgs.gnused}/bin/sed 's/,$//' || true)
       [ -n "$TOR_V6_ELEMS" ] && echo "    elements = { $TOR_V6_ELEMS }"
       echo "  }"
       

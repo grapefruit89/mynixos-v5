@@ -22,9 +22,7 @@ in {
  # Passwort via Sops (Ausschnitt aus secrets.yaml)
  hashedPasswordFile = config.sops.secrets.freund_password.path;
  
- openssh.authorizedKeys.keys = [
- "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI...PLACEHOLDER..." 
- ];
+ openssh.authorizedKeys.keys = []; # No key yet – add real key before deployment
  
  shell = pkgs.bashInteractive;
  };

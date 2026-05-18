@@ -20,14 +20,19 @@
  # SSoT Integration
  sshPort = toString config.my.ports.ssh;
 in {
- options.my.meta.fail2ban = lib.mkOption {
- type = lib.types.attrs;
- default = nms;
- readOnly = true;
- description = "NMS metadata";
- };
+ options.my.services.fail2ban = {
+     enable = lib.mkEnableOption "Fail2ban Brute-Force Protection";
+   };
 
- config = lib.mkIf (config.my.services.fail2ban.enable or true) {
+   options.my.meta.fail2ban = lib.mkOption {
+     type = lib.types.attrs;
+     default = nms;
+     readOnly = true;
+     description = "NMS metadata";
+   };
+
+   config = lib.mkIf config.my.services.fail2ban.enable {
+
  services.fail2ban = {
  enable = true;
  # 🛡️ GLOBAL HARDENING (NFTables Standard)

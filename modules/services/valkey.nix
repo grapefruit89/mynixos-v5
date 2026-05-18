@@ -23,6 +23,7 @@ in
 
 
  config = lib.mkIf config.my.services.valkey.enable {
+ users.users.redis-valkey.uid = config.my.users.registry.valkey;
  services.redis.package = pkgs.valkey;
  services.redis.servers.valkey = {
  enable = true; 
