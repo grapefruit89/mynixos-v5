@@ -104,6 +104,7 @@ in
  };
  users.groups.${cfg.group} = {};
 
+      # 🏠 HOME ASSISTANT IOT (anchor: home-assistant-iot)
       services.home-assistant = {
         enable = true;
         configDir = cfg.stateDir;

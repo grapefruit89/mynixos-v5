@@ -108,6 +108,7 @@ in
  description = "n8n Workflow Engine (hardened)";
  after = [ "network.target" ] ++ (lib.optional (cfg.database.type == "postgres") "postgresql.service");
  
+ # 🔗 N8N WORKFLOWS (anchor: n8n-workflows)
  # 🔗 N8N ENV CONFIG
  environment = {
  N8N_PORT = toString cfg.port;

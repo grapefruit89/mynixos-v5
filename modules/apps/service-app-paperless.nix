@@ -68,6 +68,7 @@ in
  environment = {
  PAPERLESS_URL = "https://paperless.${config.my.configs.identity.subdomain}.${config.my.configs.identity.domain}";
  PAPERLESS_TIME_ZONE = config.my.configs.locale.timezone;
+ # 📑 PAPERLESS AUTOMATION (anchor: paperless-automation)
  PAPERLESS_OCR_LANGUAGE = "deu+eng";
  
  # ABC-Tiering Paths (Source: ADR 852)

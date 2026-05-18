@@ -55,6 +55,7 @@ in {
      };
    })
    {
+     # 🔐 VAULTWARDEN SECRETS (anchor: vaultwarden-secrets)
      services.vaultwarden = {
        enable = true;
        config = {
