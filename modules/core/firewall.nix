@@ -123,7 +123,7 @@ in {
         ip saddr ${lanCidr} tcp dport ${toString sshPort} accept
         ip6 saddr ${lanCidrV6} tcp dport ${toString sshPort} accept
 
-        # DNS Support für das LAN (Blocky)
+        # DNS Support für das LAN (Blocky) (anchor: lan-dns-support)
         ip saddr ${lanCidr} { tcp, udp } dport 53 accept
         ip6 saddr ${lanCidrV6} { tcp, udp } dport 53 accept
 

@@ -29,8 +29,10 @@ in {
  networking.useDHCP = false;
  networking.networkmanager.enable = lib.mkForce false;
 
+ # 🌐 NETWORK INTERFACES (anchor: network-interfaces)
  systemd.network = {
- enable = true;
+   enable = true;
+
  config.networkConfig.IPv6PrivacyExtensions = "kernel";
  networks."10-lan" = {
  matchConfig.Name = "en*";

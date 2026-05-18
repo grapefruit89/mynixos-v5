@@ -23,6 +23,7 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    # 🛡️ BLOCKY DNS (anchor: blocky-dns)
     services.blocky = {
       enable = true;
       settings = {
@@ -33,7 +34,7 @@ in {
         ];
         bootstrapDns = "1.1.1.1";
         
-        # 🛡️ Ad-Blocking
+        # 🛡️ Ad-Blocking (anchor: dns-adblocking)
         blocking = {
           blackLists = {
             ads = [
