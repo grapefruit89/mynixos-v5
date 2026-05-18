@@ -2,17 +2,26 @@
 title: ADR-016: Sops-Nix Boot Timing Fix
 status: [ACCEPTED]
 category: architecture/decision
+last_reviewed: 2026-05-18
+nix_modules:
+  - path: modules/core/secrets.nix
 ---
 
 # 🏛️ ADR-016: Sops-Nix Boot-Reihenfolge
 
 ## Kontext
-Bei Nutzung von Impermanence und sops-nix besteht ein Race-Condition-Risiko: Secrets werden angefordert, bevor der SSH-Host-Key physisch auf /persist verfügbar ist.
+Bei Nutzung von Impermanence besteht ein Race-Condition-Risiko beim Entschlüsseln von Secrets während des Bootvorgangs.
 
 ## Entscheidung
-Wir erzwingen die korrekte Abhängigkeit in der System-Konfiguration:
-1. **Key-Mapping:** Wir nutzen \`sops.age.sshKeyPaths = [ "/persist/etc/ssh/ssh_host_ed25519_key" ];\`
-2. **Systemd-Dependency:** Wir stellen sicher, dass der \`sops-install-secrets.service\` erst startet, wenn die persistente Partition gemountet ist.
+Wir erzwingen die Abhängigkeit der Secrets vom persistenten Speicher.
 
-## Begründung
-Garantiert einen fehlerfreien Boot-Vorgang ohne manuellen Eingriff, selbst nach einem "Erase-your-darlings" Wipe des Root-Dateisystems.
+## Umsetzung in Nix
+- **Dependency:** `modules/core/secrets.nix` (setzt `sops.age.sshKeyPaths` auf den persistenten Pfad).
+- **Boot:** Sicherstellung, dass `/persist` gemountet ist, bevor `sops-install-secrets` startet.
+
+## Verifizierung
+```bash
+# Prüfe ob Secrets erfolgreich geladen wurden
+ls -l /run/secrets/
+# Erwartetes Ergebnis: Secrets sind nach dem Boot vorhanden und lesbar.
+```

@@ -3,6 +3,10 @@ title: ADR-009: Media Stack Consolidation (Simplicity over Complexity)
 status: [ACCEPTED]
 category: architecture/decision
 capabilities: [sqlite-reliability, service-bundling, zero-maintenance]
+last_reviewed: 2026-05-18
+nix_modules:
+  - path: modules/apps/_arr-factory.nix
+  - path: modules/apps/media-stack.nix
 sources: [nixarr, user-feedback, Internal SRE Audit]
 ---
 
@@ -14,13 +18,13 @@ Wir haben die Wahl zwischen PostgreSQL und SQLite für den ARR-Stack analysiert.
 ## Entscheidung
 Wir nutzen **SQLite** als Standard-Datenbank für alle ARR-Dienste (Sonarr, Radarr, Lidarr, Prowlarr).
 
-## Begründung (The Simplicity Wins)
-1.  **Zero Maintenance:** Keine Datenbank-Administration nötig. NixOS-Module konfigurieren SQLite automatisch "out-of-the-box".
-2.  **Resource Efficiency:** Einsparung des PostgreSQL-Daemon Overheads (RAM/CPU).
-3.  **Backup Ease:** Einfache Datei-basierte Sicherung der Datenbank-Files (\`.db\`) im App-Verzeichnis.
+## Umsetzung in Nix
+- **Factory:** `modules/apps/_arr-factory.nix` (konfiguriert Pfade für SQLite `.db` Files).
+- **Target:** `modules/apps/media-stack.nix` (bündelt Dienste unter `media-stack.target`).
 
-## Bündelung
-Wir behalten das Systemd-Target \`media-stack.target\` bei, um alle Dienste gleichzeitig steuern zu können.
-
-## Konsequenz
-In \`modules/40-media/*.nix\` wird kein PostgreSQL-Bezug für ARR-Apps implementiert. Wir folgen dem Pfad von \`nixarr\`.
+## Verifizierung
+```bash
+# Prüfe ob SQLite Files im App-Datenordner liegen
+ls -l /var/lib/sonarr/sonarr.db
+# Erwartetes Ergebnis: Datei existiert und wird vom Dienst genutzt.
+```

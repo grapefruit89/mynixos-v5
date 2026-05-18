@@ -3,6 +3,11 @@ title: ADR-004: Media Engine & VPN Isolation Standard
 status: [ACCEPTED]
 category: architecture/decision
 capabilities: [vpn-namespaces, hardware-transcoding, dendritic-purity]
+last_reviewed: 2026-05-18
+nix_modules:
+  - path: modules/services/vpn-confinement.nix
+  - path: modules/apps/_arr-factory.nix
+  - path: modules/core/hardware-configuration.nix
 sources: [nixarr, nixflix, Internal SRE Audit]
 ---
 
@@ -13,14 +18,18 @@ Wir implementieren den Medien-Stack (Layer 40). Wir wollen die Sicherheit von `n
 
 ## Entscheidung
 Wir implementieren eine "Hybrid-Engine":
-1.  **VPN-Isolation:** Wir nutzen das Namespace-Pattern von `nixarr` (Native NixOS netns).
-2.  **Hardware:** Wir nutzen die QuickSync-Optimierungen von `nixflix` (iHD Driver).
-3.  **Struktur:** Wir nutzen das **mynixos v8.0 Flat-Dendritic Pattern**.
+1.  **VPN-Isolation:** Wir nutzen das Namespace-Pattern via `vpn-confinement.nix` (Native NixOS netns).
+2.  **Hardware:** Wir nutzen QuickSync Optimierungen (iHD Driver) via `hardware-configuration.nix`.
+3.  **Struktur:** Wir nutzen das **mynixos v8.0 Flat-Dendritic Pattern** in `_arr-factory.nix`.
 
-## Was wir besser machen (Aviation-Grade Improvements)
-- **Caddy Injektion:** Jeder Medien-Dienst injiziert seinen Ingress selbst (Dendritic Synthesis).
-- **Sops-First:** Alle API-Keys (Sonarr, Radarr) werden zwingend via Sops verschlüsselt.
-- **Binary-Only:** Wo möglich, nutzen wir Go/Rust-Helfer (z.B. Recyclarr).
+## Umsetzung in Nix
+- **Netzwerk:** `modules/services/vpn-confinement.nix` (Erstellung der netns).
+- **Services:** `modules/apps/_arr-factory.nix` (Factory-Pattern für isolierte Dienste).
+- **GPU:** `modules/core/hardware-configuration.nix` (VA-API/QuickSync).
 
-## Konsequenz
-Der Medien-Stack wird zum sichersten und effizientesten Teil des Systems. Kein Dienst kann am VPN vorbei kommunizieren.
+## Verifizierung
+```bash
+# Prüfe ob der Download-Client im VPN-Namespace läuft
+ip netns exec vpn curl ifconfig.me
+# Sollte die IP des VPN-Providers zurückgeben, nicht die lokale ISP-IP.
+```

@@ -3,6 +3,10 @@ title: ADR-014: Systemic Governance & Purity Mandate
 status: [ACCEPTED]
 category: architecture/decision
 capabilities: [evaluation-performance, dependency-integrity, security-purity]
+last_reviewed: 2026-05-18
+nix_modules:
+  - path: modules/core/architecture-rules.nix
+  - path: modules/security/security-assertions.nix
 sources: [Nixpkgs Maintainer Guide, Manifest v7.1]
 ---
 
@@ -11,18 +15,22 @@ sources: [Nixpkgs Maintainer Guide, Manifest v7.1]
 Dieses ADR definiert die Regeln für die langfristige Stabilität und Sicherheit von mynixos.
 
 ## 🚫 1. IFD-Verbot (No Import-From-Derivation)
-Um die Evaluations-Performance des Flakes zu garantieren, ist IFD im gesamten \`mynixos/\` Baum untersagt.
-- **Regel:** Generierte Dateien (z.B. API-Listen) müssen committed werden, anstatt sie während der Evaluation zu bauen.
+IFD ist im gesamten `mynixos/` Baum untersagt, um die Evaluations-Performance zu garantieren.
 
 ## 🛠️ 2. Fix-at-Source (Anti-Override Policy)
-Wir vermeiden \`overrideAttrs\` oder \`overridePythonAttrs\` innerhalb der eigenen Module.
-- **Regel:** Wenn ein Paket angepasst werden muss, geschieht dies durch eine saubere Funktions-Abstraktion oder einen direkten Patch im Paket-Dendriten.
-- **Ziel:** Ein transparenter, flacher Abhängigkeitsgraph.
+Wir vermeiden `overrideAttrs` innerhalb der eigenen Module. Anpassungen geschehen über saubere Funktions-Abstraktionen.
 
-## 🛡️ 3. Security-Source-Purity
-Sicherheitskritische Komponenten (PAM, SUID, Auth-Dienste) dürfen niemals als binäre Blobs eingebunden werden.
-- **Regel:** Bau aus dem verifizierten Quellcode ist zwingend.
-- **Audit:** Jede externe Quelle muss eine stabile Checksumme (SHA-256) haben.
+## 🛡️ 3. No External Frameworks
+Die Nutzung von `flake-parts` oder anderen externen Architektur-Frameworks ist untersagt, um die volle Kontrolle über den Dependency-Graph zu behalten.
 
-## Begründung
-Diese Regeln verhindern die schleichende Erosion der Systemqualität ("Software Rot") und garantieren, dass der Tower auch nach 5 Jahren noch wartbar bleibt.
+## Umsetzung in Nix
+Die Einhaltung wird durch die **Architecture Rule Engine** erzwungen:
+- `modules/core/architecture-rules.nix` (Assertion gegen flake-parts).
+- `modules/security/security-assertions.nix` (Struktur-Validierung).
+
+## Verifizierung
+```bash
+# Prüfe auf unzulässige Frameworks im Flake
+nix flake show --all-systems | grep "flake-parts"
+# Erwartetes Ergebnis: Kein Treffer.
+```

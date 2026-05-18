@@ -3,20 +3,27 @@ title: ADR-012: Selection Criteria for Socket Activation (Safety First)
 status: [ACCEPTED]
 category: architecture/decision
 capabilities: [pragmatic-efficiency, connectivity-guarantee, security-hardening]
+last_reviewed: 2026-05-18
+nix_modules:
+  - path: modules/core/ssh.nix
 sources: [User Feedback, Connectivity Audit]
 ---
 
 # 🏛️ ADR-012: Pragmatische Socket-Activation (v2.0)
 
 ## Kontext
-Wir haben SSH fälschlicherweise für Socket-Activation vorgesehen. 
+Wir haben SSH fälschlicherweise für Socket-Activation vorgesehen (siehe ADR-011). 
 
 ## Entscheidung
-**SSH wird STRIKT von der Socket-Activation ausgeschlossen.** Es bleibt permanent aktiv (\`services.openssh.enable = true;\`).
+**SSH wird STRIKT von der Socket-Activation ausgeschlossen.** Es bleibt permanent aktiv.
 
-## Begründung (The Safety Mandate)
-- **Erreichbarkeit:** Das Risiko, sich bei einem Fehler in der Socket-Logik physisch vom Tower auszusperren, ist inakzeptabel.
-- **Minimaler Gewinn:** Die Ersparnis von ~5MB RAM steht in keinem Verhältnis zur Gefahr des Kontrollverlusts.
+## Umsetzung in Nix
+- **SSH:** `modules/core/ssh.nix` (systemd.services.sshd.enable = true).
+- **Hardening:** `modules/core/ssh.nix` (systemd hardening ohne Socket-Activation).
 
-## Konsequenz
-Nur interaktive Schwergewichte (Jellyfin, Paperless) werden bei Bedarf gestartet.
+## Verifizierung
+```bash
+# Prüfe ob SSHD permanent läuft
+systemctl is-active sshd
+# Erwartetes Ergebnis: "active" (nicht "waiting for socket").
+```

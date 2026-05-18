@@ -3,23 +3,27 @@ title: ADR-015: Distance Over Local Parity (The anti-RAID Mandate)
 status: [ACCEPTED]
 category: architecture/decision
 capabilities: [offsite-recovery, 3-2-1-rule, state-minimization]
+last_reviewed: 2026-05-18
+nix_modules:
+  - path: modules/core/storage-policy.nix
+  - path: modules/core/backup.nix
 ---
 
 # 🏛️ ADR-015: Distanz ist die bessere Parität
 
 ## Kontext
-Lokale Redundanz (RAID/SnapRAID) schützt nicht gegen Feuer, Diebstahl oder Headcrash-Serien, erhöht aber die Komplexität und verhindert HDD-Spindown.
+Lokale Redundanz (RAID) schützt nicht gegen Katastrophen und verhindert HDD-Spindown.
 
 ## Entscheidung
-Wir verzichten auf jegliche lokale Redundanz (RAID/Parity) und investieren die Ressourcen in **geografische Distanz**:
-1. **Tier A (State):** Muss unter 10GB bleiben. Sicherung via Restic zu S3.
-2. **Tier A++ (Fotos):** 3-2-1 Strategie. Zwei geografisch getrennte Cloud-Ziele plus lokaler State.
-3. **Tier C (Media):** Akzeptierter Totalverlust bei Hardware-Defekt.
+Wir verzichten auf RAID und investieren in **geografische Distanz** (Restic zu S3/Offsite).
 
-## Begründung
-- **KISS:** Keine RAID-Rebuilds, keine Paritäts-Berechnungen.
-- **Recovery:** Ein S3-Bucket ist schneller wiederhergestellt als ein korruptes RAID-Array.
-- **Efficiency:** Maximaler Spindown für HDDs garantiert.
+## Umsetzung in Nix
+- **Policy:** `modules/core/storage-policy.nix` (Definition der Tiers A, B, C).
+- **Backup:** `modules/core/backup.nix` (Automatisierte Restic-Backups für Tier A/A++).
 
-## Konsequenz
-Wir implementieren eine strikte State-Diät (Logging-Limits, Thumbnail-Offloading), um die 10GB Grenze für Tier A physisch zu garantieren.
+## Verifizierung
+```bash
+# Prüfe den Status der Backup-Timer
+systemctl list-timers | grep restic
+# Erwartetes Ergebnis: Aktive Timer für die tägliche Sicherung nach S3.
+```
