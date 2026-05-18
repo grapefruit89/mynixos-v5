@@ -84,6 +84,7 @@ in {
  default = {};
  };
 
+ # 🔍 HEALTH ENDPOINTS (anchor: health-endpoints)
  endpoints = lib.mkOption {
  type = lib.types.listOf lib.types.attrs;
  default = [

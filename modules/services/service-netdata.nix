@@ -25,6 +25,7 @@ in
 
 
   config = lib.mkIf config.my.services.netdata.enable {
+    # 📈 NETDATA TELEMETRY (anchor: netdata-telemetry)
     services.netdata = {
       enable = true;
       config = {
