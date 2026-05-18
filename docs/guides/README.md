@@ -20,9 +20,12 @@ Dieses Verzeichnis enthält die konsolidierte Dokumentation für das NixHome v7.
 
 ## 🛠️ Zusätzliche Ressourcen
 
-- **[reference/](../reference/)**: Zentrale Nachschlagewerke (ANTIPATTERN, LAYER_CONSOLIDATED, RISKS).
+- **[98-antipattern.md](./98-antipattern.md)**: Strikte Einhaltung der Projekthierarchie & Anti-Pattern-Vermeidung.
+- **[98-layer-consolidated.md](./98-layer-consolidated.md)**: Konsolidierte Architektur-Layer & Verantwortlichkeiten.
+- **[98-risks.md](./98-risks.md)**: Risiko-Analyse & Mitigation-Strategien.
+- **[99-current-status.md](./99-current-status.md)**: Aktueller Live-Status der Implementierung.
 - **[archive/proposed/](../archive/proposed/)**: Archiv für vorgeschlagene, aber aktuell nicht aktive Features.
-- **[specs/](../specs/)**: JSON-Schemas und technische Metadaten.
+- **[NIXMETA_SCHEMA.json](../NIXMETA_SCHEMA.json)**: JSON-Spezifikation für technische Metadaten.
 
 ---
 *Zuletzt aktualisiert: Mai 2026*
