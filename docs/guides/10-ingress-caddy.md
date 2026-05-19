@@ -27,6 +27,11 @@ In mynixos verschmelzen wir die deklarative Power von Nix mit der dynamischen Ag
 ### 🛡️ 1. Ingress Hardening (anchor: caddy-hardening)
 Die Konfiguration erfolgt modular in `modules/services/caddy.nix`.
 
+### 🌐 Cloudflare – Nur DNS, kein Proxy
+Cloudflare wird ausschließlich für DNS-Management genutzt (Gray Cloud). Der Traffic läuft direkt zum Server, nicht über Cloudflare. Gründe:
+- **Terms of Service**: Die Nutzung als Proxy für nicht-HTML-Inhalte (z.B. Medien-Streaming, API) verstößt gegen die Cloudflare TOS (Abschnitt 2.8) und kann zur Sperrung führen.
+- **Performance**: Geo-Blocking erfolgt direkt auf nftables-Ebene (Kernel-nah) – das ist effizienter und vermeidet Latenz durch Cloudflare-Nodes.
+
 ### 🛠️ Konfiguration
 ```nix
 my.services.caddy.enable = true;
