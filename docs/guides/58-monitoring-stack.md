@@ -2,13 +2,12 @@
 title: 58-monitoring-stack
 category: architecture/consolidated
 status: [ACTIVE-SSoT]
-last_reviewed: 2026-05-18
+last_reviewed: 2026-05-19
+adr: [ADR-010, ADR-015]
+test: tests/basic.nix
 nix_modules:
   - path: modules/services/service-gatus.nix
     anchor: gatus-health
-    github_url: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/services/service-gatus.nix
-  - path: modules/services/service-gatus.nix
-    anchor: health-endpoints
     github_url: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/services/service-gatus.nix
   - path: modules/services/service-netdata.nix
     anchor: netdata-telemetry
@@ -25,7 +24,15 @@ Dieses Dokument beschreibt die Observability-Architektur von mynixos, die auf ma
 
 Gatus ist unser primärer "Watchtower". Es führt kontinuierlich Health-Checks gegen alle Dienste aus und stellt den Status auf einem übersichtlichen Dashboard dar.
 
-- **Konfiguration**: `modules/services/service-gatus.nix`.
+### 🛠️ Konfiguration
+```nix
+my.monitoring.gatus = {
+  enable = true;
+  ntfy.enable = true;
+  # Endpunkte werden automatisch via SSoT-Anker registriert
+};
+```
+
 - **Technik**: In Go geschrieben, hocheffizient, nutzt SQLite für die Historie.
 - **SRE-Vorteil**: Rein deklarative Definition von Endpunkten über Nix.
 
@@ -41,7 +48,11 @@ Gatus überwacht kritische Systemkomponenten bevorzugt über **Unix-Sockets**, u
 
 Netdata liefert hochauflösende Metriken (pro Sekunde) für Hardware und Betriebssystem.
 
-- **Konfiguration**: `modules/services/service-netdata.nix`.
+### 🛠️ Konfiguration
+```nix
+my.services.netdata.enable = true;
+```
+
 - **Speicherung**: Nutzt die `dbengine` für Langzeit-Retention (Standard: 30 Tage).
 - **Härtung**: Das Web-Interface ist via Unix-Socket an Caddy gebunden und durch `admin_auth` (LAN-only) geschützt.
 
@@ -67,17 +78,22 @@ Fehler werden proaktiv gemeldet, bevor sie den User beeinträchtigen.
 
 ```bash
 # 1. Prüfe Gatus Status & Endpunkte
-systemctl status gatus
-curl -s http://127.0.0.1:8080/api/v1/health | jq
+systemctl status gatus --no-pager
+# Positiv-Test: API muss 200 liefern
+curl -f -s http://127.0.0.1:80111/api/v1/health | jq .status | grep "200"
+# Negativ-Test: Externer Zugriff ohne Proxy muss scheitern (nur localhost bound)
+! curl -s --connect-timeout 2 http://$(hostname -I | awk '{print $1}'):80111
 
 # 2. Prüfe Netdata Socket-Verbindung
 ss -lx | grep netdata.sock
+# Negativ-Test: Port 19999 darf NICHT auf allen Interfaces lauschen
+! ss -tulpn | grep ":19999" | grep "0.0.0.0"
 
 # 3. Starte iGPU Monitoring (Interaktiv)
-nvtop
+# nvtop (Manuelle Prüfung notwendig)
 
 # 4. Teste ntfy Alerting (Manueller Trigger)
-curl -d "TEST: Gatus Alert Simulation" https://ntfy.m7c5.de/gatus-alerts
+curl -f -d "TEST: Gatus Alert Simulation" https://ntfy.m7c5.de/gatus-alerts
 ```
 
 ---
@@ -89,9 +105,14 @@ curl -d "TEST: Gatus Alert Simulation" https://ntfy.m7c5.de/gatus-alerts
 - [netdata/netdata](https://github.com/netdata/netdata) - Real-time monitoring
 
 ### Context7 Observability
+<!-- context7: nixpkgs/nixos/modules/services/monitoring/gatus.nix -->
+<!-- context7: nixpkgs/nixos/modules/services/monitoring/netdata.nix -->
 <!-- context7: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/services/service-gatus.nix -->
 <!-- context7: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/services/service-netdata.nix -->
 
 ### Nix MCP Index
-<!-- mcp: repo_v5/modules/services/service-gatus.nix -->
-<!-- mcp: repo_v5/modules/services/service-netdata.nix -->
+<!-- mcp: nixos:repo_v5/modules/services/service-gatus.nix -->
+<!-- mcp: nixos:repo_v5/modules/services/service-netdata.nix -->
+
+---
+*Status: Production Hardened | Letzte Aktualisierung: 19. Mai 2026*

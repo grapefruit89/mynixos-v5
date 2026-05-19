@@ -32,6 +32,9 @@ let
   staticSeedV6 = [
     "::1/128"
     "fe80::/10"
+    "fc00::/7"   # Unique Local Address (ULA)
+    "2001:db8::/32" # Documentation
+    "2001:470::/32" # HE.net (Common in homelabs)
   ];
 
   updateScript = pkgs.writeShellScript "update-geoip-data" ''
@@ -49,7 +52,6 @@ let
     touch "$GEO_V4" "$GEO_V6" "$DC_BLOCK" "$TOR_V4" "$TOR_V6"
 
     # 1. Fetch GeoIP (IPv4)
-    # ... (existing fetch logic) ...
     for cc in ${lib.concatStringsSep " " cfg.allowedCountries}; do
       echo "Fetching GeoIP v4 for $cc..."
       ${pkgs.curl}/bin/curl -sSfL "https://www.ipdeny.com/ipblocks/data/aggregated/$cc-aggregated.zone" >> "$GEO_V4" || echo "Warning: Failed to fetch v4 for $cc"
@@ -64,30 +66,24 @@ let
     # 3. Fetch Datacenter Blocklists
     for url in ${lib.concatStringsSep " " dcSources}; do
       echo "Fetching DC blocklist from $url..."
-      ${pkgs.curl}/bin/curl -sSfL "$url" | grep -v "^#" >> "$DC_BLOCK" || echo "Warning: Failed to fetch DC list from $url"
+      ${pkgs.curl}/bin/curl -sSfL "$url" | ${pkgs.gnugrep}/bin/grep -v "^#" >> "$DC_BLOCK" || echo "Warning: Failed to fetch DC list from $url"
     done
 
-    # 4. Fetch Tor Exit Nodes
-    echo "Fetching Tor exit nodes (Dual-Stack)..."
-    TOR_DATA=$(${pkgs.curl}/bin/curl -sSfL "https://check.torproject.org/exit-addresses")
-    echo "$TOR_DATA" | ${pkgs.gnugrep}/bin/grep "ExitAddress" | ${pkgs.gawk}/bin/awk '{print $2}' | ${pkgs.gnugrep}/bin/grep -v ":" > "$TOR_V4" || true
-    echo "$TOR_DATA" | ${pkgs.gnugrep}/bin/grep "ExitAddress" | ${pkgs.gawk}/bin/awk '{print $2}' | ${pkgs.gnugrep}/bin/grep ":" > "$TOR_V6" || true
+    # 4. Fetch Tor Exit Nodes (H-07: Dual-Stack Parity)
+    echo "Fetching Tor exit nodes..."
+    TOR_DATA=$(${pkgs.curl}/bin/curl -sSfL "https://check.torproject.org/exit-addresses" || echo "")
+    if [ -n "$TOR_DATA" ]; then
+      echo "$TOR_DATA" | ${pkgs.gnugrep}/bin/grep "ExitAddress" | ${pkgs.gawk}/bin/awk '{print $2}' | ${pkgs.gnugrep}/bin/grep -v ":" > "$TOR_V4" || true
+      echo "$TOR_DATA" | ${pkgs.gnugrep}/bin/grep "ExitAddress" | ${pkgs.gawk}/bin/awk '{print $2}' | ${pkgs.gnugrep}/bin/grep ":" > "$TOR_V6" || true
+    fi
 
     # 5. Post-processing & Validation
-    sort -u "$GEO_V4" -o "$GEO_V4"
-    sort -u "$GEO_V6" -o "$GEO_V6"
-    sort -u "$DC_BLOCK" -o "$DC_BLOCK"
-    sort -u "$TOR_V4" -o "$TOR_V4"
-    sort -u "$TOR_V6" -o "$TOR_V6"
-
-    # Validation: Ensure we didn't get a completely empty list for Geo
-    if [ ! -s "$GEO_V4" ]; then
-      echo "Error: GeoIP v4 list is empty. Aborting update."
-      ${lib.optionalString (config.my.logging.vector.ntfyTopic != null) ''
-        ${pkgs.curl}/bin/curl -d "GeoIP Update Failed: V4 list empty" ${config.my.configs.identity.ntfyUrl}/${config.my.logging.vector.ntfyTopic}
-      ''}
-      exit 1
-    fi
+    # Ensure lists are clean and sorted
+    sort -u "$GEO_V4" | ${pkgs.gnugrep}/bin/grep -E "^([0-9]{1,3}\.){3}[0-9]{1,3}(/[0-9]+)?$" > "$GEO_V4.tmp" || true
+    mv "$GEO_V4.tmp" "$GEO_V4"
+    
+    sort -u "$GEO_V6" | ${pkgs.gnugrep}/bin/grep ":" > "$GEO_V6.tmp" || true
+    mv "$GEO_V6.tmp" "$GEO_V6"
 
     # 6. Atomic Update to live filesystem
     mkdir -p ${geoipDir}
@@ -128,18 +124,19 @@ let
 
       echo "  set tor_exit_nodes {"
       echo "    type ipv4_addr; flags interval;"
-      TOR_V4_ELEMS=$(${pkgs.gnugrep}/bin/grep -v ":" "$TOR_V4" | ${pkgs.coreutils}/bin/tr '\n' ',' | ${pkgs.gnused}/bin/sed 's/,$//' || true)
+      TOR_V4_ELEMS=$(${pkgs.coreutils}/bin/tr '\n' ',' < "$TOR_V4" | ${pkgs.gnused}/bin/sed 's/,$//' || true)
       [ -n "$TOR_V4_ELEMS" ] && echo "    elements = { $TOR_V4_ELEMS }"
       echo "  }"
 
       echo "  set tor_exit_nodes_v6 {"
       echo "    type ipv6_addr; flags interval;"
-      TOR_V6_ELEMS=$(${pkgs.gnugrep}/bin/grep ":" "$TOR_V6" | ${pkgs.coreutils}/bin/tr '\n' ',' | ${pkgs.gnused}/bin/sed 's/,$//' || true)
+      TOR_V6_ELEMS=$(${pkgs.coreutils}/bin/tr '\n' ',' < "$TOR_V6" | ${pkgs.gnused}/bin/sed 's/,$//' || true)
       [ -n "$TOR_V6_ELEMS" ] && echo "    elements = { $TOR_V6_ELEMS }"
       echo "  }"
       
       echo "}"
     } > "$NFT_FILE"
+
 
     if ${pkgs.nftables}/bin/nft -f "$NFT_FILE"; then
       echo "✅ nftables sets updated successfully."

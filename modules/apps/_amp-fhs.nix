@@ -11,6 +11,7 @@
 
 { pkgs, ... }:
 
+# 📦 AMP FHS ENVIRONMENT (anchor: amp-fhs)
 pkgs.buildFHSEnv {
   name = "amp-fhs";
   targetPkgs = pkgs: with pkgs; [

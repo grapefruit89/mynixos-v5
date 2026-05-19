@@ -28,13 +28,13 @@ in {
     enable = lib.mkEnableOption "AMP Game Server Panel";
     port = lib.mkOption {
       type = lib.types.port;
-      default = 8080;
+      default = config.my.ports.amp;
       description = "Internal port for AMP Web UI.";
     };
   };
 
   config = lib.mkIf cfg.enable {
-    # 📝 1. SYSTEMD SERVICE (Manual definition for maximum control)
+    # 📝 1. SYSTEMD SERVICE (anchor: amp-service)
     systemd.services.amp = {
       description = "AMP Game Server Manager (Native FHS)";
       after = [ "network.target" "local-fs.target" ];

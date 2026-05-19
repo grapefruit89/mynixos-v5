@@ -1,3 +1,19 @@
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-080-MON-NET-001",
+#   "title": "Netdata Real-time Telemetry",
+#   "layer": 80,
+#   "category": "services/monitoring",
+#   "lastReviewed": "2026-05-19",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 2,
+#   "tags": ["monitoring", "netdata", "telemetry", "real-time"],
+#   "description": "Hardened Netdata configuration with socket-only access and dbengine storage."
+# }
+# ---ENDNIXMETA
+
 { config, lib, ... }:
 let
  # 🚀 NMS v4.0 Metadaten

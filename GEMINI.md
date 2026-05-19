@@ -25,15 +25,9 @@
 - `modules/core/defaults.nix` – Centralized sysctls and swappiness
 - `modules/security/hardened-core.nix` – Kernel hardening & sandboxing
 
-## ✅ Recently Completed
-- [x] **SSO Enforcement:** Removed Tailscale bypass in Homepage.
-- [x] **Registration Lock:** Disabled public registration in Pocket-ID.
-- [x] **Port Collision Resolution:** Pocket-ID (8089), AdGuard (3004), etc.
-- [x] **Storage Safety:** Hardened Storage-Mover with WAL/SHM exclusions.
-- [x] **Jellyfin Optimization:** 2GB RAM-transcode disk (tmpfs).
-- [x] **Fluff Removal:** Systematic elimination of "Aviation-Grade" terminology.
+## 🛤️ Projekt-Status & Roadmap (SSoT)
+**ALLE offenen Punkte und der aktuelle Fortschritt werden AUSSCHLIESSLICH hier verwaltet:**
+👉 `docs/CURRENT_STATUS.md`
 
-## 🛤️ Next Steps
-- [ ] Fill `secrets.yaml` using `secrets.yaml.example` as a template.
-- [ ] Verify backup integrity on `/persist`.
-- [ ] Fine-tune IPv6 geoblocking sets.
+*(Keine To-Do Listen direkt in dieser Datei pflegen!)*
+

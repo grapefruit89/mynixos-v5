@@ -38,6 +38,8 @@
       homepage = 20300;
       matrix = 20001;
       readmeabook = 20002;
+      forgejo = 20003;
+      amp = 20080;
 
       # 📈 80xxx: MONITORING
       netdata = 80999;

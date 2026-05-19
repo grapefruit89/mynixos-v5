@@ -62,6 +62,20 @@ in
       pruneOpts = [ "--keep-daily 7" "--keep-weekly 4" "--keep-monthly 6" ];
     };
 
+    # 🕵️ WEEKLY INTEGRITY AUDIT (anchor: backup-audit)
+    # Perform a deeper check of 10% of the data once a week.
+    systemd.services.restic-backup-audit = {
+      description = "Deep Audit of Restic Backup Integrity";
+      startAt = "weekly";
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = "${pkgs.restic}/bin/restic -r ${localRepo} check --read-data-subset=10% --password-file ${config.sops.secrets.restic_password.path}";
+        # Hardening
+        CPUWeight = 50;
+        IOWeight = 50;
+      };
+    };
+
     services.restic.backups.remote = {
       initialize = true;
       repository = "s3:s3.eu-central-003.backblazeb2.com/nixhome-backup";

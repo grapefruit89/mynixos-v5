@@ -36,6 +36,7 @@
       zigbee2mqtt = 2206;
       mosquitto = 2207;
       matrix = 2208;
+      forgejo = 2209;
 
       # 📈 Monitoring (2300-2399)
       netdata = 2300;

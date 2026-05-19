@@ -1,47 +1,69 @@
-# 🎮 AMP Game Server Panel Setup (Native NixOS)
+# 🎮 Guide 95: Gaming & AMP (Native FHS)
 
-Diese Dokumentation beschreibt die Einrichtung des AMP Panels ohne Docker in der gehärteten `repo_v5` Umgebung.
+---
+title: 🎮 Gaming & AMP (Native FHS)
+category: services/gaming
+status: [ACTIVE-SSoT]
+capabilities: [game-server, fhs-env, steamcmd, amp-panel]
+sources: [CubeCoders AMP Docs, NixOS Wiki: FHS]
+last_reviewed: 2026-05-19
+---
 
-## 🏗️ Architektur
-AMP läuft in einer **FHS-Sandbox** (`buildFHSEnv`), die alle benötigten Bibliotheken (.NET 8, glibc, etc.) bereitstellt. Die Daten werden über **Impermanence** unter `/persist/var/lib/amp` gesichert.
+Dieses Dokument beschreibt die native Integration des **AMP Game Server Panels** in der NixHome-Umgebung. Wir verzichten bewusst auf Docker und nutzen stattdessen **FHS-Sandboxing**.
 
-## 🚀 Erstmalige Einrichtung (Bootstrapping)
+## 🏛️ 1. Die Architektur: FHS-Sandboxing
 
-1.  **System-Rebuild:** Führe einen `nixos-rebuild switch` aus, um den `amp` User und die Sandbox zu erstellen.
-2.  **Bootstrap-Skript ausführen:**
-    ```bash
-    sudo bash scripts/bootstrap-amp.sh
-    ```
-3.  **Innerhalb der FHS-Shell (als User `amp`):**
-    ```bash
-    wget https://repo.cubecoders.com/ampinstmgr.zip
-    unzip ampinstmgr.zip
-    ./ampinstmgr QuickStart <DEINE_LIZENZ_NUMMER>
-    ```
-4.  **Service starten:**
-    Verlasse die Shell (`exit`) und starte den Service:
-    ```bash
-    sudo systemctl enable --now amp
-    ```
+Da Game-Server oft vorkompilierte Binaries und spezifische Pfade (`/bin/bash`, `/usr/lib`) erwarten, nutzen wir ein **Filesystem Hierarchy Standard (FHS)** Environment.
 
-## 🌐 Zugriff
-Das Panel ist unter `https://amp.<deine-domain>` erreichbar. 
-Der Zugriff ist auf die **Admin-Zone** beschränkt (`admin_auth`).
+### 📦 AMP FHS Sandbox (`modules/apps/_amp-fhs.nix`)
+- **Basis:** `pkgs.buildFHSEnv` stellt eine kompatible Laufzeitumgebung bereit.
+- **Dependencies:** .NET 8 SDK, glibc, OpenSSL, SteamCMD, libstdc++, etc.
+- **Vorteil:** Game-Server "denken", sie laufen auf einem Standard-Linux (Ubuntu/Debian), während sie tatsächlich sicher isoliert auf NixOS laufen. ✅
 
-## 🛡️ Sicherheit & Härtung
--   **Sandbox:** `ProtectSystem=strict`, `NoNewPrivileges=true`.
--   **Netzwerk:** `PrivateNetwork=false` (notwendig für Game-Server).
--   **User:** Eigener unprivilegierter System-User `amp` mit statischer UID `2109`.
+---
 
-## 📂 Pfade
--   **State:** `/var/lib/amp` (Persistent via `/persist/var/lib/amp`).
--   **Binaries:** Werden von `ampinstmgr` direkt in das State-Verzeichnis geladen.
+## 🛠️ 2. AMP Service Konfiguration
 
-## 🔧 Game-Ports öffnen
-Standardmäßig sind keine Game-Ports in der Firewall geöffnet. Um Ports für ein bestimmtes Spiel (z.B. Minecraft 25565) zu öffnen, passe `modules/core/firewall.nix` an:
+### 💎 Der Service (`modules/services/amp.nix`)
+- **User:** Eigener unprivilegierter System-User `amp` (UID `2109`).
+- **Persistence:** Alle Instanzen und Daten liegen unter `/var/lib/amp` (persistent via `/persist`).
+- **Network:** Direkter Netzwerkzugriff notwendig (kein `PrivateNetwork`), um Game-Ports dynamisch binden zu können.
+- **Proxy:** Erreichbar über `https://amp.m7c5.de/` (Zone: Admin).
+
+### 🚀 Erstmaliges Bootstrapping
+1. **Modul aktivieren:** `my.services.amp.enable = true;` in `configuration.nix`.
+2. **Rebuild:** `sudo nixos-rebuild switch`.
+3. **Instanz-Manager:**
+   ```bash
+   sudo -u amp -i
+   # Du befindest dich nun in der FHS-Shell
+   ampinstmgr QuickStart <DEINE_LIZENZ>
+   ```
+
+---
+
+## 🎮 3. Game-Server Management
+
+### 🛡️ Sicherheit
+Obwohl AMP als User `amp` läuft, spawned es weitere Prozesse. 
+- **Sandboxing:** Wir nutzen `ProtectSystem=strict` für den Master-Service.
+- **Isolation:** Game-Server sollten innerhalb von AMP mit eigenen "Instances" isoliert werden.
+
+### 🔓 Firewall-Management
+Game-Server benötigen spezifische Ports. Diese müssen manuell in `firewall.nix` oder über eine Host-spezifische Konfiguration geöffnet werden:
 
 ```nix
+# Beispiel: Minecraft
 networking.firewall.allowedTCPPorts = [ 25565 ];
-networking.firewall.allowedUDPPorts = [ 25565 ];
 ```
-Oder nutze die `extraInputRules`.
+
+---
+
+## 📝 Nächste Schritte
+
+- [ ] **TODO-025:** Implementierung eines automatischen Firewall-Wrappers für AMP (optional).
+- [ ] **TODO-026:** Monitoring der Game-Server Auslastung via Netdata/Prometheus.
+- [ ] **Final Check:** Verifikation der SteamCMD Funktionalität innerhalb der FHS-Sandbox.
+
+---
+*Status: Production Hardened | Letzte Aktualisierung: 19. Mai 2026*
