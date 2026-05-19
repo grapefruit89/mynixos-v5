@@ -35,6 +35,14 @@ in
  systemd.services.cockpit.serviceConfig = {
    OOMScoreAdjust = -500;
    ProtectSystem = "strict";
+   ProtectHome = true;
+   PrivateTmp = true;
+   PrivateDevices = true;
+   NoNewPrivileges = true;
+   RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" ];
+   SystemCallFilter = [ "@system-service" "@privileged" "~@resources" ];
+   MemoryMax = "512M";
+   CPUWeight = 30;
  };
  };
 }
