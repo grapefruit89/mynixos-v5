@@ -14,28 +14,33 @@
 # }
 # ---ENDNIXMETA
 
-{ config, lib, pkgs, myLib, ... }: 
-
-  # Custom Option for our project
+{ config, lib, pkgs, ... }: 
+let
+  cfg = config.my.services.pocketId;
+  id = config.my.configs.identity;
+in {
   options.my.services.pocketId.enable = lib.mkEnableOption "Pocket-ID";
 
   config = lib.mkIf cfg.enable {
-    # 🔌 Import the custom provider module (if not imported elsewhere)
-    # Note: Usually modules are imported in configuration.nix, 
-    # but we can include it here for self-containment if needed, 
-    # though it's better to manage imports centrally.
-    
     # 🆔 POCKET-ID SSO (anchor: pocket-id-sso)
     # 🔑 PASSKEY SUPPORT (anchor: passkey-support)
-  services.pocket-id = {
+    services.pocket-id = {
       enable = true;
       dataDir = "${config.my.configs.paths.stateDir}/pocket-id";
       settings = {
-        issuer = lib.mkForce "https://auth.${subdomain}.${domain}";
+        issuer = lib.mkForce "https://auth.${id.subdomain}.${id.domain}";
         title = "NixHome Identity";
         public_registration = false;
       };
     };
+
+    # 👤 IDENTITY BINDING
+    users.users.pocket-id = {
+      isSystemUser = true;
+      group = "pocket-id";
+      uid = config.my.users.registry.pocket-id;
+    };
+    users.groups.pocket-id = {};
 
     # 🛡️ Hardening via the Factory or manual overrides
     systemd.services.pocket-id.serviceConfig = {
@@ -50,15 +55,15 @@
       RestrictNamespaces = true;
       MemoryDenyWriteExecute = true;
       LockPersonality = true;
-      SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" ];
+      SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" "~@mount" "~@swap" "~@cpu-emulation" ];
       Restart = "always";
       RestartSec = config.my.configs.systemd.restartSec;
       OOMScoreAdjust = -900;
-      };
+    };
 
-      systemd.services.pocket-id.restartTriggers = [
+    systemd.services.pocket-id.restartTriggers = [
       config.services.pocket-id.package
       (builtins.toJSON config.services.pocket-id.settings)
-      ];
+    ];
   };
 }
