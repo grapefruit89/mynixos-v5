@@ -13,7 +13,7 @@ Veraltete Entscheidungen wurden ins Archiv (`../archive/adr/legacy/`) verschoben
 | ADR-008 | SSH ProxyJump Standard | ACCEPTED |
 | ADR-009 | Media Stack Consolidation (Simplicity) | ACCEPTED |
 | ADR-010 | Headless Server Law (No-GUI Mandate) | ACCEPTED |
-| ADR-011 | On-Demand Service Orchestration (Socket Activation) | PROPOSED |
+| ADR-011 | On-Demand Service Orchestration (Socket Activation) | SUPERSEDED |
 | ADR-012 | Selection Criteria for Socket Activation | ACCEPTED |
 | ADR-013 | Resource Priority & Throttling | ACCEPTED |
 | ADR-014 | Systemic Governance & Purity Mandate | ACCEPTED |
