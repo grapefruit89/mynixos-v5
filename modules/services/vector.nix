@@ -57,7 +57,26 @@ in {
       ProtectSystem = "strict";
       ProtectHome = true;
       PrivateTmp = true;
+      PrivateDevices = true;
+      NoNewPrivileges = true;
+      RestrictNamespaces = true;
+      ProtectKernelTunables = true;
+      ProtectKernelLogs = true;
+      ProtectControlGroups = true;
+      ProtectHostname = true;
+      RestrictSUIDSGID = true;
+      LockPersonality = true;
       MemoryDenyWriteExecute = true;
+      SystemCallFilter = [
+        "@system-service"
+        "~@privileged"
+        "~@resources"
+        "~@mount"
+        "~@swap"
+        "~@cpu-emulation"
+      ];
+      CapabilityBoundingSet = "";
+      AmbientCapabilities = "";
     };
 
     # Create target directory for Vector logs
