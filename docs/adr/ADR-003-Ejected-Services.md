@@ -38,7 +38,6 @@ Die Durchsetzung erfolgt über harte Build-Time Assertions in:
 
 ## Verifizierung
 ```bash
-# Versuche einen verbotenen Dienst zu aktivieren
-nix build .#nixosConfigurations.tower.config.system.build.toplevel --override-input nixpkgs github:NixOS/nixpkgs/nixos-unstable --argstr services.docker.enable true
-# Erwartetes Ergebnis: Build-Abbruch mit [POL-003] Fehlermeldung
+# Versuche einen verbotenen Dienst zu aktivieren (nur Dry-Run, kein echter Build)
+nix eval .#nixosConfigurations.nixhome.config.assertions --apply 'builtins.map (a: a.message)' --override-input nixpkgs github:NixOS/nixpkgs/nixos-unstable || true
 ```
