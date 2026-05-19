@@ -51,50 +51,81 @@ in {
       # 🛠️ GLOBAL OPTIONS (Source: Fragment 2526 / Performance Kick)
       # 🛡️ CADDY HARDENING (anchor: caddy-hardening)
       globalConfig = ''
-        admin unix//run/caddy/admin.sock
-        
-        # 🧩 Performance & Resources
-        servers {
-          trusted_proxies static ${trustedIPs}
-          trusted_proxies_strict
-          # Speed-up: Buffer settings
-          max_header_size 16kb
-        }
-        
-        # 📊 Structured Logging for fail2ban
-        log {
-          output file /var/log/caddy/access.log {
-            roll_size 10MB
-            roll_keep 3
-            roll_keep_for 7d
-          }
-          format json
-        }
-        
-        # 🔄 DYNAMIC DNS (Source: Caddy-on-Steroids)
-        dynamic_dns {
-          provider cloudflare {env.CLOUDFLARE_API_TOKEN}
-          domains {
-            ${sreConfig.identity.domain} @
-            ${sreConfig.identity.subdomain}.${sreConfig.identity.domain} *
-          }
-          check_interval 5m
-        }
+      admin unix//run/caddy/admin.sock
 
- # --- HONEYPOT (Time & Resource Stealer) ---
- (honeypot) {
- @evil_paths {
- not remote_ip private_ranges
- path /.env* /.git* /.vscode* /wp-config* /config.json* /actuator* /phpmyadmin* /.aws* /.ssh* /xmlrpc.php /wp-login* /admin* /setup.php /install.php /shell* /cmd.php /cgi-bin*
- }
- handle @evil_paths {
- # 💀 Connection-Killer: Immediate 444 (No Response)
- header -Server
- abort
- }
- }
+      # 🧩 Order of custom modules
+      order rate_limit before basicauth
 
-        # --- HARDENED HEADERS (v7.0 Strict Stealth) ---
+      # 🧩 Performance & Resources
+      servers {
+        trusted_proxies static ${trustedIPs}
+        trusted_proxies_strict
+        # Speed-up: Buffer settings
+        max_header_size 16kb
+      }
+
+      # 📊 Structured Logging for fail2ban
+      log {
+        output file /var/log/caddy/access.log {
+          roll_size 10MB
+          roll_keep 3
+          roll_keep_for 7d
+        }
+        format json
+      }
+
+      # 🔄 DYNAMIC DNS (Source: Caddy-on-Steroids)
+      dynamic_dns {
+        provider cloudflare {env.CLOUDFLARE_API_TOKEN}
+        domains {
+          ${sreConfig.identity.domain} @
+          ${sreConfig.identity.subdomain}.${sreConfig.identity.domain} *
+        }
+        check_interval 5m
+      }
+
+      # --- HONEYPOT (Time & Resource Stealer) ---
+      (honeypot) {
+      @evil_paths {
+      not remote_ip private_ranges
+      path /.env* /.git* /.vscode* /wp-config* /config.json* /actuator* /phpmyadmin* /.aws* /.ssh* /xmlrpc.php /wp-login* /admin* /setup.php /install.php /shell* /cmd.php /cgi-bin*
+      }
+      handle @evil_paths {
+      # 💀 Connection-Killer: Immediate 444 (No Response)
+      header -Server
+      log {
+      level error
+      }
+      abort
+      }
+      }
+
+      # --- CLOUDFLARE GEO-CHECK (Defense in Depth) ---
+      (cloudflare_geo_check) {
+        @blocked_country {
+          not header CF-IPCountry DE
+          not header CF-IPCountry AT
+          not header CF-IPCountry LT
+          not remote_ip private_ranges
+        }
+        handle @blocked_country {
+          respond "Access denied from your region." 403
+        }
+      }
+
+      # --- RATE LIMITING (Bot Mitigation) ---
+      (rate_limit_policy) {
+        rate_limit {
+          zone auth_limit {
+            key {remote_ip}
+            events 10
+            window 1m
+          }
+        }
+      }
+
+      # --- HARDENED HEADERS (v7.0 Strict Stealth) ---
+
         (hardened_headers) {
           header {
             X-Content-Type-Options nosniff
@@ -123,6 +154,8 @@ in {
         # --- FAMILY AUTH (Pocket-ID) (anchor: family-auth)
         # 🛡️ FORWARD-AUTH (anchor: forward-auth)
         (family_auth) {
+          import cloudflare_geo_check
+          import rate_limit_policy
           @needs_auth {
             not remote_ip 127.0.0.1
             not header_regexp host ^auth\.
