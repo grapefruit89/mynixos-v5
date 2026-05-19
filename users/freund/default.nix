@@ -13,7 +13,12 @@
  audit.last_reviewed = "2026-04-27";
  };
 in {
- config = {
+  config = {
+   assertions = [{
+     assertion = config.users.users.freund.openssh.authorizedKeys.keys != [];
+     message = "freund: SSH key must be set in users/freund/default.nix before deployment.";
+   }];
+
  users.users.freund = {
  isNormalUser = true;
  description = "Collaborator (Freund)";
