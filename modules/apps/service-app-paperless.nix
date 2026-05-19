@@ -1,10 +1,19 @@
-# ---
-# nms_id: APP-DOCS-PAPERLESS
-# title: Paperless-ngx
-# capabilities: ["docs/management"]
-# status: "hardened"
-# tier_strategy: "ABC-v5.1"
-# ---
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-050-KNW-PAP-001",
+#   "title": "Paperless-ngx (hardened)",
+#   "layer": 50,
+#   "category": "services/misc",
+#   "lastReviewed": "2026-05-19",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 3,
+#   "tags": ["knowledge", "documents", "ocr", "paperless", "hardened"],
+#   "description": "Hardened document management system with Valkey and PostgreSQL."
+# }
+# ---ENDNIXMETA
+
 { config, lib, pkgs, myLib, ... }:
 let
  # 🚀 NMS v4.2 Metadaten (hardened Paperless-ngx)

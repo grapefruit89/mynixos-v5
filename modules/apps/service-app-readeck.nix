@@ -1,10 +1,19 @@
-# ---
-# nms_id: APP-TOOLS-READECK
-# title: Readeck Reader
-# capabilities: ["tools/reader"]
-# status: "hardened"
-# tier_strategy: "ABC-v5.1"
-# ---
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-050-KNW-REA-001",
+#   "title": "Readeck Reader",
+#   "layer": 50,
+#   "category": "services/web-apps",
+#   "lastReviewed": "2026-05-19",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 2,
+#   "tags": ["knowledge", "reader", "read-it-later", "hardened"],
+#   "description": "Self-hosted 'read-it-later' service, tightly sandboxed with DynamicUser."
+# }
+# ---ENDNIXMETA
+
 { config, lib, pkgs, ... }:
 let
  # 🚀 NMS v4.0 Metadaten

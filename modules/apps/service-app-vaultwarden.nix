@@ -1,16 +1,26 @@
-# ---
-# nms_id: APP-SEC-VAULTWARDEN
-# title: Vaultwarden Password Manager
-# capabilities: ["security/vault"]
-# status: "hardened"
-# tier_strategy: "ABC-v5.1"
-# ---
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-060-APP-VLT-001",
+#   "title": "Vaultwarden Password Manager",
+#   "layer": 60,
+#   "category": "services/security",
+#   "lastReviewed": "2026-05-19",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 2,
+#   "tags": ["security", "passwords", "vault", "hardened", "socket-activation"],
+#   "description": "Tightly sandboxed password manager with Wake-on-Access (Socket Activation)."
+# }
+# ---ENDNIXMETA
+
 {
  config,
  lib,
  myLib,
  ...
-}: let
+}:
+ let
  # 🚀 NMS v4.1 Metadaten
  nms = {
  id = "NIXH-60-APP-007";

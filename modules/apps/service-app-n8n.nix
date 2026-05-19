@@ -1,10 +1,19 @@
-# ---
-# nms_id: APP-AUTO-N8N
-# title: n8n Automation Tool
-# capabilities: ["automation/workflows"]
-# status: "hardened"
-# tier_strategy: "ABC-v5.1"
-# ---
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-030-AUT-N8N-001",
+#   "title": "n8n Workflow Automation (hardened)",
+#   "layer": 30,
+#   "category": "services/misc",
+#   "lastReviewed": "2026-05-19",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 3,
+#   "tags": ["automation", "workflows", "n8n", "hardened"],
+#   "description": "Hardened n8n instance with Postgres backend and Secret-Isolation."
+# }
+# ---ENDNIXMETA
+
 { config, lib, pkgs, myLib, ... }:
 let
  # 🚀 NMS v4.2 Metadaten (hardened n8n)

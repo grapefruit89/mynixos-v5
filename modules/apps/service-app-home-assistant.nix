@@ -1,10 +1,19 @@
-# ---
-# nms_id: APP-AUTO-HA
-# title: Home Assistant
-# capabilities: ["automation/iot"]
-# status: "hardened"
-# tier_strategy: "ABC-v5.1"
-# ---
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-030-AUT-HAS-001",
+#   "title": "Home Assistant (hardened)",
+#   "layer": 30,
+#   "category": "services/home-automation",
+#   "lastReviewed": "2026-05-19",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 3,
+#   "tags": ["home-automation", "hass", "iot", "mqtt", "hardened"],
+#   "description": "Hardened Home Automation with ABC-Tiering and Secret-Isolation."
+# }
+# ---ENDNIXMETA
+
 { config, lib, pkgs, myLib, ... }:
 let
  # 🚀 NMS v4.2 Metadaten (hardened Home Assistant)
