@@ -67,7 +67,12 @@ in {
     };
 
     # 👤 Static UID from registry
-    users.users.blocky.uid = config.my.users.registry.blocky;
+    users.users.blocky = {
+      isSystemUser = true;
+      group = "blocky";
+      uid = config.my.users.registry.blocky;
+    };
+    users.groups.blocky = {};
 
     systemd.services.blocky.serviceConfig = {
       # 🛡️ Hardening (v7.1 Strict)
