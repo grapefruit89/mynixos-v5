@@ -2,7 +2,7 @@
 title: 40-storage-strategy
 category: architecture/consolidated
 status: [ACTIVE-SSoT]
-last_reviewed: 2026-05-18
+last_reviewed: 2026-05-19
 nix_modules:
   - path: modules/core/storage.nix
     anchor: mergerfs-pool
@@ -19,11 +19,14 @@ nix_modules:
   - path: modules/core/impermanence.nix
     anchor: persistence-core
     github_url: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/core/impermanence.nix
+  - path: modules/core/recovery-usb.nix
+    anchor: recovery-usb
+    github_url: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/core/recovery-usb.nix
 ---
 
-# Cluster 40: Storage Strategy
+# Cluster 40: Storage Strategy & Disaster Recovery
 
-Dieses Dokument beschreibt die Speicher-Architektur von mynixos, basierend auf dem ABC-Tiering-Modell und einer robusten Backup-Strategie.
+Dieses Dokument beschreibt die Speicher-Architektur von mynixos, basierend auf dem ABC-Tiering-Modell, sowie die Prozesse für den Wiederaufbau nach Hardware-Totalausfall (Disaster Recovery).
 
 ---
 
@@ -73,13 +76,37 @@ NixHome v7.1 nutzt ein Stateless-Root (RAM). Nur explizit definierte Pfade werde
 
 ---
 
-## 🚨 Disaster Recovery
+## 🚨 Disaster Recovery (anchor: disaster-recovery)
 
-Im Falle eines Totalausfalls folgen wir dem Runbook:
+Im Falle eines Totalausfalls folgen wir dem Runbook für den Wiederaufbau des Systems.
 
-1.  **Hardware-Replacement**: Installation eines frischen NixOS-Images.
-2.  **Repo-Rebuild**: Klonen von `repo_v5` und Einspielen der SOPS-Secrets (Master-Key erforderlich).
-3.  **Restic-Restore**: Wiederherstellung von `/persist` direkt aus Backblaze B2 oder dem lokalen Archiv.
+### 🏛️ Master-Key Management (Hierarchie)
+| Ebene | Typ | Aufbewahrung | Nutzung |
+|-------|-----|--------------|---------|
+| **Primary** | TPM 2.0 / YubiKey | Hardware-gebunden | Täglicher Betrieb. |
+| **Emergency** | Age Master Key | Physischer USB-Stick (Safe) | Entsperren von SOPS bei Hardware-Defekt. |
+| **Backup** | Restic Password | SOPS-verschlüsselt | Daten-Wiederherstellung. |
+| **Recovery** | LUKS Passphrase | QR-Unlock / Physisch | Manueller Boot-Eingriff. |
+
+### 🛠️ Recovery Pfade
+
+#### Pfad A: Der "Ignition" USB-Stick (`recovery-usb.nix`)
+Wenn das System startet, aber die SOPS-Keys fehlen (z.B. nach Neuinstallation), kann ein physischer Stick mit dem Label `RECOVERY_STICK` eingesteckt werden.
+- **Inhalt**: Enthält den `age` Master-Key, der vom `secrets.nix` Modul automatisch eingelesen wird.
+
+#### Pfad B: Remote QR-Unlock (Disaster Path)
+Falls der Server an einem unbekannten Ort startet (DNA-Check schlägt fehl), wird ein QR-Code auf dem TTY1 ausgegeben. Scan mit dem Smartphone -> SSH auf Port 2222 -> LUKS-Eingabe.
+
+#### Pfad C: Bare-Metal Restore (Totalverlust)
+Vorgehensweise bei neuer Hardware:
+1.  **Boot**: NixOS Minimal ISO (USB).
+2.  **Git**: Repository clonen: `git clone https://github.com/m7c5/repo_v5.git`.
+3.  **Secrets**: Emergency Age-Key vom Recovery-Stick exportieren: `export SOPS_AGE_KEY_FILE=/mnt/recovery/keys.txt`.
+4.  **Restic**: Daten von Backblaze B2 ziehen:
+    ```bash
+    restic -r s3:s3.eu-central-003.backblazeb2.com/nixhome-backup restore latest --target /mnt/persist
+    ```
+5.  **Install**: `nixos-rebuild switch --flake .#default --root /mnt`.
 
 ---
 
@@ -107,8 +134,13 @@ journalctl -u log-s3-sync.service -n 20 --no-pager
 
 # 7. Prüfe HDD Spindown Status & Timer
 tlp-stat --disk
-# Alternativ: Aktuellen Status abfragen (ACHTUNG: weckt die Platte evtl. kurz auf)
-# hdparm -C /dev/sda
+
+# 8. Prüfe Restic Backup Snapshots
+restic -r /mnt/archive/.restic-vault snapshots
+
+# 9. Simuliere Recovery-Stick Mount
+udevadm trigger --action=add --subsystem-match=block
+[ -d /mnt/recovery ] && echo "Recovery Mount logic active"
 ```
 
 ---
@@ -127,9 +159,11 @@ Zusätzlich werden **Jellyfin-Bibliotheks-Scans** nur nachts um **02:00 Uhr** du
 <!-- context7: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/core/backup.nix -->
 <!-- context7: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/core/storage.nix -->
 <!-- context7: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/services/service-storage-mover.nix -->
+<!-- context7: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/core/recovery-usb.nix -->
 
 ### Nix MCP Index
 <!-- mcp: repo_v5/modules/core/storage.nix -->
 <!-- mcp: repo_v5/modules/core/backup.nix -->
 <!-- mcp: repo_v5/modules/services/service-storage-mover.nix -->
 <!-- mcp: repo_v5/modules/core/impermanence.nix -->
+<!-- mcp: repo_v5/modules/core/recovery-usb.nix -->

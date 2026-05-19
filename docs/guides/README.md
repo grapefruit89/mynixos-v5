@@ -17,7 +17,6 @@ Dieses Verzeichnis enthält die konsolidierte Dokumentation für das NixHome v7.
 - **[80-matrix-sovereign.md](./80-matrix-sovereign.md)**: Sovereign Communication (Matrix/Conduit) & Alerting-Orchestrierung.
 - **[90-github-workflows.md](./90-github-workflows.md)**: CI/CD Pipelines (GitHub Actions), Security Hardening, Sovereign Git & Codespaces.
 - **[95-gaming-amp.md](./95-gaming-amp.md)**: Spiele-Server Orchestrierung (AMP).
-- **[99-recovery.md](./99-recovery.md)**: Bootstrap & System-Wiederherstellung.
 
 ## 🛠️ Zusätzliche Ressourcen
 
