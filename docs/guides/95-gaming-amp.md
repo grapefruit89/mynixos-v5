@@ -7,6 +7,7 @@ status: [ACTIVE-SSoT]
 capabilities: [game-server, fhs-env, steamcmd, amp-panel]
 sources: [CubeCoders AMP Docs, NixOS Wiki: FHS]
 last_reviewed: 2026-05-19
+adr: [ADR-013]
 ---
 
 Dieses Dokument beschreibt die native Integration des **AMP Game Server Panels** in der NixHome-Umgebung. Wir verzichten bewusst auf Docker und nutzen stattdessen **FHS-Sandboxing**.

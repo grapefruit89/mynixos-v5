@@ -7,6 +7,7 @@ status: [ACTIVE-SSoT]
 capabilities: [bare-metal-restore, emergency-keys, qr-unlock, restic-recovery]
 sources: [NMS v4.2 Architecture, NixOS Wiki]
 last_reviewed: 2026-05-19
+adr: [ADR-015, ADR-016]
 ---
 
 Dieses Dokument beschreibt das ultimative Sicherheitsnetz für den NixHome Tower. Es definiert die Prozesse für den Wiederaufbau nach Hardware-Totalausfall, Datenverlust oder gesperrten Keys.

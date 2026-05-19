@@ -3,6 +3,7 @@ title: 80-matrix-sovereign
 category: architecture/consolidated
 status: [ACTIVE-SSoT]
 last_reviewed: 2026-05-18
+adr: [ADR-004, ADR-012, ADR-014]
 nix_modules:
   - path: modules/apps/service-app-matrix-conduit.nix
     anchor: matrix-conduit
