@@ -23,7 +23,7 @@ Wir implementieren den Medien-Stack (Layer 40). Wir wollen die Sicherheit von `n
 Wir implementieren eine "Hybrid-Engine":
 1.  **VPN-Isolation:** Wir nutzen das Namespace-Pattern via `vpn-confinement.nix` (Native NixOS netns).
 2.  **Hardware:** Wir nutzen QuickSync Optimierungen (iHD Driver) via `hardware-configuration.nix`.
-3.  **Struktur:** Wir nutzen das **mynixos v8.0 Flat-Dendritic Pattern** in `_arr-factory.nix`.
+3.  **Struktur:** Wir nutzen das **mynixos v7.1 Flat-Dendritic Pattern** in `_arr-factory.nix`.
 
 ## Umsetzung in Nix
 - **Netzwerk:** `modules/services/vpn-confinement.nix` (Erstellung der netns).
