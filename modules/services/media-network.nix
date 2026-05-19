@@ -27,6 +27,15 @@ in {
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
+        CapabilityBoundingSet = [ "CAP_NET_ADMIN" "CAP_NET_RAW" "CAP_SYS_ADMIN" ];
+        AmbientCapabilities = [ "CAP_NET_ADMIN" "CAP_NET_RAW" "CAP_SYS_ADMIN" ];
+        ProtectHome = true;
+        PrivateTmp = true;
+        NoNewPrivileges = true;
+        MemoryDenyWriteExecute = true;
+        RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" "AF_NETLINK" ];
+        ProtectSystem = "full";
+        SystemCallFilter = [ "@system-service" "@network-io" "unshare" "setns" "~@resources" ];
       };
       script = ''
         # Create namespace if it doesn't exist
