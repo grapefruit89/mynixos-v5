@@ -60,23 +60,13 @@ in {
       PrivateDevices = true;
       NoNewPrivileges = true;
       RestrictNamespaces = true;
-      ProtectKernelTunables = true;
-      ProtectKernelLogs = true;
-      ProtectControlGroups = true;
-      ProtectHostname = true;
-      RestrictSUIDSGID = true;
       LockPersonality = true;
       MemoryDenyWriteExecute = true;
-      SystemCallFilter = [
-        "@system-service"
-        "~@privileged"
-        "~@resources"
-        "~@mount"
-        "~@swap"
-        "~@cpu-emulation"
-      ];
-      CapabilityBoundingSet = "";
-      AmbientCapabilities = "";
+      CapabilityBoundingSet = [];
+      AmbientCapabilities = [];
+      RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" ];
+      SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" "~@mount" ];
+      ReadWritePaths = [ "/var/log/vector" ];
     };
 
     # Create target directory for Vector logs
