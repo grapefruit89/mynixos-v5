@@ -1,3 +1,19 @@
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-000-COR-BCK-001",
+#   "title": "Hardened Restic Backups",
+#   "layer": 0,
+#   "category": "core/security",
+#   "lastReviewed": "2026-05-19",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 3,
+#   "tags": ["backup", "restic", "cloud-sync", "hardened"],
+#   "description": "Hardened Restic backup configuration with dual local/cloud strategy and weekly integrity audits."
+# }
+# ---ENDNIXMETA
+
 { config, lib, pkgs, ... }:
 let
   localRepo = "/mnt/archive/.restic-vault";

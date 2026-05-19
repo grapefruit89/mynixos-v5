@@ -8,6 +8,7 @@ capabilities: [bare-metal-restore, emergency-keys, qr-unlock, restic-recovery]
 sources: [NMS v4.2 Architecture, NixOS Wiki]
 last_reviewed: 2026-05-19
 adr: [ADR-015, ADR-016]
+test: tests/security.nix
 ---
 
 Dieses Dokument beschreibt das ultimative Sicherheitsnetz für den NixHome Tower. Es definiert die Prozesse für den Wiederaufbau nach Hardware-Totalausfall, Datenverlust oder gesperrten Keys.
@@ -30,12 +31,12 @@ Wir nutzen eine mehrstufige Key-Hierarchie, um Sicherheit und Wiederherstellbark
 ### Pfad A: Der "Ignition" USB-Stick (`recovery-usb.nix`)
 Wenn das System startet, aber die SOPS-Keys fehlen (z.B. nach Neuinstallation), kann ein physischer Stick mit dem Label `RECOVERY_STICK` eingesteckt werden.
 - **Automatismus:** UDEV erkennt den Stick und mountet ihn RO unter `/mnt/recovery`.
-- **Inhalt:** Enthält den `age` Master-Key, der vom `secret-ingest.nix` Modul automatisch eingelesen wird. ✅
+- **Inhalt:** Enthält den `age` Master-Key, der vom `secrets.nix` Modul automatisch eingelesen wird. ✅
 
 ### Pfad B: Remote QR-Unlock (Disaster Path)
 Falls der Server an einem unbekannten Ort startet (DNA-Check schlägt fehl), wird ein QR-Code auf dem TTY1 ausgegeben.
 - **Vorgehensweise:** Scan mit dem Smartphone -> SSH-Verbindung auf Port 2222 -> Eingabe der LUKS-Passphrase via Handy-Tastatur.
-- **Anker:** `# anchor: qr-unlock`
+- **Anker**: `qr-unlock`
 
 ### Pfad C: Bare-Metal Restore (Totalverlust)
 Vorgehensweise bei neuer Hardware:
@@ -61,11 +62,42 @@ Vorgehensweise bei neuer Hardware:
 
 ---
 
-## 📝 Nächste Schritte (Offene Punkte)
+## ✅ Verifizierung
 
-- [ ] **TODO-016:** Physischen USB-Key mit Age-Fallback final erstellen (Hardware-Task).
-- [ ] **TODO-027:** Automatisches Backup des Recovery-Sticks auf einen zweiten, verschlüsselten Offline-Datenträger.
-- [ ] **Audit:** Jährliche "Wiederherstellungs-Übung" (Simulation eines Totalausfalls).
+```bash
+# 1. Prüfe Restic Backup Status (SSoT)
+restic -r /mnt/archive/.restic-vault snapshots
+# Positiv-Test: Snapshots vorhanden
+[ $(restic -r /mnt/archive/.restic-vault snapshots --json | jq '. | length') -gt 0 ] && echo "Backups healthy"
+
+# 2. Simuliere Recovery-Stick Mount
+udevadm trigger --action=add --subsystem-match=block
+# Prüfe ob MountPoint existiert
+[ -d /mnt/recovery ] && echo "Mount logic active"
+
+# 3. Teste LUKS-Header Integrität
+cryptsetup luksDump /dev/disk/by-label/persist | grep "TPM2"
+
+# 4. Negativ-Test: Recovery-Stick darf NICHT beschreibbar sein
+touch /mnt/recovery/test.tmp && echo "FAIL: Stick writable" || echo "OK: Stick RO"
+```
+
+---
+
+## 🔗 Quellen & Verweise
+
+### Externe Repositories
+- [restic/restic](https://github.com/restic/restic) - Backups
+- [FiloSottile/age](https://github.com/FiloSottile/age) - Encryption
+
+### Context7 Observability
+<!-- context7: nixpkgs/nixos/modules/services/backup/restic.nix -->
+<!-- context7: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/core/backup.nix -->
+<!-- context7: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/core/recovery-usb.nix -->
+
+### Nix MCP Index
+<!-- mcp: nixos:repo_v5/modules/core/backup.nix -->
+<!-- mcp: nixos:repo_v5/modules/core/recovery-usb.nix -->
 
 ---
 *Status: Production Hardened | Letzte Aktualisierung: 19. Mai 2026*
