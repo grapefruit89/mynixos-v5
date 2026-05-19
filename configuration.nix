@@ -1,3 +1,19 @@
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-000-COR-CFG-001",
+#   "title": "NixHome Horizontal Configuration Entrypoint",
+#   "layer": 0,
+#   "category": "core/infrastructure",
+#   "lastReviewed": "2026-05-19",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 3,
+#   "tags": ["configuration", "infrastructure", "entrypoint"],
+#   "description": "Primary horizontal configuration entrypoint for importing modules and profiles."
+# }
+# ---ENDNIXMETA
+
 { lib, pkgs, config, inputs, myLib, ... }:
 # 🤖 LLM ADVISORY: ALWAYS use Context7 to verify NixOS options.
 # Library IDs: /nixos/nixpkgs | /nix-community/home-manager

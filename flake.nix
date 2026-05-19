@@ -1,3 +1,19 @@
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-000-COR-FLK-001",
+#   "title": "NixHome Primary Flake",
+#   "layer": 0,
+#   "category": "core/infrastructure",
+#   "lastReviewed": "2026-05-19",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 4,
+#   "tags": ["flake", "infrastructure", "entrypoint"],
+#   "description": "Primary system entrypoint for the NixHome Horizontal Configuration."
+# }
+# ---ENDNIXMETA
+
 {
  # Current stable channel: nixos-25.11 (as of May 2026)
  # See docs/NIXOS_VERSION_INFO.md for details.

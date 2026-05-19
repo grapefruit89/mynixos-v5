@@ -1,3 +1,19 @@
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-000-COR-PRN-001",
+#   "title": "NixHome Architectural Principles",
+#   "layer": 0,
+#   "category": "core/documentation",
+#   "lastReviewed": "2026-05-19",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 1,
+#   "tags": ["principles", "architecture", "manifesto"],
+#   "description": "Core manifesto and architectural principles of the NixHome project."
+# }
+# ---ENDNIXMETA
+
 { lib, ... }:
 let
  # 🚀 NMS v4.2 Metadaten (hardened Manifesto)

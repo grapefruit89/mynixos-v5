@@ -1,3 +1,19 @@
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-000-COR-PRT-001",
+#   "title": "Global Port Registry",
+#   "layer": 0,
+#   "category": "core/network",
+#   "lastReviewed": "2026-05-19",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 1,
+#   "tags": ["network", "ports", "ssot"],
+#   "description": "Central Single Source of Truth for all service ports in the project."
+# }
+# ---ENDNIXMETA
+
 { lib, config, ... }:
 let
   # 🚀 NMS v4.2 Metadaten

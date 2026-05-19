@@ -1,3 +1,19 @@
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-001-HW-Q958-001",
+#   "title": "Hardware Configuration Template (Q958)",
+#   "layer": 1,
+#   "category": "hardware/provisioning",
+#   "lastReviewed": "2026-05-19",
+#   "reviewedBy": "Gemini",
+#   "status": "draft",
+#   "complexity": 2,
+#   "tags": ["hardware", "template", "q958"],
+#   "description": "Template for board-specific hardware configuration for Fujitsu Esprimo Q958."
+# }
+# ---ENDNIXMETA
+
 # This is a template. Copy to hardware-configuration.nix and fill in actual UUIDs before deployment.
 {
  config,
