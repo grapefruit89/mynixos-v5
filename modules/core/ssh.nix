@@ -1,33 +1,25 @@
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-000-COR-SSH-001",
+#   "title": "SSH (Post-Quantum Hardened)",
+#   "layer": 0,
+#   "category": "system/networking",
+#   "lastReviewed": "2026-05-19",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 3,
+#   "tags": ["ssh", "hardening", "post-quantum", "remote-access"],
+#   "description": "Hardened SSH daemon with Post-Quantum cryptography and strict CIDR-based forwarding."
+# }
+# ---ENDNIXMETA
+
 {
  lib,
  config,
  pkgs,
  ...
-}: let
- # 🚀 NMS v4.2 Metadaten (hardened Security)
- nms = {
- id = "NIXH-00-COR-032";
- title = "SSH (Post-Quantum Hardened)";
- description = "Hardened SSH daemon with Post-Quantum cryptography, strict CIDR-based forwarding and legal protections.";
- layer = 00;
- nixpkgs.category = "system/networking";
- capabilities = ["security/ssh" "network/hardening" "crypto/post-quantum"];
- audit.last_reviewed = "2026-04-27";
- audit.complexity = 3;
- source_repo = "grapefruit89/mynixos";
- };
- 
- # SSoT Integration
- sshPort = config.my.ports.ssh;
- user = config.my.configs.identity.user;
- lanCidr = config.my.configs.network.lanCidr;
-in {
- options.my.meta.ssh = lib.mkOption {
- type = lib.types.attrs;
- default = nms;
- readOnly = true;
- description = "NMS metadata";
- };
+}:
 
  config = {
  # 🛡️ SSH HARDENING (anchor: ssh-hardening)

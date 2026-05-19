@@ -1,29 +1,20 @@
-{ config, lib, pkgs, myLib, ... }: 
-let
-  # 🚀 NMS v4.2 Metadaten
-  nms = {
-    id = "NIXH-10-GTW-009";
-    title = "Pocket-ID (OIDC Provider)";
-    description = "Self-hosted OIDC identity provider for secure SSO with Caddy integration.";
-    layer = 10;
-    nixpkgs.category = "services/security";
-    capabilities = ["security/oidc" "identity/provider"];
-    audit.last_reviewed = "2026-03-03";
-    audit.complexity = 2;
-  };
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-010-SRV-IDP-001",
+#   "title": "Pocket-ID (OIDC Provider)",
+#   "layer": 10,
+#   "category": "services/security",
+#   "lastReviewed": "2026-05-19",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 2,
+#   "tags": ["identity", "oidc", "sso", "pocket-id", "hardened"],
+#   "description": "Self-hosted OIDC identity provider for secure SSO with Caddy integration."
+# }
+# ---ENDNIXMETA
 
-  cfg = config.my.services.pocketId;
-  sreConfig = config.my.configs;
-  domain = sreConfig.identity.domain;
-  subdomain = sreConfig.identity.subdomain;
-  port = config.my.ports.pocket-id;
-in {
-  # 🧬 Audit-Compliance: Metadaten als echtes Nix-Attribut
-  options.my.meta.pocketId = lib.mkOption {
-    type = lib.types.attrs;
-    default = nms;
-    readOnly = true;
-  };
+{ config, lib, pkgs, myLib, ... }: 
 
   # Custom Option for our project
   options.my.services.pocketId.enable = lib.mkEnableOption "Pocket-ID";
