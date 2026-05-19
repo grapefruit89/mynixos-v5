@@ -1,10 +1,15 @@
 # ---NIXMETA
 # {
 #   "specVersion": "2.0",
-#   "id": "NIXH-SVC-AMP-001",
+#   "id": "NIXH-060-GAM-AMP-001",
 #   "title": "AMP Game Server Panel",
 #   "layer": 60,
 #   "category": "services/gaming",
+#   "lastReviewed": "2026-05-19",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 3,
+#   "tags": ["gaming", "amp", "fhs", "hardened"],
 #   "description": "Native NixOS integration of AMP Game Server Panel using buildFHSEnv."
 # }
 # ---ENDNIXMETA

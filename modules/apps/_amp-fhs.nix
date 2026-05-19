@@ -1,10 +1,15 @@
 # ---NIXMETA
 # {
 #   "specVersion": "2.0",
-#   "id": "NIXH-APP-AMP-FHS-001",
+#   "id": "NIXH-060-GAM-AMP-FHS",
 #   "title": "AMP FHS Sandbox",
 #   "layer": 60,
 #   "category": "apps/gaming",
+#   "lastReviewed": "2026-05-19",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 2,
+#   "tags": ["gaming", "amp", "fhs", "sandbox"],
 #   "description": "FHS Sandbox for AMP Game Server Panel (Native / Docker-free)."
 # }
 # ---ENDNIXMETA

@@ -8,6 +8,7 @@ capabilities: [game-server, fhs-env, steamcmd, amp-panel]
 sources: [CubeCoders AMP Docs, NixOS Wiki: FHS]
 last_reviewed: 2026-05-19
 adr: [ADR-013]
+test: tests/gaming.nix
 ---
 
 Dieses Dokument beschreibt die native Integration des **AMP Game Server Panels** in der NixHome-Umgebung. Wir verzichten bewusst auf Docker und nutzen stattdessen **FHS-Sandboxing**.
@@ -15,6 +16,11 @@ Dieses Dokument beschreibt die native Integration des **AMP Game Server Panels**
 ## 🏛️ 1. Die Architektur: FHS-Sandboxing
 
 Da Game-Server oft vorkompilierte Binaries und spezifische Pfade (`/bin/bash`, `/usr/lib`) erwarten, nutzen wir ein **Filesystem Hierarchy Standard (FHS)** Environment.
+
+### 🛠️ Konfiguration
+```nix
+my.services.amp.enable = true;
+```
 
 ### 📦 AMP FHS Sandbox (`modules/apps/_amp-fhs.nix`)
 - **Basis:** `pkgs.buildFHSEnv` stellt eine kompatible Laufzeitumgebung bereit.
@@ -60,11 +66,40 @@ networking.firewall.allowedTCPPorts = [ 25565 ];
 
 ---
 
-## 📝 Nächste Schritte
+## ✅ Verifizierung
 
-- [ ] **TODO-025:** Implementierung eines automatischen Firewall-Wrappers für AMP (optional).
-- [ ] **TODO-026:** Monitoring der Game-Server Auslastung via Netdata/Prometheus.
-- [ ] **Final Check:** Verifikation der SteamCMD Funktionalität innerhalb der FHS-Sandbox.
+```bash
+# 1. Prüfe AMP Status
+systemctl status amp --no-pager
+# Positiv-Test: Web-UI erreichbar (Local)
+curl -f -s http://127.0.0.1:20080 | grep "AMP"
+
+# 2. Prüfe FHS-Sandbox Funktionalität
+# Betrete die FHS-Shell und prüfe .NET Version
+sudo -u amp amp-fhs -c "dotnet --version"
+
+# 3. Prüfe SteamCMD Verfügbarkeit
+sudo -u amp amp-fhs -c "steamcmd +quit"
+
+# 4. Negativ-Test: AMP darf NICHT auf 0.0.0.0 binden (nur localhost hinter Caddy)
+! ss -tulpn | grep ":20080" | grep "0.0.0.0"
+```
+
+---
+
+## 🔗 Quellen & Verweise
+
+### Externe Repositories
+- [CubeCoders/AMP](https://cubecoders.com/AMP) - Game Server Panel
+- [SteamCMD](https://developer.valvesoftware.com/wiki/SteamCMD) - Valve CLI Client
+
+### Context7 Observability
+<!-- context7: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/services/amp.nix -->
+<!-- context7: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/apps/_amp-fhs.nix -->
+
+### Nix MCP Index
+<!-- mcp: nixos:repo_v5/modules/services/amp.nix -->
+<!-- mcp: nixos:repo_v5/modules/apps/_amp-fhs.nix -->
 
 ---
 *Status: Production Hardened | Letzte Aktualisierung: 19. Mai 2026*
