@@ -36,7 +36,7 @@ in {
  backupFileExtension = "hm-backup";
  
  users.${user} = { pkgs, ... }: {
- home.stateVersion = "24.05"; # 💎 Stable anchor. # see docs/NIXOS_VERSION_INFO.md – this is the current stable channel, not future music.
+ home.stateVersion = "25.11"; # 💎 Aligned with project-wide v7.1 / 25.11 standard.
  
  # Importiert die Home-Manager Logik
  imports = [ ./home-manager-config.nix ./preferences.nix ];
@@ -63,8 +63,7 @@ in {
  programs.bash = {
  enable = true;
       shellAliases = {
-        # Gemini Godmode (Aligned with Project Path)
-        godmode = "gemini --yolo --include-directories /persist/etc/nixos,$(pwd)";
+        # godmode = "gemini --yolo --include-directories /persist/etc/nixos,$(pwd)"; # ⚠️ Deaktiviert: --yolo erlaubt unkontrollierte Ausführung – siehe TODO-016
       };
  };
  };
