@@ -27,14 +27,27 @@ in
  pathConfig = { DirectoryNotEmpty = "/etc/nixos/secret-landing-zone"; MakeDirectory = true; };
  };
 
- systemd.services.secret-ingest = {
- description = "Secret Ingest Agent";
- path = with pkgs; [ sops coreutils ];
- serviceConfig = {
- Type = "oneshot";
- ExecStart = pkgs.writeScript "ingest-run" "#!${python}/bin/python\nimport os, re, subprocess, glob\n..."; # Shortened
- User = "root";
- };
- };
+    systemd.services.secret-ingest = {
+      description = "Secret Ingest Agent";
+      path = with pkgs; [ sops coreutils ];
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = pkgs.writeScript "ingest-run" "#!${python}/bin/python\nimport os, re, subprocess, glob\n..."; # Shortened
+        User = "root";
+        ProtectSystem = "strict";
+        ProtectHome = true;
+        PrivateTmp = true;
+        PrivateDevices = true;
+        NoNewPrivileges = true;
+        RestrictNamespaces = true;
+        MemoryDenyWriteExecute = true;
+        CapabilityBoundingSet = "";
+        RestrictAddressFamilies = [ "AF_UNIX" ];
+        SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" "~@mount" ];
+        ReadWritePaths = [ "/etc/nixos/secret-landing-zone" "/run/secrets" ];
+        InaccessiblePaths = [ "/home" "/root" "/proc/*/mem" ];
+        TemporaryFileSystem = "/:ro";
+      };
+    };
  };
 }
