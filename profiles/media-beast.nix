@@ -4,6 +4,7 @@
 
   imports = [
     ../modules/apps/service-media-jellyfin.nix
+    # Deaktiviert, da service-media-seerr nicht implementiert (siehe LAYER_CONSOLIDATED)
     # ../modules/apps/service-media-seerr.nix
     ../modules/apps/service-media-sonarr.nix
     ../modules/apps/service-media-sonarr-setup.nix # 🔥 API-Setup PoC
@@ -14,10 +15,13 @@
     ../modules/apps/service-media-readarr.nix
     ../modules/apps/service-media-lidarr.nix
     ../modules/apps/service-media-sabnzbd.nix
+    # Deaktiviert, da service-media-recyclarr nicht implementiert
     # ../modules/apps/service-media-recyclarr.nix
+    # Deaktiviert, da service-app-audiobookshelf nicht implementiert
     # ../modules/apps/service-app-audiobookshelf.nix
     ../modules/apps/service-app-navidrome.nix
     ../modules/apps/media-stack.nix
+    # Deaktiviert, da storage.nix durch storage-policy.nix ersetzt wurde
     # ../modules/core/storage.nix
   ];
 
@@ -25,8 +29,14 @@
  my.meta.profile_media_beast = {
  id = "NIXH-PROF-MED-001";
  title = "Media Beast Profile";
- layer = 30;
+ layer = 40;
  audit.last_reviewed = "2026-04-27";
+ };
+
+ # 🖥️ GPU Acceleration (Intel QuickSync)
+ hardware.graphics = {
+   enable = true;
+   extraPackages = with pkgs; [ intel-media-driver vaapiIntel ];
  };
 
  # 🎶 Aktivierung Navidrome
