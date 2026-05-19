@@ -63,7 +63,7 @@ in {
  programs.bash = {
  enable = true;
       shellAliases = {
-        # godmode = "gemini --yolo --include-directories /persist/etc/nixos,$(pwd)"; # ⚠️ Deaktiviert: --yolo erlaubt unkontrollierte Ausführung – siehe TODO-016
+        # godmode = "gemini --yolo --include-directories /persist/etc/nixos,$(pwd)"; # Achtung: --yolo erlaubt unkontrollierte Ausführung – nur für Testumgebungen
       };
  };
  };
