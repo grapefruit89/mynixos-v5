@@ -36,8 +36,5 @@ Um die Lebensdauer der HDDs zu maximieren und den Stromverbrauch zu minimieren, 
 - **Zukunftsvision (Warm-up):** Eine mögliche Erweiterung ist das automatische Extrahieren von Metadaten (via `ffprobe`) unmittelbar nach einem Download auf Tier B, um den nächtlichen HDD-Scan weiter zu beschleunigen. Dies ist aktuell aufgrund der Komplexität nicht implementiert.
 
 ## Verifizierung
-```bash
-# Prüfe den Status der Backup-Timer
-systemctl list-timers | grep restic
-# Erwartetes Ergebnis: Aktive Timer für die tägliche Sicherung nach S3.
-```
+- **Backup-Timer:** `systemctl list-timers | grep restic` (Tägliche Sicherung nach S3).
+- **Spinup-Monitoring:** `journalctl -u hdd-spinup-monitor.service` (Lückenlose Überwachung der HDD-Zustandswechsel via SMART-Polling ohne Spinups).

@@ -1,16 +1,16 @@
 # ---NIXMETA
 # {
 #   "specVersion": "2.0",
-#   "id": "NIXH-AUTO-GEN",
-#   "title": "Auto Generated",
-#   "layer": 99,
-#   "category": "auto/gen",
+#   "id": "NIXH-00-COR-040",
+#   "title": "Unified Storage Pool (MergerFS)",
+#   "layer": 0,
+#   "category": "core/storage",
 #   "lastReviewed": "2026-05-19",
 #   "reviewedBy": "Gemini",
 #   "status": "production",
-#   "complexity": 2,
-#   "tags": ["auto-generated"],
-#   "description": "Auto-migrated module to NIXMETA 2.0."
+#   "complexity": 3,
+#   "tags": ["storage", "mergerfs", "tiering", "monitoring"],
+#   "description": "Unified storage pool using MergerFS with HDD silence protocol, tiered caching, and spinup monitoring."
 # }
 # ---ENDNIXMETA
 
@@ -89,6 +89,27 @@ in
       wantedBy = [ "timers.target" ];
     };
 
+    # 🕵️ HDD Spinup Monitor (anchor: hdd-spinup-monitor)
+    # Monitors Load_Cycle_Count changes without waking the disks.
+    systemd.services.hdd-spinup-monitor = {
+      description = "Monitor HDD Spinups via SMART attributes";
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = "${pkgs.bash}/bin/bash /etc/nixos/scripts/hdd-spinup-monitor.sh";
+        User = "root";
+      };
+      path = with pkgs; [ smartmontools gawk utillinux coreutils ];
+    };
+
+    systemd.timers.hdd-spinup-monitor = {
+      description = "Timer for HDD Spinup Monitoring";
+      timerConfig = {
+        OnCalendar = "*:0/5"; # Every 5 minutes
+        Persistent = true;
+      };
+      wantedBy = [ "timers.target" ];
+    };
+
     # 🛡️ Path Enforcement (Hardened Permissions)
     systemd.services.storage-init = {
       description = "Storage Path Initialization";
@@ -113,6 +134,6 @@ in
       SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", RUN+="${pkgs.hdparm}/bin/hdparm -S 120 /dev/%k"
     '';
 
-    environment.systemPackages = with pkgs; [ mergerfs util-linux hdparm ];
+    environment.systemPackages = with pkgs; [ mergerfs util-linux hdparm smartmontools ];
   };
 }

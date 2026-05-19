@@ -141,6 +141,9 @@ restic -r /mnt/archive/.restic-vault snapshots
 # 9. Simuliere Recovery-Stick Mount
 udevadm trigger --action=add --subsystem-match=block
 [ -d /mnt/recovery ] && echo "Recovery Mount logic active"
+
+# 10. Prüfe HDD Spinup Logs
+journalctl -u hdd-spinup-monitor.service --no-pager
 ```
 
 ---
@@ -149,6 +152,10 @@ udevadm trigger --action=add --subsystem-match=block
 
 Um die HDDs zu schonen, haben wir den Spindown-Timer auf **30 Minuten** erhöht. Dies verhindert das "Flattern" (ständiges An/Aus), wenn kurze Zugriffe erfolgen.
 
+### 🕵️ Spinup-Monitoring
+Jeder Zustandswechsel der HDDs (Standby -> Active) wird lückenlos protokolliert. Ein systemd-Timer (`hdd-spinup-monitor`) prüft alle 5 Minuten die SMART-Werte (`Load_Cycle_Count`). Da der Befehl mit dem Flag `-n standby` ausgeführt wird, werden schlafende Platten **nicht** geweckt. Wenn ein Zuwachs erkannt wird, erfolgt ein Eintrag im System-Journal.
+
+### 📅 Gesteuerte Scans
 Zusätzlich werden **Jellyfin-Bibliotheks-Scans** nur nachts um **02:00 Uhr** durchgeführt. Dies stellt sicher, dass die Platten tagsüber im Tiefschlaf bleiben können, sofern keine Medien aktiv gestreamt werden. Die manuelle Konfiguration erfolgt in der Jellyfin Web-UI unter *Einstellungen -> Dashboard -> Bibliotheken -> Geplanter Aufgaben-Trigger*.
 
 ---
