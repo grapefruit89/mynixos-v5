@@ -24,7 +24,7 @@ let
     layer = 0;
     nixpkgs.category = "core/security";
     capabilities = ["kernel/security" "security/hardening" "system/stability"];
-    audit.last_reviewed = "2026-05-14";
+    audit.last_reviewed = "2026-05-19";
     audit.complexity = 4;
   };
 in
@@ -94,7 +94,7 @@ in
 
       # 9. Legacy Protocols & Vulnerable Modules (Decision FW-11)
       "isdn" "hisax" "hysdn" "atm" "uvcvideo" "videodev" "ppp" "pppoe" "pppox" "slhc"
-      "ip6table_filter" "esp4" "esp6" "rxrpc"
+      "ip6table_filter" "esp4" "esp6" "rxrpc" "dccp" "sctp" "rds" "tipc"
     ];
 
     # 🛡️ MODULE WHITELISTING (NixOS native mechanism)
@@ -116,6 +116,12 @@ in
       "net.ipv6.conf.all.accept_redirects" = 0;
       "net.ipv4.icmp_echo_ignore_broadcasts" = true;
       "net.ipv4.conf.all.secure_redirects" = false;
+      "net.ipv4.conf.all.send_redirects" = 0;
+      "net.ipv4.conf.default.send_redirects" = 0;
+      "net.ipv4.conf.all.accept_source_route" = 0;
+      "net.ipv4.conf.default.accept_source_route" = 0;
+      "net.ipv4.icmp_ignore_bogus_error_responses" = 1;
+      
       # Härtungserweiterungen (LHF-02)
       "net.ipv4.conf.all.log_martians" = 1;
       "net.ipv4.conf.default.log_martians" = 1;
@@ -134,6 +140,9 @@ in
       "kernel.kexec_load_disabled" = 1; # Disables kexec (Decision KM-02)
       "kernel.yama.ptrace_scope" = 2; # Cross-process ptrace restriction (LHF-02)
 
+      # Filesystem Hardening
+      "fs.protected_hardlinks" = 1;
+      "fs.protected_symlinks" = 1;
       
       # ASLR & Memory Hardening
       "vm.mmap_rnd_bits" = 32;
@@ -149,6 +158,12 @@ in
 
     # 💎 BOOT PARAMETERS (ADR 001 - v7.0 Strict)
     boot.kernelParams = [
+      # CPU & Device Protection (nix-mineral alignment)
+      "mitigations=auto,nosmt" # Full mitigations + Disable SMT
+      "intel_iommu=on"         # Enable IOMMU
+      "iommu=force"            # Force IOMMU isolation
+      "pti=on"                 # Page Table Isolation
+
       # Memory Protection
       "slab_nomerge"          # Mitigates heap exploits
       "init_on_free=1"        # Zero memory on free
