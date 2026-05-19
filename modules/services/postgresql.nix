@@ -79,7 +79,11 @@ in
    PrivateNetwork = true;
    PrivateUsers = true;
    NoNewPrivileges = true; 
-   SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" ]; 
+   RestrictNamespaces = true;
+   ProtectKernelLogs = true;
+   ProtectControlGroups = true;
+   ProtectHostname = true;
+   SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" "~@mount" "~@swap" "~@cpu-emulation" ]; 
    OOMScoreAdjust = -1000; # 🚀 Highest Priority for DB
  };
 
