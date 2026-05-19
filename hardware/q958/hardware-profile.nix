@@ -32,7 +32,7 @@ in
  my.storage.mover.enable = true;
 
  # 🧠 CPU & KERNEL TUNING
- boot.kernelPackages = pkgs.linuxPackages_latest; # Latest kernel for best CFL support
+ boot.kernelPackages = pkgs.linuxPackages; # Stable kernel (nixos-25.11 standard)
 
  boot.kernelParams = [
  "quiet"
@@ -44,7 +44,7 @@ in
  "i915.enable_fbc=1" # Frame Buffer Compression (Saves power)
  "i915.fastboot=1" # Cleaner boot transition
  "intel_idle.max_cstate=4" # Balance between power saving and C-state exit latency stability
- "ibt=off" # Disable Indirect Branch Tracking (Workaround for some CFL issues)
+ "ibt=off" # TODO: Prüfen ob ibt=off noch nötig ist (Kernel >= 6.x?)
  "intel_pstate=passive" # Use passive mode to allow TLP/thermald better control
  ];
 
@@ -75,8 +75,6 @@ in
  CPU_SCALING_GOVERNOR_ON_AC = "powersave";
  CPU_ENERGY_PERF_POLICY_ON_AC = "balance_performance";
  PCIE_ASPM_ON_AC = "performance"; # Prioritize I/O stability on AC
- START_CHARGE_THRESH_BAT8 = 75; # Not relevant for Q958 desktop but good practice in profiles
- STOP_CHARGE_THRESH_BAT8 = 80;
  };
  };
 
