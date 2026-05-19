@@ -95,6 +95,9 @@ in
       # 9. Legacy Protocols & Vulnerable Modules (Decision FW-11)
       "isdn" "hisax" "hysdn" "atm" "uvcvideo" "videodev" "ppp" "pppoe" "pppox" "slhc"
       "ip6table_filter" "esp4" "esp6" "rxrpc" "dccp" "sctp" "rds" "tipc"
+
+      # 10. Legacy Filesystems & Vulnerable Drivers (Fortress Hardening Update)
+      "hfs" "hfsplus" "jffs2" "freevxfs" "vivid" "minix" "udf"
     ];
 
     # 🛡️ MODULE WHITELISTING (NixOS native mechanism)
