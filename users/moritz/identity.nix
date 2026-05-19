@@ -6,6 +6,7 @@
   config.my.configs.identity = {
     sshKeys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILvttE1EzwLJpzFc/LuuXZP485Ma0mEJQiu3iMXaO58W" # 🔑 Bitwarden-managed Key
+      # TODO-016: Aktivieren, sobald TPM/YubiKey-Provisioning abgeschlossen ist
       # "sk-ssh-ed25519@openssh.com AAA..." # 🛡️ Future TPM-bound Identity
     ];
   };
