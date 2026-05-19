@@ -1,0 +1,5 @@
+# vulnix Whitelist - Manage false positives here.
+# Format: package-name-version OR CVE-ID
+# Example:
+# binutils-2.31.1
+# CVE-2020-12345
