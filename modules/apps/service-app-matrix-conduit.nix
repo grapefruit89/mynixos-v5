@@ -1,10 +1,19 @@
-# ---
-# nms_id: APP-SOCIAL-CONDUIT
-# title: Matrix Conduit
-# capabilities: ["social/chat"]
-# status: "hardened"
-# tier_strategy: "ABC-v5.1"
-# ---
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-060-SOC-CON-001",
+#   "title": "Matrix Conduit",
+#   "layer": 60,
+#   "category": "services/matrix",
+#   "lastReviewed": "2026-05-19",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 2,
+#   "tags": ["matrix", "conduit", "chat", "rust", "hardened"],
+#   "description": "Lightweight Matrix homeserver (Conduit) written in Rust."
+# }
+# ---ENDNIXMETA
+
 { config, lib, pkgs, myLib, ... }:
 let
  # 🚀 NMS v4.0 Metadaten

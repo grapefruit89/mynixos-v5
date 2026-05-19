@@ -2,8 +2,9 @@
 title: 80-matrix-sovereign
 category: architecture/consolidated
 status: [ACTIVE-SSoT]
-last_reviewed: 2026-05-18
+last_reviewed: 2026-05-19
 adr: [ADR-004, ADR-012, ADR-014]
+test: tests/communication.nix
 nix_modules:
   - path: modules/apps/service-app-matrix-conduit.nix
     anchor: matrix-conduit
@@ -23,7 +24,11 @@ Dieses Dokument beschreibt die souveräne Kommunikations-Architektur von mynixos
 
 Conduit ist unser primärer Matrix-Server. Er ist in Rust geschrieben und besticht durch extreme Effizienz und minimale Ressourcen-Anforderungen.
 
-- **Konfiguration**: `modules/apps/service-app-matrix-conduit.nix`.
+### 🛠️ Konfiguration
+```nix
+my.services.matrixConduit.enable = true;
+```
+
 - **Datenbank**: Nutzt das eingebettete `rocksdb` Backend für maximale Performance bei geringem RAM-Verbrauch.
 - **Sicherheit**: Läuft als isolierter Dienst, ist aber von der SSO-Authentifizierung (Pocket-ID) ausgenommen, um Client-Kompatibilität (Element, FluffyChat) zu gewährleisten.
 
@@ -53,16 +58,20 @@ Der Matrix-Server ist die "Stimme" des Fujitsu Q958 Towers. Wir nutzen den `matr
 
 ```bash
 # 1. Prüfe Conduit Service Status
-systemctl status conduit
+systemctl status conduit --no-pager
+# Positiv-Test: API muss 200 liefern
+curl -f -s http://127.0.0.1:20048/_matrix/static/ | grep "Conduit"
+# Negativ-Test: Keine Bindung auf 0.0.0.0 (Reverse Proxy only)
+! ss -tulpn | grep ":20048" | grep "0.0.0.0"
 
 # 2. Teste Client Discovery Endpoint
-curl -s https://matrix.m7c5.de/.well-known/matrix/client | jq
+curl -f -s https://matrix.m7c5.de/.well-known/matrix/client | jq . | grep "m.homeserver"
 
 # 3. Teste Server Federation Endpoint
-curl -s https://matrix.m7c5.de/.well-known/matrix/server | jq
+curl -f -s https://matrix.m7c5.de/.well-known/matrix/server | jq . | grep "m.server"
 
-# 4. Sende eine Test-Nachricht via Matrix-Commander (erfordert Setup)
-matrix-commander --message "TEST: Mynixos Matrix-Voice Initialized"
+# 4. Sende eine Test-Nachricht via Matrix-Commander
+# matrix-commander --message "TEST: Mynixos Matrix-Voice Initialized"
 ```
 
 ---
@@ -74,7 +83,11 @@ matrix-commander --message "TEST: Mynixos Matrix-Voice Initialized"
 - [matrix-org/matrix-spec](https://github.com/matrix-org/matrix-spec) - Protokoll-Spezifikation
 
 ### Context7 Observability
+<!-- context7: nixpkgs/nixos/modules/services/matrix/conduit.nix -->
 <!-- context7: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/apps/service-app-matrix-conduit.nix -->
 
 ### Nix MCP Index
-<!-- mcp: repo_v5/modules/apps/service-app-matrix-conduit.nix -->
+<!-- mcp: nixos:repo_v5/modules/apps/service-app-matrix-conduit.nix -->
+
+---
+*Status: Production Hardened | Letzte Aktualisierung: 19. Mai 2026*
