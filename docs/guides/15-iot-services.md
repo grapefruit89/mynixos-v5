@@ -13,7 +13,7 @@ In mynixos nutzen wir spezialisierte Dienste für das Fundament und die IoT-Komm
 ## 🛡️ 1. nftables: Der Aviation-Grade Schutz
 Wir ersetzen die veralteten \`iptables\` durch \`nftables\`.
 - **Vorteil:** Schnellere Paketverarbeitung, atomare Updates der Firewall-Regeln.
-- **Strategie:** Wir definieren die Regeln in \`modules/00-core/firewall.nix\`.
+- **Strategie:** Wir definieren die Regeln in `modules/core/firewall.nix`.
 
 ## 📡 2. Mosquitto (MQTT): Die Nervenbahn (Layer 20)
 Zentraler Message-Broker für Home Assistant und Zigbee2MQTT.
