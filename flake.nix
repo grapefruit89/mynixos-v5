@@ -28,6 +28,11 @@
      url = "github:utensils/mcp-nixos";
      inputs.nixpkgs.follows = "nixpkgs";
    };
+
+   vulnix = {
+     url = "github:nix-community/vulnix";
+     inputs.nixpkgs.follows = "nixpkgs";
+   };
  };
 
  outputs = { self, nixpkgs, ... }@inputs: let
@@ -36,7 +41,7 @@
  in {
    checks = forAllSystems (system: {
      basic-eval = let pkgs = nixpkgs.legacyPackages.${system}; in pkgs.runCommand "basic-eval" {} ''
-       nix eval --file ${./tests/basic.nix} > $out
+       nix eval --file ${./scripts/basic.nix} > $out
      '';
 
      nixmeta-validation = let
@@ -45,7 +50,7 @@
        nativeBuildInputs = [ pkgs.jq pkgs.bash ];
      } ''
        cd ${self}
-       ${pkgs.bash}/bin/bash ${./scripts/ci/validate-nixmeta.sh}
+       ${pkgs.bash}/bin/bash ${./scripts/validate-nixmeta.sh}
        touch $out
      '';
    });
@@ -56,7 +61,7 @@
        program = let
          pkgs = nixpkgs.legacyPackages.${system};
          script = pkgs.writeShellScriptBin "validate-nixmeta" ''
-           ${pkgs.bash}/bin/bash ${./scripts/ci/validate-nixmeta.sh}
+           ${pkgs.bash}/bin/bash ${./scripts/validate-nixmeta.sh}
          '';
        in "${script}/bin/validate-nixmeta";
      };
@@ -72,6 +77,7 @@
          pkgs.jq
          pkgs.ripgrep
          pkgs.fd
+         inputs.vulnix.packages.${system}.vulnix
        ];
        shellHook = ''
          echo -e "\n🚀 \033[0;32mNixHome DevShell Loaded\033[0m"
@@ -79,6 +85,7 @@
          echo "  nix run .#validate-nixmeta"
          echo "  nix run .#generate-nixmeta-schema"
          echo "  nix flake check"
+         echo "  vulnix --help (CVE Scanner)"
        '';
      };
    });
