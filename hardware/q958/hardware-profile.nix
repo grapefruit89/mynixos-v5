@@ -94,6 +94,8 @@ in
  CPU_SCALING_GOVERNOR_ON_AC = "powersave";
  CPU_ENERGY_PERF_POLICY_ON_AC = "balance_performance";
  PCIE_ASPM_ON_AC = "performance"; # Prioritize I/O stability on AC
+ # https://linrunner.de/tlp/settings/disk.html – Verlängerung des Spindown-Timers auf 30 Minuten
+ DISK_SPINDOWN_TIMEOUT_ON_AC = "30m";
  };
  };
 

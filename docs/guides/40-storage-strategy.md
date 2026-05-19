@@ -104,7 +104,20 @@ systemctl status hdd-inode-warmer.service
 # 6. Prüfe Log-Sync Status (Backblaze B2)
 systemctl status log-s3-sync.service
 journalctl -u log-s3-sync.service -n 20 --no-pager
+
+# 7. Prüfe HDD Spindown Status & Timer
+tlp-stat --disk
+# Alternativ: Aktuellen Status abfragen (ACHTUNG: weckt die Platte evtl. kurz auf)
+# hdparm -C /dev/sda
 ```
+
+---
+
+## 💤 HDD Spindown & Wartung
+
+Um die HDDs zu schonen, haben wir den Spindown-Timer auf **30 Minuten** erhöht. Dies verhindert das "Flattern" (ständiges An/Aus), wenn kurze Zugriffe erfolgen.
+
+Zusätzlich werden **Jellyfin-Bibliotheks-Scans** nur nachts um **02:00 Uhr** durchgeführt. Dies stellt sicher, dass die Platten tagsüber im Tiefschlaf bleiben können, sofern keine Medien aktiv gestreamt werden. Die manuelle Konfiguration erfolgt in der Jellyfin Web-UI unter *Einstellungen -> Dashboard -> Bibliotheken -> Geplanter Aufgaben-Trigger*.
 
 ---
 

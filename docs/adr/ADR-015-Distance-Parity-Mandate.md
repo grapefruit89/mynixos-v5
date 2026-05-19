@@ -29,6 +29,12 @@ Anstatt auf RAID-Parität zu setzen, nutzen wir ein hybrides Speichermodell:
 - **Kapazitätsbasierter Mover:** Der `smart-mover` (`modules/services/service-storage-mover.nix`) verschiebt Daten von der SSD (Tier B) auf die HDD (Tier C) erst dann, wenn der Platz knapp wird UND die HDDs bereits für andere Aufgaben aktiv sind.
 - **WAL-Schutz:** Datenbanken und Write-Ahead-Logs verbleiben zwingend auf Tier A (NVMe), um Korruption bei HDD-Latenzen zu vermeiden.
 
+## 🔋 HDD-Spindown & Scan-Optimierung
+Um die Lebensdauer der HDDs zu maximieren und den Stromverbrauch zu minimieren, werden folgende Maßnahmen umgesetzt:
+- **TLP Disk Spindown:** Der Spindown-Timer wird auf 30 Minuten festgelegt (`DISK_SPINDOWN_TIMEOUT_ON_AC = "30m"`), um übermäßiges Parken der Köpfe bei kurzen Inaktivitätsphasen zu verhindern. (Quelle: [TLP Docs](https://linrunner.de/tlp/settings/disk.html))
+- **Gesteuerte Media-Scans:** Jellyfin-Bibliotheks-Scans werden auf 02:00 Uhr nachts terminiert, um HDD-Spin-ups während der Hauptnutzungszeit zu vermeiden. (Quelle: [Jellyfin Docs](https://jellyfin.org/docs/general/administration/configuration/#scan-schedule))
+- **Zukunftsvision (Warm-up):** Eine mögliche Erweiterung ist das automatische Extrahieren von Metadaten (via `ffprobe`) unmittelbar nach einem Download auf Tier B, um den nächtlichen HDD-Scan weiter zu beschleunigen. Dies ist aktuell aufgrund der Komplexität nicht implementiert.
+
 ## Verifizierung
 ```bash
 # Prüfe den Status der Backup-Timer

@@ -90,6 +90,12 @@ in
  group = "media";
  };
 
+ # 📅 JELLYFIN SCAN SCHEDULE (anchor: jellyfin-scan)
+ # Note: ScanSchedule is not natively exposed in the NixOS module.
+ # Set to "0 2 * * *" (02:00 AM) in the Jellyfin Web UI or directly in the XML config.
+ # This aligns with the nightly maintenance window and reduces daytime HDD spin-ups.
+ # Source: https://jellyfin.org/docs/general/administration/configuration/#scan-schedule
+
  # 🚀 RAM-DISK FÜR TRANSCODING (anchor: jellyfin-transcode)
  systemd.mounts = [
  {
