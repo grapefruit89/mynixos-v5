@@ -123,8 +123,14 @@ systemctl status sonarr radarr prowlarr sabnzbd --no-pager
 <!-- context7: nixpkgs/nixos/modules/services/video/jellyfin.nix -->
 <!-- context7: nixpkgs/nixos/modules/services/audio/navidrome.nix -->
 <!-- context7: nixpkgs/nixos/modules/services/misc/audiobookshelf.nix -->
+<!-- context7: nixpkgs/nixos/modules/services/misc/servarr/sonarr.nix -->
+<!-- context7: nixpkgs/nixos/modules/services/misc/servarr/radarr.nix -->
+<!-- context7: nixpkgs/nixos/modules/services/misc/servarr/prowlarr.nix -->
+<!-- context7: nixpkgs/nixos/modules/services/misc/servarr/lidarr.nix -->
+<!-- context7: nixpkgs/nixos/modules/services/networking/sabnzbd.nix -->
 <!-- context7: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/apps/service-media-jellyfin.nix -->
 <!-- context7: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/apps/service-app-navidrome.nix -->
+<!-- context7: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/apps/service-app-audiobookshelf.nix -->
 <!-- context7: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/apps/_arr-factory.nix -->
 
 ### Nix MCP Index
