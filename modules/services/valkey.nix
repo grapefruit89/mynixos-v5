@@ -44,6 +44,11 @@ in
 
  systemd.services.redis-valkey.serviceConfig = {
    ProtectSystem = "strict"; ProtectHome = true; PrivateTmp = true; PrivateDevices = true; NoNewPrivileges = true;
+   RestrictNamespaces = true;
+   ProtectKernelLogs = true;
+   ProtectControlGroups = true;
+   ProtectHostname = true;
+   SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" "~@mount" "~@swap" "~@cpu-emulation" ];
    PrivateNetwork = true; PrivateUsers = true;
    MemoryDenyWriteExecute = true; RestrictAddressFamilies = [ "AF_INET" "AF_UNIX" ]; OOMScoreAdjust = -1000;
  };
