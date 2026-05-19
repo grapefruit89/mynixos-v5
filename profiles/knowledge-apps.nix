@@ -10,6 +10,9 @@
  ../modules/apps/service-app-linkding.nix
  ];
 
+ # 🟢 Aktivierte Dienste
+ my.services.linkding.enable = true;
+
  # Standard-Metadaten für das Profil
  my.meta.profile_knowledge = {
  id = "NIXH-PROF-KNOW-001";
