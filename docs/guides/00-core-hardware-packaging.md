@@ -2,7 +2,9 @@
 title: 00-core-hardware-packaging
 category: architecture/consolidated
 status: [ACTIVE-SSoT]
-last_reviewed: 2026-05-18
+last_reviewed: 2026-05-19
+adr: [ADR-010, ADR-014]
+test: tests/basic.nix
 nix_modules:
   - path: hardware/q958/hardware-profile.nix
     anchor: graphics-quicksync
@@ -37,13 +39,13 @@ Für den Fujitsu Q958 (Intel UHD 630) ist QuickSync der "Heilige Gral". Wir erre
 ### 🏛️ 1. Die Treiber-Wahl (Layer 00-core)
 Für den i3-9100 (Coffee Lake) ist der `intel-media-driver` (iHD) zwingend. Die Konfiguration erfolgt in `hardware/q958/hardware-profile.nix`.
 
+### 🛠️ Konfiguration
 ```nix
-# anchor: graphics-quicksync
 hardware.graphics = {
   enable = true;
   extraPackages = with pkgs; [
-    intel-media-driver # Der moderne iHD Treiber
-    intel-vaapi-driver # Fallback
+    intel-media-driver
+    vpl-gpu-rt
   ];
 };
 ```
@@ -60,10 +62,14 @@ Basierend auf den Patterns von Misterio77 führen wir die System-Hygiene auf das
 ### 🏛️ Das Prinzip
 Das gesamte Root-Dateisystem (`/`) wird bei jedem Bootvorgang physisch durch einen leeren Snapshot ersetzt. Dies wird in `modules/core/impermanence.nix` gesteuert.
 
-### 🛠️ Technische Umsetzung
-1.  **Boot-Phase:** Ein initrd-Script löscht das aktuelle root-Subvolume.
-2.  **Rollback:** Ein leerer Snapshot (benannt `blank`) wird eingehängt.
-3.  **Opt-in:** Nur deklarierte Pfade werden nach `/persist` gemountet.
+### 🛠️ Konfiguration
+```nix
+fileSystems."/" = {
+  device = "none";
+  fsType = "tmpfs";
+  options = [ "defaults" "size=4G" "mode=755" ];
+};
+```
 
 ---
 
@@ -72,10 +78,20 @@ Das gesamte Root-Dateisystem (`/`) wird bei jedem Bootvorgang physisch durch ein
 In mynixos folgen wir dem DRY-Prinzip. Wir nutzen eine zentrale Hilfsfunktion in `modules/core/lib-helpers.nix`.
 
 ### 🏆 Die hocheffiziente Service-Factory
-Die Funktion `mkService` (anchor: mkHardenedService) abstrahiert:
+Die Funktion `mkService` abstrahiert:
 - Systemd Hardening (PrivateDevices, ProtectSystem)
 - Impermanence Integration
 - Ingress-Registrierung (Caddy)
+
+### 🛠️ Beispiel
+```nix
+myLib.mkService {
+  inherit config name;
+  description = "Example Service";
+  port = 1234;
+  useSSO = true;
+};
+```
 
 ---
 
@@ -114,16 +130,20 @@ my.system.onboardingComplete = true; # anchor: onboarding-complete
 
 ```bash
 # 1. Prüfe Intel QuickSync Treiber
-intel_gpu_top -s 1 # Sollte Auslastung bei Transcoding zeigen
+intel_gpu_top -s 1 # Erwartet UHD Graphics 630 Sichtbarkeit
 
 # 2. Prüfe Nix-Einstellungen
-nix show-config | grep -E "auto-optimise-store|substituters"
+nix show-config | grep "max-jobs = 0"
+# Positiv-Test: Optimierung aktiv
+nix show-config | grep "auto-optimise-store = true"
 
 # 3. Prüfe Impermanence (ob Root auf tmpfs)
-findmnt / # Muss fsType "tmpfs" zeigen
+findmnt / | grep "tmpfs"
+# Negativ-Test: / darf NICHT auf der SSD liegen
+! findmnt / | grep "ext4\|xfs"
 
 # 4. Prüfe Onboarding Status
-nix eval .#nixosConfigurations.nixhome.config.my.system.onboardingComplete
+nix eval .#nixosConfigurations.nixhome.config.my.system.onboardingComplete | grep "true"
 ```
 
 ---
@@ -137,13 +157,17 @@ nix eval .#nixosConfigurations.nixhome.config.my.system.onboardingComplete
 - [Misterio77/nix-config](https://github.com/Misterio77/nix-config) - Architektur-Referenz
 
 ### Context7 Observability
+<!-- context7: nixpkgs/nixos/modules/hardware/video/intel.nix -->
+<!-- context7: nixpkgs/nixos/modules/services/misc/impermanence.nix -->
 <!-- context7: https://github.com/grapefruit89/mynixos-v5/blob/main/hardware/q958/hardware-profile.nix -->
 <!-- context7: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/core/impermanence.nix -->
-<!-- context7: nixpkgs/nixos/modules/hardware/video/intel.nix -->
+<!-- context7: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/core/lib-helpers.nix -->
 
 ### Nix MCP Index
-<!-- mcp: repo_v5/hardware/q958/hardware-profile.nix -->
-<!-- mcp: repo_v5/modules/core/nix-tuning.nix -->
-<!-- mcp: repo_v5/modules/core/impermanence.nix -->
-<!-- mcp: repo_v5/modules/core/lib-helpers.nix -->
+<!-- mcp: nixos:repo_v5/hardware/q958/hardware-profile.nix -->
+<!-- mcp: nixos:repo_v5/modules/core/nix-tuning.nix -->
+<!-- mcp: nixos:repo_v5/modules/core/impermanence.nix -->
+<!-- mcp: nixos:repo_v5/modules/core/lib-helpers.nix -->
 
+---
+*Status: Core Hardened | Letzte Aktualisierung: 19. Mai 2026*

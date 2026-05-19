@@ -1,27 +1,25 @@
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-000-COR-TUN-001",
+#   "title": "Nix Tuning (Pure Binary Policy)",
+#   "layer": 0,
+#   "category": "system/settings",
+#   "lastReviewed": "2026-05-19",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 2,
+#   "tags": ["nix", "tuning", "binary-only", "gc"],
+#   "description": "Optimized nix-daemon settings with strict binary-only enforcement."
+# }
+# ---ENDNIXMETA
+
 {
  config,
  lib,
  pkgs,
  ...
-}: let
- # 🚀 NMS v4.2 Metadaten (hardened Nix Tuning)
- nms = {
- id = "NIXH-00-COR-024";
- title = "Nix Tuning (Pure Binary Policy)";
- description = "Optimized nix-daemon settings. Strict binary-only enforcement to prevent local compilation wear.";
- layer = 00;
- nixpkgs.category = "system/settings";
- capabilities = ["nix/tuning" "policy/binary-only" "maintenance/auto-gc" "impermanence/bash-fix"];
- audit.last_reviewed = "2026-04-27";
- audit.complexity = 2;
- source_repo = "grapefruit89/mynixos";
- };
-in {
- options.my.meta.nix_tuning = lib.mkOption {
- type = lib.types.attrs;
- default = nms;
- readOnly = true;
- };
+}:
 
  config = {
  # ⚙️ NIX SETTINGS (anchor: nix-settings)

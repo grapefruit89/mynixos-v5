@@ -1,3 +1,19 @@
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-000-HW-Q958-001",
+#   "title": "Hardware Profile: Fujitsu Q958",
+#   "layer": 0,
+#   "category": "hardware",
+#   "lastReviewed": "2026-05-19",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 3,
+#   "tags": ["hardware", "q958", "intel", "quicksync"],
+#   "description": "Optimized hardware profile for Fujitsu Q958 with Intel UHD 630 Graphics and QuickSync."
+# }
+# ---ENDNIXMETA
+
 { config, lib, pkgs, myLib, ... }: 
 let
  cfg = config.my.hardware;

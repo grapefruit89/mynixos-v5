@@ -1,3 +1,19 @@
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-000-SEC-ONB-001",
+#   "title": "System Onboarding Status",
+#   "layer": 0,
+#   "category": "security",
+#   "lastReviewed": "2026-05-19",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 1,
+#   "tags": ["security", "onboarding", "governance"],
+#   "description": "Simple onboarding flag and warning system to ensure production readiness."
+# }
+# ---ENDNIXMETA
+
 { lib, config, ... }:
 {
   # 🚀 ONBOARDING STATUS (anchor: onboarding-complete)

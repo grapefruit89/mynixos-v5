@@ -1,10 +1,19 @@
-# ────────────────────────────────────────────────────────────────────────────────
-# QUELLEN:
-# - Misterio77/nix-config (Systemd-Härtung, modulare Struktur)
-# - andersonjoseph/jailed-agents (PrivateUsers / network Policy)
-# - denful/dendrix (Dendritisches Muster / rekursive Imports)
-# - kiriwalawren/nixflix (Media-Stack Isolation)
-# ────────────────────────────────────────────────────────────────────────────────
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-000-COR-LIB-001",
+#   "title": "Hardened Service Factory (mkService)",
+#   "layer": 0,
+#   "category": "core/lib",
+#   "lastReviewed": "2026-05-19",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 4,
+#   "tags": ["lib", "factory", "hardening", "systemd"],
+#   "description": "Central factory for generating hardened systemd services with automated persistence and proxying."
+# }
+# ---ENDNIXMETA
+
 { lib, pkgs, ... }: 
 let
  # 🚀 SSoT Domain Generator
