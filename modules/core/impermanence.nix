@@ -14,7 +14,28 @@
 # }
 # ---ENDNIXMETA
 
-{ config, lib, ... }: {
+{ config, lib, ... }:
+let
+  # 🚀 NMS v4.2 Metadaten
+  nms = {
+    id = "NIXH-00-COR-036";
+    title = "Impermanence Core";
+    description = "System-wide persistence for stateless root-on-RAM setup. Manages declarative state on /persist.";
+    layer = 0;
+    nixpkgs.category = "core/persistence";
+    capabilities = ["persistence/stateless" "system/impermanence" "storage/tiering"];
+    audit.last_reviewed = "2026-05-14";
+    audit.complexity = 3;
+  };
+in
+ {
+  options.my.meta.impermanence = lib.mkOption {
+    type = lib.types.attrs;
+    default = nms;
+    readOnly = true;
+    description = "NMS metadata";
+  };
+
   # 💾 HARDENED IMPERMANENCE (anchor: persistence-core)
   # Verwaltet die systemweiten Persistenz-Pfade für das Stateless-Root (tmpfs).
  # App-spezifische Pfade werden automatisch via mkService (lib-helpers) registriert.

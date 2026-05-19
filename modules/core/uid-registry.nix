@@ -1,4 +1,25 @@
-{ lib, ... }: {
+{ lib, ... }:
+let
+  # 🚀 NMS v4.2 Metadaten
+  nms = {
+    id = "NIXH-00-COR-004";
+    title = "Static UID Registry";
+    description = "Single Source of Truth for static UIDs to enable zero-trust nftables skuid filtering.";
+    layer = 0;
+    nixpkgs.category = "core/user";
+    capabilities = ["security/uid-isolation" "firewall/skuid"];
+    audit.last_reviewed = "2026-05-19";
+    audit.complexity = 1;
+  };
+in
+{
+  options.my.meta.uid_registry = lib.mkOption {
+    type = lib.types.attrs;
+    default = nms;
+    readOnly = true;
+    description = "NMS metadata";
+  };
+
   # 🚀 Single Source of Truth for Static UIDs (v6.0)
   # Used for zero-trust nftables filtering (meta skuid).
   # Range: 2000-2999 for NixHome Services.

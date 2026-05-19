@@ -18,12 +18,31 @@
   config,
   ...
 }: let
+  # 🚀 NMS v4.2 Metadaten
+  nms = {
+    id = "NIXH-00-COR-024";
+    title = "Hardened nftables Firewall";
+    description = "Zero-Trust nftables configuration with UID-based outbound filtering and dual-stack parity.";
+    layer = 0;
+    nixpkgs.category = "core/network";
+    capabilities = ["firewall/nftables" "security/zero-trust" "network/hardening"];
+    audit.last_reviewed = "2026-05-14";
+    audit.complexity = 5;
+  };
+
   # SSoT Integration
   sshPort = config.my.ports.ssh;
   lanCidr = config.my.configs.network.lanCidr;
   lanCidrV6 = config.my.configs.network.lanCidrV6;
   linkLocalV6 = config.my.configs.network.linkLocalV6;
 in {
+  options.my.meta.firewall = lib.mkOption {
+    type = lib.types.attrs;
+    default = nms;
+    readOnly = true;
+    description = "NMS metadata";
+  };
+
   options.my.security.firewall = {
     enable = lib.mkEnableOption "Hardened Nftables Firewall with Geo-Blocking";
     allowedCountries = lib.mkOption {

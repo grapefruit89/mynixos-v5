@@ -1,8 +1,27 @@
 { config, lib, pkgs, ... }:
 let
+  # 🚀 NMS v4.2 Metadaten
+  nms = {
+    id = "NIXH-90-SEC-004";
+    title = "Zero-Trust Secrets (Native)";
+    description = "TPM2-backed native secrets decryptor service for hardware-bound identity and zero-trust ingestion.";
+    layer = 90;
+    nixpkgs.category = "security/secrets";
+    capabilities = ["security/zero-trust" "identity/tpm2" "sops/native-decryption"];
+    audit.last_reviewed = "2026-05-19";
+    audit.complexity = 3;
+  };
+
   cfg = config.my.security.zeroTrustSecrets;
 in
 {
+  options.my.meta.zero_trust_secrets = lib.mkOption {
+    type = lib.types.attrs;
+    default = nms;
+    readOnly = true;
+    description = "NMS metadata";
+  };
+
   options.my.security.zeroTrustSecrets = {
     enable = lib.mkEnableOption "Zero-Trust Secrets (Native Decryptor)";
     secretsFile = lib.mkOption {

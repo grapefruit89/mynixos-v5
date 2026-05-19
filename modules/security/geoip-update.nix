@@ -147,9 +147,16 @@ let
       ''}
       exit 1
     fi
-  '';
+  ];
 
-in {
+  in {
+  options.my.meta.geoip_update = lib.mkOption {
+    type = lib.types.attrs;
+    default = nms;
+    readOnly = true;
+    description = "NMS metadata";
+  };
+
   config = lib.mkIf cfg.enable {
     
     # 🔄 SYSTEMD UPDATE SERVICE

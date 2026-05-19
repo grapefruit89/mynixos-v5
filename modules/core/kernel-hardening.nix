@@ -14,7 +14,28 @@
 # }
 # ---ENDNIXMETA
 
-{ config, lib, pkgs, ... }: {
+{ config, lib, pkgs, ... }:
+let
+  # 🚀 NMS v4.2 Metadaten
+  nms = {
+    id = "NIXH-00-COR-021";
+    title = "Hardened Kernel Core";
+    description = "Comprehensive module blacklist and sysctl security hardening. Production-grade attack surface reduction.";
+    layer = 0;
+    nixpkgs.category = "core/security";
+    capabilities = ["kernel/security" "security/hardening" "system/stability"];
+    audit.last_reviewed = "2026-05-14";
+    audit.complexity = 4;
+  };
+in
+ {
+  options.my.meta.kernel_hardening = lib.mkOption {
+    type = lib.types.attrs;
+    default = nms;
+    readOnly = true;
+    description = "NMS metadata";
+  };
+
   # 🛡️ PRODUCTION HARDENED KERNEL HARDENING (NixHome v6.1)
   # Comprehensive module blacklist and sysctl hardening.
   # Static declarative approach (Decision R-03).

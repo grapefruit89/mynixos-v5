@@ -20,6 +20,26 @@
  pkgs,
  ...
 }:
+let
+  # 🚀 NMS v4.2 Metadaten
+  nms = {
+    id = "NIXH-00-COR-031";
+    title = "Hardened SSH (Post-Quantum)";
+    description = "Hardened SSH daemon with Post-Quantum cryptography and strict CIDR-based forwarding.";
+    layer = 0;
+    nixpkgs.category = "system/networking";
+    capabilities = ["ssh/hardening" "security/post-quantum" "network/remote-access"];
+    audit.last_reviewed = "2026-05-19";
+    audit.complexity = 3;
+  };
+in
+{
+  options.my.meta.ssh = lib.mkOption {
+    type = lib.types.attrs;
+    default = nms;
+    readOnly = true;
+    description = "NMS metadata";
+  };
 
  config = {
  # 🛡️ SSH HARDENING (anchor: ssh-hardening)

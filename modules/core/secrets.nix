@@ -20,6 +20,27 @@
  pkgs,
  ...
 }:
+let
+  # 🚀 NMS v4.2 Metadaten
+  nms = {
+    id = "NIXH-00-COR-003";
+    title = "Secrets Master Vault";
+    description = "Centralized secret management with multi-key age/SSH encryption and SOPS integration.";
+    layer = 0;
+    nixpkgs.category = "core/security";
+    capabilities = ["security/secrets" "sops/active" "identity/tpm2"];
+    audit.last_reviewed = "2026-05-19";
+    audit.complexity = 3;
+  };
+in
+{
+  options.my.meta.secrets = lib.mkOption {
+    type = lib.types.attrs;
+    default = nms;
+    readOnly = true;
+    description = "NMS metadata";
+  };
+
 # 🛡️ SOPS MULTI-KEY STRATEGY (Decision S-01)
 # Secrets are encrypted for three independent keys. Any one can decrypt.
 #  - Key 1: Server SSH Host Key (age-ssh-ed25519) – present on /persist

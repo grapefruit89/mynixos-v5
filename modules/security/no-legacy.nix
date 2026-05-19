@@ -1,16 +1,17 @@
 { config, lib, pkgs, ... }:
 let
- nms = {
- id = "NIXH-90-POL-003";
- title = "No Legacy";
- description = "Blocks legacy services and insecure protocols.";
- layer = 90;
- nixpkgs.category = "system/policy";
- capabilities = [ "policy/enforcement" "security/hardening" ];
- audit.last_reviewed = "2026-03-02";
- audit.complexity = 2;
- };
- msg = prefix: alt: "🚫 [LEGACY-BLOCK] ${prefix} ist veraltet. Nutze ${alt}.";
+  # 🚀 NMS v4.2 Metadaten
+  nms = {
+    id = "NIXH-90-SEC-003";
+    title = "No-Legacy Policy";
+    description = "Disables legacy protocols and insecure services (Telnet, FTP, RSH, etc.).";
+    layer = 90;
+    nixpkgs.category = "system/policy";
+    capabilities = ["security/no-legacy" "network/hardening"];
+    audit.last_reviewed = "2026-05-19";
+    audit.complexity = 2;
+  };
+  msg = prefix: alt: "🚫 [LEGACY-BLOCK] ${prefix} ist veraltet. Nutze ${alt}.";
 in
 {
  options.my.meta.no_legacy = lib.mkOption {

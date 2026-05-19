@@ -50,6 +50,13 @@ let
   schema = lib.genAttrs (categories.infra ++ categories.media) (name: "");
 
 in {
+  options.my.meta.secrets_schema = lib.mkOption {
+    type = lib.types.attrs;
+    default = nms;
+    readOnly = true;
+    description = "NMS metadata";
+  };
+
   options.my.secrets = {
     schema = mkOption {
       type = types.attrsOf types.str;

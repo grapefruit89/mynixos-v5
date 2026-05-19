@@ -16,10 +16,29 @@
 
 { config, lib, pkgs, ... }:
 let
+  # 🚀 NMS v4.2 Metadaten
+  nms = {
+    id = "NIXH-00-COR-039";
+    title = "Hardened Restic Backups";
+    description = "Hardened Restic backup configuration with dual local/cloud strategy and weekly integrity audits.";
+    layer = 0;
+    nixpkgs.category = "core/security";
+    capabilities = ["backup/restic" "cloud/sync" "security/hardened"];
+    audit.last_reviewed = "2026-05-19";
+    audit.complexity = 3;
+  };
+
   localRepo = "/mnt/archive/.restic-vault";
   maxSizeGB = 20;
 in
 {
+  options.my.meta.backup = lib.mkOption {
+    type = lib.types.attrs;
+    default = nms;
+    readOnly = true;
+    description = "NMS metadata";
+  };
+
   options.my.services.backup = {
     enable = lib.mkEnableOption "Hardened Restic Backups";
   };

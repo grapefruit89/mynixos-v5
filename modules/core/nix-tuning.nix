@@ -20,6 +20,26 @@
  pkgs,
  ...
 }:
+let
+  # 🚀 NMS v4.2 Metadaten
+  nms = {
+    id = "NIXH-00-COR-009";
+    title = "Nix Daemon Tuning";
+    description = "Optimized nix-daemon settings with strict binary-only enforcement and automated garbage collection.";
+    layer = 0;
+    nixpkgs.category = "system/settings";
+    capabilities = ["nix/tuning" "nix/binary-only" "system/gc"];
+    audit.last_reviewed = "2026-05-19";
+    audit.complexity = 2;
+  };
+in
+{
+  options.my.meta.nix_tuning = lib.mkOption {
+    type = lib.types.attrs;
+    default = nms;
+    readOnly = true;
+    description = "NMS metadata";
+  };
 
  config = {
  # ⚙️ NIX SETTINGS (anchor: nix-settings)

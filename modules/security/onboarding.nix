@@ -15,7 +15,27 @@
 # ---ENDNIXMETA
 
 { lib, config, ... }:
+let
+  # 🚀 NMS v4.2 Metadaten
+  nms = {
+    id = "NIXH-90-SEC-ONB-001";
+    title = "System Onboarding Status";
+    description = "Onboarding flag and warning system to ensure production readiness and governance compliance.";
+    layer = 0;
+    nixpkgs.category = "security/governance";
+    capabilities = ["security/onboarding" "system/governance"];
+    audit.last_reviewed = "2026-05-19";
+    audit.complexity = 1;
+  };
+in
 {
+  options.my.meta.onboarding = lib.mkOption {
+    type = lib.types.attrs;
+    default = nms;
+    readOnly = true;
+    description = "NMS metadata";
+  };
+
   # 🚀 ONBOARDING STATUS (anchor: onboarding-complete)
   options.my.system.onboardingComplete = lib.mkOption {
     type = lib.types.bool;

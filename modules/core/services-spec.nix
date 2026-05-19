@@ -1,4 +1,25 @@
-{ lib, config, ... }: {
+{ lib, config, ... }: 
+let
+  # 🚀 NMS v4.2 Metadaten
+  nms = {
+    id = "NIXH-00-COR-008";
+    title = "Service Specification Matrix";
+    description = "Single Source of Truth for service-to-zone mapping, domains, and socket/port definitions.";
+    layer = 0;
+    nixpkgs.category = "core/config";
+    capabilities = ["core/ssot" "security/zoning" "network/routing"];
+    audit.last_reviewed = "2026-05-19";
+    audit.complexity = 2;
+  };
+in
+{
+  options.my.meta.services_spec = lib.mkOption {
+    type = lib.types.attrs;
+    default = nms;
+    readOnly = true;
+    description = "NMS metadata";
+  };
+
   options.my.services.spec = lib.mkOption {
     type = lib.types.attrsOf (lib.types.submodule {
       options = {

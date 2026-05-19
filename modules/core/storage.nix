@@ -1,10 +1,29 @@
 { config, lib, pkgs, ... }:
 let
+  # 🚀 NMS v4.2 Metadaten
+  nms = {
+    id = "NIXH-00-COR-040";
+    title = "Unified Storage Pool (MergerFS)";
+    description = "Unified storage pool using MergerFS with HDD silence protocol and tiered caching.";
+    layer = 0;
+    nixpkgs.category = "core/storage";
+    capabilities = ["storage/mergerfs" "storage/tiering" "storage/performance"];
+    audit.last_reviewed = "2026-05-19";
+    audit.complexity = 3;
+  };
+
   cfg = config.my.media.storagePool;
   # Pfade aus SSoT Registry
   srePaths = config.my.configs.paths;
 in
 {
+  options.my.meta.storage = lib.mkOption {
+    type = lib.types.attrs;
+    default = nms;
+    readOnly = true;
+    description = "NMS metadata";
+  };
+
   options.my.media.storagePool = {
     enable = lib.mkEnableOption "Unified MergerFS Storage Pool";
   };

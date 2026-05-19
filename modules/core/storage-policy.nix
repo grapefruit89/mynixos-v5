@@ -40,6 +40,13 @@ let
 
 in
 {
+  options.my.meta.storage_policy = lib.mkOption {
+    type = lib.types.attrs;
+    default = nms;
+    readOnly = true;
+    description = "NMS metadata";
+  };
+
   config = {
     # 🛡️ HARDWARE VALIDATION ASSERTIONS
     # Ensure paths are mounted on the correct physical media

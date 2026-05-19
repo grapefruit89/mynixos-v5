@@ -55,6 +55,13 @@ let
   ];
 
 in {
+  options.my.meta.architecture_rules = lib.mkOption {
+    type = lib.types.attrs;
+    default = nms;
+    readOnly = true;
+    description = "NMS metadata";
+  };
+
   config = {
     # Erzwungene Regeln für das gesamte System
     assertions = violations;

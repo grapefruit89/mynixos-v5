@@ -1,4 +1,25 @@
-{ lib, myLib, ... }: {
+{ lib, myLib, ... }:
+let
+  # 🚀 NMS v4.2 Metadaten
+  nms = {
+    id = "NIXH-00-COR-001";
+    title = "Global System Configs";
+    description = "Single Source of Truth for global configuration values, domain settings, and hardware detection.";
+    layer = 0;
+    nixpkgs.category = "core/config";
+    capabilities = ["core/ssot" "system/identity" "storage/tiering"];
+    audit.last_reviewed = "2026-05-19";
+    audit.complexity = 2;
+  };
+in
+{
+  options.my.meta.configs = lib.mkOption {
+    type = lib.types.attrs;
+    default = nms;
+    readOnly = true;
+    description = "NMS metadata";
+  };
+
   # 🚀 Single Source of Truth für globale Konfigurationswerte
   # Nutzt Traceability Matrix v2 (ADR 220)
   options.my.configs = {

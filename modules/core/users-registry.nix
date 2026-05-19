@@ -1,4 +1,25 @@
-{ lib, ... }: {
+{ lib, ... }:
+let
+  # 🚀 NMS v4.2 Metadaten
+  nms = {
+    id = "NIXH-00-COR-005";
+    title = "Service User Registry";
+    description = "Mapping of service users to static UIDs for architectural consistency and firewall rules.";
+    layer = 0;
+    nixpkgs.category = "core/user";
+    capabilities = ["core/user-registry" "security/identity"];
+    audit.last_reviewed = "2026-05-19";
+    audit.complexity = 1;
+  };
+in
+{
+  options.my.meta.users_registry = lib.mkOption {
+    type = lib.types.attrs;
+    default = nms;
+    readOnly = true;
+    description = "NMS metadata";
+  };
+
   # 🚀 PRODUCTION-HARDENED USER REGISTRY (ADR 005)
   # Centralized mapping for static UIDs to enable nftables 'meta skuid' filtering.
   # UID Range: 2000-2999 (Reserved for persistent services with network identity)

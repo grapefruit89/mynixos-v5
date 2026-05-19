@@ -1,4 +1,25 @@
-{ lib, config, ... }: {
+{ lib, config, ... }:
+let
+  # 🚀 NMS v4.2 Metadaten
+  nms = {
+    id = "NIXH-00-COR-002";
+    title = "Global Port Registry";
+    description = "Central SSoT for all service ports, prioritizing Unix sockets and localhost bindings.";
+    layer = 0;
+    nixpkgs.category = "core/network";
+    capabilities = ["network/ports" "security/isolation"];
+    audit.last_reviewed = "2026-05-19";
+    audit.complexity = 1;
+  };
+in
+{
+  options.my.meta.ports_registry = lib.mkOption {
+    type = lib.types.attrs;
+    default = nms;
+    readOnly = true;
+    description = "NMS metadata";
+  };
+
   # 🚀 Single Source of Truth für alle Ports (v6.0)
   # Alle Dienste nutzen primär Unix-Sockets. TCP-Ports sind reine Fallbacks auf 127.0.0.1.
   

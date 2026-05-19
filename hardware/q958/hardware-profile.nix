@@ -16,9 +16,28 @@
 
 { config, lib, pkgs, myLib, ... }: 
 let
+  # 🚀 NMS v4.2 Metadaten
+  nms = {
+    id = "NIXH-HW-Q958-001";
+    title = "Hardware Profile: Fujitsu Q958";
+    description = "Optimized hardware profile for Fujitsu Q958 with Intel UHD 630 Graphics and QuickSync.";
+    layer = 0;
+    nixpkgs.category = "hardware";
+    capabilities = ["hardware/intel" "hardware/quicksync" "power/management"];
+    audit.last_reviewed = "2026-05-19";
+    audit.complexity = 3;
+  };
+
  cfg = config.my.hardware;
 in
 {
+  options.my.meta.hardware_q958 = lib.mkOption {
+    type = lib.types.attrs;
+    default = nms;
+    readOnly = true;
+    description = "NMS metadata";
+  };
+
  # 🚀 hardened HARDWARE PROFILE: FUJITSU Q958
  # Optimized for Intel Coffee Lake (Gen 9) & UHD Graphics 630.
 
