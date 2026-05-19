@@ -13,7 +13,7 @@
 - [x] **Storage Strategy:** ABC-Tiering & Restic/Rclone Mapping (Guide 40).
 - [x] **Identity & Auth:** Pocket-ID SSO & Forward-Auth angereichert (Guide 50).
 - [x] **Monitoring:** Gatus & Netdata Integration (Guide 58).
-- [x] **Media Stack:** QuickSync & RAM-Transcoding (Guide 60).
+- [x] **Media Stack:** QuickSync & RAM-Transcoding enriched with missing Context7 IDs (Guide 60).
 - [x] **Matrix:** Conduit (Rust) & Federation (Guide 80).
 - [x] **Docs Cleanup:** Auflösung von `reference/` und `specs/` in `guides/`.
 
