@@ -10,12 +10,11 @@
    cp secrets/infra.yaml.example secrets/infra.yaml
    cp secrets/media.yaml.example secrets/media.yaml
    ```
-2. Bearbeite beide Dateien und ersetze alle Platzhalter (z. B. `CHANGE_ME`, `PLACEHOLDER`).
+
+2. Bearbeite beide Dateien und ersetze alle Platzhalter (z. B. CHANGE_ME, PLACEHOLDER).
+
 3. Verschlüssele die Dateien mit SOPS:
    ```bash
    sops --encrypt --in-place secrets/infra.yaml
    sops --encrypt --in-place secrets/media.yaml
    ```
-
-## Hinweis
-Die alte `secrets.yaml` wird nicht mehr verwendet. Alle Secrets sind nun nach Themen getrennt.
