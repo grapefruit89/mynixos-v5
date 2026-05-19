@@ -2,7 +2,7 @@
 # {
 #   "specVersion": "2.0",
 #   "id": "NIXH-000-COR-KER-001",
-#   "title": "Production Hardened Kernel Hardening",
+#   "title": "gehärtetes Kernel Hardening",
 #   "layer": 0,
 #   "category": "core/security",
 #   "lastReviewed": "2026-05-14",
@@ -36,7 +36,7 @@ in
     description = "NMS metadata";
   };
 
-  # 🛡️ PRODUCTION HARDENED KERNEL HARDENING (NixHome v6.1)
+  # 🛡️ HARDENED KERNEL CORE
   # Comprehensive module blacklist and sysctl hardening.
   # Static declarative approach (Decision R-03).
 
@@ -96,7 +96,7 @@ in
       "isdn" "hisax" "hysdn" "atm" "uvcvideo" "videodev" "ppp" "pppoe" "pppox" "slhc"
       "ip6table_filter" "esp4" "esp6" "rxrpc" "dccp" "sctp" "rds" "tipc"
 
-      # 10. Legacy Filesystems & Vulnerable Drivers (Fortress Hardening Update)
+      # 10. Legacy Filesystems & Vulnerable Drivers (System Hardening Update)
       "hfs" "hfsplus" "jffs2" "freevxfs" "vivid" "minix" "udf"
     ];
 
@@ -161,7 +161,7 @@ in
     security.apparmor.enable = true;
     security.lockKernelModules = true; # Decision KM-01
 
-    # 💎 BOOT PARAMETERS (ADR 001 - v7.0 Strict)
+    # 💎 BOOT PARAMETERS (ADR 001 - v7.0)
     boot.kernelParams = [
       # CPU & Device Protection (nix-mineral alignment)
       "mitigations=auto,nosmt" # Full mitigations + Disable SMT

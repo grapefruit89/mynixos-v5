@@ -40,6 +40,9 @@ my.services.caddy.enable = true;
 - **Admin-API**: Beschränkt auf den Unix-Socket `/run/caddy/admin.sock`.
 - **Security Headers**: HSTS, CSP und Stealth-Header (Server-Header entfernen).
 
+### 📦 Keine externen Caddy-Module (Custom Builds)
+Wir verzichten bewusst auf externe Caddy-Plugins (via xcaddy), um die Angriffsfläche zu minimieren und den Build-Prozess (Binary-Only) einfach zu halten. Die Standard-Bordmittel von Caddy 2.7+ sind für alle mynixos-Anforderungen (Reverse Proxy, Header-Manipulation, Forward-Auth) vollständig ausreichend.
+
 ### ⚡ 2. Zero-Downtime Updates (Graceful Reload)
 Wir nutzen die nativen Caddy-Reload-Signale (`systemctl reload caddy`), um aktive Streams (Jellyfin/Navidrome) bei Konfigurations-Updates zu schützen.
 
@@ -106,4 +109,4 @@ ss -tulpn | grep -E "80|443|53844"
 <!-- mcp: nixos:repo_v5/modules/core/ssh.nix -->
 
 ---
-*Status: Production Hardened | Letzte Aktualisierung: 19. Mai 2026*
+*Status: gehärtet | Letzte Aktualisierung: 19. Mai 2026*

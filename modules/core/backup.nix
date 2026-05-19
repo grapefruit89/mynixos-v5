@@ -81,12 +81,9 @@ in
         fi
       '';
 
-      # ☁️ CLOUD SYNC (v7.1 Hardened: SOPS + TPM 2.0)
-      backupCleanupCommand = ''
-        echo "📤 Starte Cloud-Sync via SOPS-protected rclone..."
-        ${pkgs.rclone}/bin/rclone --config ${config.sops.secrets.rclone_config.path} sync ${localRepo} cloud-backup:nixhome-vault --bwlimit 5M
-        echo "✅ Cloud-Sync abgeschlossen."
-      '';
+      # ☁️ CLOUD SYNC (v7.1 Hardened: direct restic-remote job instead of rclone sync)
+      # backupCleanupCommand was removed to avoid double backups and reduce overhead.
+      # Off-site persistence is now handled directly by services.restic.backups.remote.
 
       timerConfig = {
         OnCalendar = "02:00";

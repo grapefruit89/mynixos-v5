@@ -25,7 +25,7 @@ nix_modules:
 
 # Cluster 60: Media Stack
 
-Dieses Dokument beschreibt die hochperformante Medien-Architektur von mynixos. Wir nutzen Hardware-Beschleunigung und intelligentes Tiering, um ein "Aviation-Grade" Streaming-Erlebnis zu gewährleisten.
+Dieses Dokument beschreibt die hochperformante Medien-Architektur von mynixos. Wir nutzen Hardware-Beschleunigung und intelligentes Tiering, um ein hochwertiges Streaming-Erlebnis zu gewährleisten.
 
 ---
 

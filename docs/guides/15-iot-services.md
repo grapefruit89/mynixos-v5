@@ -10,7 +10,7 @@ sources: [NixOS Search, official nixpkgs modules]
 
 In mynixos nutzen wir spezialisierte Dienste für das Fundament und die IoT-Kommunikation.
 
-## 🛡️ 1. nftables: Der Aviation-Grade Schutz
+## 🛡️ 1. nftables: gehärteter Schutz
 Wir ersetzen die veralteten \`iptables\` durch \`nftables\`.
 - **Vorteil:** Schnellere Paketverarbeitung, atomare Updates der Firewall-Regeln.
 - **Strategie:** Wir definieren die Regeln in `modules/core/firewall.nix`.

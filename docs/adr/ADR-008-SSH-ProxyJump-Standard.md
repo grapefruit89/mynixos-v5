@@ -12,7 +12,7 @@ sources: [https://blog.ktz.me/ssh-tips-and-why-proxyjump-is-awesome/]
 
 <!-- context7: repo_v5/modules/core/ssh.nix -->
 
-# 🏛️ ADR-008: Aviation-Grade SSH Management
+# 🏛️ ADR-008: gehärtetes SSH Management
 
 ## Kontext
 Wir benötigen einen sicheren und bequemen Administrationszugang zum Tower, der dem Zero-Trust Prinzip folgt.

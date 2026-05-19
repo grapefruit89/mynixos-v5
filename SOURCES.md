@@ -4,7 +4,7 @@ Dieses Dokument dient der Rückverfolgbarkeit (Provenance) aller Konzepte, Entwu
 
 | Repository / Quelle | Extrahiertes Konzept / "Low-Hanging Fruit" | Implementiert in (Datei/Modul) | Anmerkung / Begründung |
 | :--- | :--- | :--- | :--- |
-| [Misterio77/nix-config](https://github.com/Misterio77/nix-config) | Systemd-Härtungen, modulare Struktur, Kernel-Sysctls | `modules/core/lib-helpers.nix`, `modules/core/kernel-hardening.nix` | Grundlage der v7.0 Strict Baseline |
+| [Misterio77/nix-config](https://github.com/Misterio77/nix-config) | Systemd-Härtungen, modulare Struktur, Kernel-Sysctls | `modules/core/lib-helpers.nix`, `modules/core/kernel-hardening.nix` | Grundlage der v7.0 Baseline |
 | [vimjoyer/nixconf](https://github.com/vimjoyer/nixconf) | Kernel-Boot-Parameter (`init_on_alloc`, `slab_nomerge`), `mergeAttrsList` | `modules/core/kernel-hardening.nix`, `modules/core/lib-helpers.nix` | Fortgeschrittene Kernel-Härtung |
 | [andersonjoseph/jailed-agents](https://github.com/andersonjoseph/jailed-agents) | `PrivateUsers`, `network = "none"` Policy | `modules/core/lib-helpers.nix` (mkService) | Namespace-Sandbox für Dienste |
 | [giomf/NixoScope](https://github.com/giomf/NixoScope) | Modul-Abhängigkeitsvisualisierung (Python-Tool) | `scripts/audit-module-graph.sh` | Externes Tool, kein Import |
@@ -13,7 +13,7 @@ Dieses Dokument dient der Rückverfolgbarkeit (Provenance) aller Konzepte, Entwu
 | [Mic92/sops-nix](https://github.com/Mic92/sops-nix) | Zero-Trust Secrets Pattern (Konzept) | `modules/security/zero-trust-secrets.nix`, `scripts/secrets-decryptor.sh` | Nur Konzept, eigene Implementierung |
 | [kiriwalawren/nixflix](https://github.com/kiriwalawren/nixflix) | `PrivateNetwork = true`, `readOnlyPaths` für Media | `modules/apps/service-media-jellyfin.nix`, `lib-helpers.nix` | Medien-Stack Isolation |
 | [nix-community/awesome-nix](https://github.com/nix-community/awesome-nix) | Entwicklungstools: `statix`, `deadnix`, `nixpkgs-fmt` | `scripts/audit-code-quality.sh` | Transiente Nutzung via `nix-shell -p` |
-| [c00w/nix-mineral](https://github.com/c00w/nix-mineral) | Enterprise-grade Hardening, Sysctls, Protocol Blacklist | `modules/core/kernel-hardening.nix` | Kern der v7.1 "Titanium" Security |
+| [c00w/nix-mineral](https://github.com/c00w/nix-mineral) | gehärtetes Hardening, Sysctls, Protocol Blacklist | `modules/core/kernel-hardening.nix` | Kern der v7.1 Security |
 | [nix-community/impermanence](https://github.com/nix-community/impermanence) | Stateless Root (Root-on-RAM) Patterns | `modules/core/impermanence.nix` | Fundament für Drift-Prävention |
 | [pocket-id/pocket-id](https://github.com/pocket-id/pocket-id) | Passkey-focused OIDC Identity Provider | `modules/services/pocket-id.nix` | Zentraler SSO-Anker |
 | [caddyserver/caddy](https://github.com/caddyserver/caddy) | Reverse Proxy, Forward-Auth, Auto-TLS | `modules/services/caddy.nix`, `services-spec.nix` | Ingress-Guard & SSL-Terminierung |

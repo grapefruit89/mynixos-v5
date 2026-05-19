@@ -1,4 +1,4 @@
-# 🚀 NixHome Project – LLM & Developer Guide (v7.1 Strict)
+# 🚀 NixHome Project – LLM & Developer Guide (v7.1)
 
 ## 🤖 LLM Guiderails (MANDATORY)
 **This project is time-sensitive and requires high precision regarding NixOS releases and library options.**

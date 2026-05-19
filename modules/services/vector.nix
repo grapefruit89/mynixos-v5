@@ -68,7 +68,7 @@ in {
     };
     users.groups.vector = {};
 
-    # Systemd Hardening (Production Hardened)
+    # Systemd Hardening (gehärtet)
     systemd.services.vector.serviceConfig = {
       ProtectSystem = "strict";
       ProtectHome = true;

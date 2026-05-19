@@ -1,8 +1,8 @@
-# NixHome v7.1 — Titanium Strict (Aviation-Grade)
+# NixHome v7.1 — gehärtet
 
 [![NixOS Stable](https://img.shields.io/badge/NixOS-25.11-blue.svg?style=flat-square&logo=nixos)](https://nixos.org)
-[![Security](https://img.shields.io/badge/Security-Titanium--Fortress-brightgreen.svg?style=flat-square)](./docs/adr/README.md)
-[![Status](https://img.shields.io/badge/Status-Production--Hardened-blue.svg?style=flat-square)](./docs/CURRENT_STATUS.md)
+[![Security](https://img.shields.io/badge/Security-Hardened-brightgreen.svg?style=flat-square)](./docs/adr/README.md)
+[![Status](https://img.shields.io/badge/Status-Hardened-blue.svg?style=flat-square)](./docs CURRENT_STATUS.md)
 [![TOS-Compliant](https://img.shields.io/badge/Cloudflare-DNS--Only-orange.svg?style=flat-square)](./docs/adr/ADR-017-Cloudflare-DNS-Only.md)
 
 ## 📖 Key Documentation (SSoT)
@@ -45,7 +45,7 @@ nixos-install --flake .#nixhome
 
 ---
 
-## ✨ Key Features (v7.1 Strict)
+## ✨ Key Features (v7.1)
 
 ### 💎 Impermanence (Stateless Root)
 The system operates on a **tmpfs-on-root** manifesto. The `/` partition is a RAM-disk that is wiped on every boot. Only explicitly declared paths are persisted to the NVMe via the `impermanence` module, preventing configuration drift and ensuring a "factory-reset" state at every start.
@@ -59,7 +59,7 @@ Data is distributed across three physical tiers with automated movement:
 ### 🌐 Cloudflare DNS-Only
 To ensure compliance with Cloudflare's Terms of Service for media streaming, this project uses Cloudflare **exclusively as a DNS resolver** (Gray Cloud). All Geo-blocking and Rate-limiting are implemented at the kernel level (nftables) and application gateway (Caddy).
 
-### 🔒 Fortress Hardening
+### 🔒 Hardening
 - **Kernel:** Extensive module blacklisting and sysctl hardening inspired by `nix-mineral` and `security_harden_linux`.
 - **Ingress:** Caddy gateway with automated vHost generation, Forward-Auth (Pocket-ID), and bot-mitigation rate limits.
 - **Outbound:** Strict nftables output filtering (KRIT-01) allowing only whitelisted service UIDs.
@@ -82,4 +82,4 @@ To ensure compliance with Cloudflare's Terms of Service for media streaming, thi
 
 ---
 
-*Status: Aviation-Grade / Production Hardened | Letzte Aktualisierung: 19. Mai 2026*
+*Status: gehärtet | Letzte Aktualisierung: 19. Mai 2026*

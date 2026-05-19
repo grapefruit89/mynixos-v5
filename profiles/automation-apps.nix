@@ -15,7 +15,7 @@
 # ---ENDNIXMETA
 
 { config, lib, pkgs, ... }: {
-  # 🚀 PRODUCTION HARDENED MISSION PROFILE: AUTOMATION APPS
+  # 🚀 HARDENED MISSION PROFILE: AUTOMATION APPS
   # Bündelt n8n, Home Assistant und Management-Tools.
 
   imports = [

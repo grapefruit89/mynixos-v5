@@ -1,6 +1,6 @@
-# NixHome v7.1 Strict Documentation
+# NixHome v7.1 Documentation
 
-Willkommen in der zentralen Dokumentation für das **NixHome v7.1 Strict** Projekt (Codename: Distiller). Diese Dokumentation ist nach dem SSoT-Prinzip (Single Source of Truth) aufgebaut und direkt mit der technischen Umsetzung in den Nix-Modulen verzahnt.
+Willkommen in der zentralen Dokumentation für das **NixHome v7.1** Projekt (Codename: Distiller). Diese Dokumentation ist nach dem SSoT-Prinzip (Single Source of Truth) aufgebaut und direkt mit der technischen Umsetzung in den Nix-Modulen verzahnt.
 
 ## 🗺️ Einstiegspunkte
 
@@ -23,4 +23,4 @@ Die verbindlichen Architekturentscheidungen des Projekts. Jede ADR ist semantisc
 Historische Dokumente, abgelehnte Vorschläge und legacy Audits zur Nachvollziehbarkeit.
 
 ---
-*Status: Production Hardened | Letzte Aktualisierung: Mai 2026*
+*Status: gehärtet | Letzte Aktualisierung: Mai 2026*

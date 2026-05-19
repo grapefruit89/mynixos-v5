@@ -71,7 +71,7 @@ in {
     # 🛡️ NFTABLES MASTERY (anchor: nftables-mastery)
     networking.nftables.enable = true;
     networking.firewall = {
-      enable = true; # Production Hardened: Firewall ALWAYS active.
+      enable = true; # gehärtet: Firewall ALWAYS active.
       trustedInterfaces = [ "lo" ];
       
       # 🛡️ GLOBAL PUBLIC PORTS

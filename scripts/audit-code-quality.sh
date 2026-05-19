@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # =============================================================================
-# 🛡️ TITAN-GUARD: NixOS Code Quality & Security Auditor
+# 🛡️ SECURITY & QUALITY AUDITOR
 # =============================================================================
-# This script enforces the project's "v7.1 Strict" security mandates.
+# This script enforces the project's v7.1 security mandates.
 # It scans for forbidden technologies, missing metadata, and invalid patterns.
 # =============================================================================
 
@@ -26,7 +26,7 @@ NC='\033[0m' # No Color
 
 EXIT_CODE=0
 
-echo -e "${YELLOW}🚀 Starting Titan-Guard Audit...${NC}"
+echo -e "${YELLOW}🚀 Starting Security & Quality Audit...${NC}"
 
 # 1. FORBIDDEN TECHNOLOGY CHECK
 echo -e "\n${YELLOW}[1/3] Checking for Forbidden Technologies...${NC}"
@@ -69,7 +69,7 @@ fi
 # FINAL RESULT
 echo -e "\n============================================================================="
 if [ $EXIT_CODE -eq 0 ]; then
-    echo -e "${GREEN}🏆 AUDIT PASSED: Repository is compliant with v7.1 Strict standards.${NC}"
+    echo -e "${GREEN}🏆 AUDIT PASSED: Repository is compliant with v7.1 standards.${NC}"
 else
     echo -e "${RED}💀 AUDIT FAILED: Please fix the errors above before committing.${NC}"
 fi

@@ -39,7 +39,7 @@ in
     inputs.sops-nix.nixosModules.sops
     inputs.impermanence.nixosModules.impermanence
     
-    # 🌲 2. DENDRITIC MODULE DISCOVERY (v7.0 Strict)
+    # 🌲 2. DENDRITIC MODULE DISCOVERY (v7.0)
     # Automatically imports all modules from ./modules/
     ./modules
 

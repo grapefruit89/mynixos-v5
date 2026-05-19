@@ -22,7 +22,7 @@ Dieses Dokument konsolidiert alle Layer-Definitionen und Modul-Metadaten des Nix
 | `NIXH-00-COR-001` | **Boot Safeguard** | `-` | Hardened boot configuration with UEFI focus and systemd-boot. |
 | `NIXH-00-COR-002` | **AI Tools (SRE Assisted)** | `ai/workflow, shell/enhancement` | Optimized terminal environment for AI-assisted development and SRE tasks. |
 | `NIXH-00-COR-003` | **Auto Locale (Zero-Touch)** | `automation/geolocate, system/boot-optimization` | Intelligent geolocation-based system localization with robust fallbacks and state persistence. |
-| `NIXH-00-COR-004` | **Backup (Restic Aviation Edition)** | `backup/restic, cloud/sync, security/integrity-check` | Hardened Restic backup logic with atomical Cloud-Sync and failure-safe ExecConditions. |
+| `NIXH-00-COR-004` | **Backup (Restic Edition)** | `backup/restic, cloud/sync, security/integrity-check` | Hardened Restic backup logic with atomical Cloud-Sync and failure-safe ExecConditions. |
 | `NIXH-00-COR-006` | **Central Configs Plan** | `architecture/roadmap` | Roadmap and architectural planning for centralized configuration management. |
 | `NIXH-00-COR-007` | **Config Merger** | `config/merger, system/runtime-config` | Dynamic bridge between NixOS declarations and user-managed JSON overrides for runtime services. |
 | `NIXH-00-COR-009` | **00-defaults** | `architecture/defaults, storage/tiering` | Shared global defaults for network namespaces, filesystem prefixes, and security conventions. |
@@ -31,7 +31,7 @@ Dieses Dokument konsolidiert alle Layer-Definitionen und Modul-Metadaten des Nix
 | `NIXH-00-COR-012` | **Hardware Configuration** | `system/hardware, boot/initrd` | Auto-generated hardware abstraction layer. |
 | `NIXH-00-COR-013` | **Home Manager (User Cockpit)** | `user/environment, shell/hardening, git/configuration` | Hardened user environment. Git SSoT and Shell-Secret integration. |
 | `NIXH-00-COR-016` | **Host Identity** | `system/identity` | Basic hostname and identity configuration for the server. |
-| `NIXH-00-COR-017` | **Kernel Slim (Advanced Hardened)** | `kernel/hardening, system/performance, security/sysctl` | Aviation-grade optimized and hardened kernel. Max security via slab_nomerge and poison-paging. |
+| `NIXH-00-COR-017` | **Kernel Slim (Advanced Hardened)** | `kernel/hardening, system/performance, security/sysctl` | gehärtet und optimiert. Max security via slab_nomerge and poison-paging. |
 | `NIXH-00-COR-020` | **Locale (SRE Refactored)** | `system/localization, ssot/locale` | Centralized localization settings using the Master Source of Truth. |
 | `NIXH-00-COR-022` | **MOTD & Shell UI** | `shell/ui, system/status-reminders` | Dynamic login dashboard and interactive shell initialization. |
 | `NIXH-00-COR-023` | **Network (SRE Optimized)** | `network/systemd-networkd, performance/tcp-bbr, security/dns-over-tls` | systemd-networkd configuration with DNS hardening, TCP BBR tuning and fast-boot optimization. |
@@ -39,7 +39,7 @@ Dieses Dokument konsolidiert alle Layer-Definitionen und Modul-Metadaten des Nix
 | `NIXH-00-COR-026` | **Architectural Principles** | `architecture/manifesto, system/standards, sre/best-practices` | The core manifesto of the NixHome project. Defines SRE standards and isomorphism. |
 | `NIXH-00-COR-027` | **Registry (Master Switch)** | `system/feature-flags, ssot/registry` | Global feature-toggles for all layers. Single Source of Truth for service enablement. |
 | `NIXH-00-COR-028` | **Secrets (Sops Master Vault)** | `security/secrets, sops/mapping, age/encryption` | Centralized secret-to-module mapping with NIXH-ID traceability. Uses age with SSH-hostkey backing. |
-| `NIXH-00-COR-029` | **Shell Premium (M1 Abrams Edition)** | `shell/premium, observability/motd, system/status-checker` | Hardened and optimized shell environment with Caddy health-checks and fastfetch reporting. |
+| `NIXH-00-COR-029` | **Shell (gehärtet)** | `shell/premium, observability/motd, system/status-checker` | Hardened and optimized shell environment with Caddy health-checks and fastfetch reporting. |
 | `NIXH-00-COR-030` | **Shell** | `shell/bash, tools/productivity` | Standardized Bash environment with productivity tools and basic maintenance aliases. |
 | `NIXH-00-COR-031` | **SSH Rescue (Fail-Safe)** | `security/recovery, ssh/fail-safe` | Isolated emergency SSH instance on port 2222. Auto-terminates after 5 minutes via systemd-timer. |
 | `NIXH-00-COR-032` | **SSH (Post-Quantum Hardened)** | `security/ssh, network/hardening, crypto/post-quantum` | Hardened SSH daemon with Post-Quantum cryptography, strict CIDR-based forwarding and legal protections. |
@@ -51,7 +51,7 @@ Dieses Dokument konsolidiert alle Layer-Definitionen und Modul-Metadaten des Nix
 | `NIXH-00-COR-038` | **User Preferences** | `user/preferences` | Customized user preferences and personal system adjustments. |
 | `NIXH-00-COR-039` | **Users (Declarative & Hardened)** | `system/users, security/no-mutable-users, security/sops-integration` | Strictly immutable user management. Passwords managed via Sops-Nix. Unified media group. |
 | `NIXH-00-COR-040` | **Zram Swap (AI Optimized)** | `system/performance, hardware/ram-optimization, ai/optimization` | Optimized compressed RAM swap for AI workloads (Ollama/Claude). High swappiness for CPU-efficient memory management. |
-| `NIXH-00-SEC-COR-001` | **Hardened Core (Titanium Fortress)** | `-` | Master security module implementing kernel lockdown, massive blacklisting, and service slimming. |
+| `NIXH-00-SEC-COR-001` | **Hardened Core** | `-` | Master security module implementing kernel lockdown, massive blacklisting, and service slimming. |
 | `NIXH-00-SYS-ROOT-001` | **Modular Entrypoint (Horizontal)** | `-` | New horizontal responsibility entrypoint. Decouples hardware, users, and common modules. |
 
 <a id="10-gateway"></a>
@@ -75,7 +75,7 @@ Dieses Dokument konsolidiert alle Layer-Definitionen und Modul-Metadaten des Nix
 | `NIXH-20-INF-001` | **ClamAV (SRE Exhausted)** | `security/antivirus, system/protection` | Professional antivirus protection. |
 | `NIXH-20-INF-002` | **PostgreSQL (SRE Optimized)** | `database/postgresql, system/persistence, maintenance/auto-backup` | Optimized database cluster with automated backups and strict sandboxing. |
 | `NIXH-20-INF-003` | **Secret Ingest** | `automation/secrets, security/ingest` | Watcher for secret landing zone. |
-| `NIXH-20-INF-006` | **Valkey (SRE Exhausted)** | `database/key-value, caching/redis` | High-performance Valkey (Redis fork) with memory caps and aviation-grade sandboxing. |
+| `NIXH-20-INF-006` | **Valkey (SRE Exhausted)** | `database/key-value, caching/redis` | High-performance Valkey (Redis fork) with memory caps and gehärtetes sandboxing. |
 | `NIXH-20-INF-008` | **Vpn Live Config** | `network/vpn-config` | Dynamic runtime configuration for VPN credentials and endpoints. |
 | `NIXH-20-SRV-011` | **Open WebUI (SRE Hardened)** | `ai/ui, security/sandboxing` | User-friendly WebUI for LLMs, tightly sandboxed with DynamicUser. |
 
@@ -115,9 +115,9 @@ Dieses Dokument konsolidiert alle Layer-Definitionen und Modul-Metadaten des Nix
 
 | ID | Modul | Capabilities | Beschreibung |
 | :--- | :--- | :--- | :--- |
-| `NIXH-60-APP-002` | **CouchDB (Aviation-Grade)** | `database/nosql, obsidian/sync` | Hardened NoSQL database for Obsidian LiveSync. |
+| `NIXH-60-APP-002` | **CouchDB (gehärtet)** | `database/nosql, obsidian/sync` | Hardened NoSQL database for Obsidian LiveSync. |
 | `NIXH-60-APP-003` | **Filebrowser (SRE Hardened)** | `web/file-management, security/sandboxing` | Web-based file manager with strict path restrictions and sandboxing. |
-| `NIXH-60-APP-004` | **Karakeep (Aviation-Grade)** | `web/bookmarks, security/sandboxing` | Hardened bookmark management tool with SRE sandboxing. |
+| `NIXH-60-APP-004` | **Karakeep (gehärtet)** | `web/bookmarks, security/sandboxing` | Hardened bookmark management tool with SRE sandboxing. |
 | `NIXH-60-APP-005` | **Matrix Conduit** | `communication/matrix, security/sandboxing` | Lightweight Matrix homeserver (Conduit) written in Rust. |
 | `NIXH-60-APP-006` | **Monica** | `web/crm` | Personal CRM. |
 | `NIXH-60-APP-007` | **Vaultwarden (SRE Exhausted)** | `security/passwords, security/socket-activation` | Tightly sandboxed password manager with Wake-on-Access (Socket Activation). |

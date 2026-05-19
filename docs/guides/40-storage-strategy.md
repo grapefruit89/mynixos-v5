@@ -75,7 +75,7 @@ NixHome v7.1 nutzt ein Stateless-Root (RAM). Nur explizit definierte Pfade werde
 
 ## 🚨 Disaster Recovery
 
-Im Falle eines Totalausfalls folgen wir dem "Aviation-Grade" Runbook:
+Im Falle eines Totalausfalls folgen wir dem Runbook:
 
 1.  **Hardware-Replacement**: Installation eines frischen NixOS-Images.
 2.  **Repo-Rebuild**: Klonen von `repo_v5` und Einspielen der SOPS-Secrets (Master-Key erforderlich).
@@ -97,6 +97,13 @@ restic -r /mnt/archive/.restic-vault check
 
 # 4. Simuliere rclone Cloud-Sync (Dry-Run)
 rclone --dry-run sync /mnt/archive/.restic-vault cloud-backup:nixhome-vault
+
+# 5. Prüfe Inode Warmer (Ghost-Tree für HDD Silence)
+systemctl status hdd-inode-warmer.service
+
+# 6. Prüfe Log-Sync Status (Backblaze B2)
+systemctl status log-s3-sync.service
+journalctl -u log-s3-sync.service -n 20 --no-pager
 ```
 
 ---

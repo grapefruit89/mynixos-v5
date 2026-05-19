@@ -17,7 +17,7 @@ sources: [User Rauswurf-Liste, GEMINI.md V2026]
 # 🏛️ ADR-003: Exkommunikation ineffizienter Dienste
 
 ## Kontext
-Zur Wahrung des Binary-Effizienz-Mandats und der System-Purity müssen Dienste entfernt werden, die dem Aviation-Grade Standard widersprechen.
+Zur Wahrung des Binary-Effizienz-Mandats und der System-Purity müssen Dienste entfernt werden, die dem gehärteten Standard widersprechen.
 
 ## Entscheidung
 Folgende Dienste sind ab sofort für die mynixos Distribution VERBOTEN:

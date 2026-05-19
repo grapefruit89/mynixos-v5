@@ -15,7 +15,7 @@
 # ---ENDNIXMETA
 
 { config, lib, pkgs, ... }: {
-  # 🚀 PRODUCTION HARDENED BOOT WATCHDOG
+  # 🚀 HARDENED BOOT WATCHDOG
   # Runs after multi-user.target to verify system health.
 
   systemd.services.boot-watchdog = {

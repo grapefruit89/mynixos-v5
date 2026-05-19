@@ -17,6 +17,7 @@ Dieses Dokument listet explizit abgelehnte Technologien, Muster und Konzepte auf
 | **Cloudflare Proxy (Orange Cloud)** | Abgelehnt | Verstößt gegen Cloudflare TOS für nicht-HTML-Inhalte (Medien-Streaming, API-Traffic). Nur DNS-Modus (Gray Cloud) erlaubt. |
 | **flake-parts** | Abgelehnt | Verdeckt Komplexität, schafft externe Abhängigkeiten. Pure Flakes bevorzugt. | GEMINI.md |
 | **fapolicyd** | Abgelehnt | Nicht weiter verfolgt, zu hoher Wartungsaufwand. | service-forbidden-tech.nix |
+| **Marketing-Floskeln** | Abgelehnt | Verwendung von nichtssagenden, nicht messbaren Begriffen (Aviation-Grade, Titanium, etc.). Stattdessen klare, technische Nomenklatur („gehärtet“, „strict“, „mandatory“). | ADR-014 |
 
 ---
 *Letzte Aktualisierung: 2026-05-18*

@@ -48,7 +48,7 @@ in
       domain = myLib.mkTracedOption "SRC-OBS-220" (lib.mkOption { 
         type = lib.types.str; 
         default = "m7c5.de"; 
-        description = "Global base domain (Production Hardened)";
+        description = "Global base domain (gehärtet)";
       });
       subdomain = myLib.mkTracedOption "SRC-CHAT-878" (lib.mkOption { 
         type = lib.types.str; 
@@ -116,7 +116,7 @@ in
       globalAllowedV6 = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [];
-        description = "List of globally trusted IPv6 ranges (Production Hardened)";
+        description = "List of globally trusted IPv6 ranges (gehärtet)";
       };
     };
 
@@ -211,6 +211,6 @@ in
 
   config = {
     warnings = lib.optional (!(config.my.configs.bastelmodus || config.my.configs.hardware.profile != "generic"))
-      "Production Hardened Safety: No hardware profile detected or set. Auto-detection for Q958 failed and no manual profile was specified. Set my.configs.hardware.profile to 'q958' or 'vm'.";
+      "gehärtet Safety: No hardware profile detected or set. Auto-detection for Q958 failed and no manual profile was specified. Set my.configs.hardware.profile to 'q958' or 'vm'.";
   };
 }

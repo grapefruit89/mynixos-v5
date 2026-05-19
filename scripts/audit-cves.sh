@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # audit-cves.sh - CVE Scanning with vulnix
-# Implementation of Phase 7 Security Auditing
+# Implementation of Security Auditing
 
 # 1. Build the local system (Fujitsu Q958 configuration)
 echo "🏗️ Building system for CVE audit..."

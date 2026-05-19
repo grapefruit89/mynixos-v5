@@ -23,6 +23,12 @@ Wir verzichten auf RAID und investieren in **geografische Distanz** (Restic zu S
 - **Policy:** `modules/core/storage-policy.nix` (Definition der Tiers A, B, C).
 - **Backup:** `modules/core/backup.nix` (Automatisierte Restic-Backups für Tier A/A++).
 
+## 📦 ABC-Tiering & Smart Mover
+Anstatt auf RAID-Parität zu setzen, nutzen wir ein hybrides Speichermodell:
+- **HDD-Silence-Protokoll:** Festplatten bleiben im Spindown, solange keine Archiv-Daten benötigt werden. Ein **Inode Warmer** (`modules/core/storage.nix`) hält die Verzeichnisstruktur im RAM.
+- **Kapazitätsbasierter Mover:** Der `smart-mover` (`modules/services/service-storage-mover.nix`) verschiebt Daten von der SSD (Tier B) auf die HDD (Tier C) erst dann, wenn der Platz knapp wird UND die HDDs bereits für andere Aufgaben aktiv sind.
+- **WAL-Schutz:** Datenbanken und Write-Ahead-Logs verbleiben zwingend auf Tier A (NVMe), um Korruption bei HDD-Latenzen zu vermeiden.
+
 ## Verifizierung
 ```bash
 # Prüfe den Status der Backup-Timer

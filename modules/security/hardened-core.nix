@@ -2,7 +2,7 @@
 # {
 #   "specVersion": "2.0",
 #   "id": "NIXH-090-SEC-COR-001",
-#   "title": "Hardened Core (fortress)",
+#   "title": "Hardened Core",
 #   "layer": 90,
 #   "category": "core/security",
 #   "lastReviewed": "2026-05-15",

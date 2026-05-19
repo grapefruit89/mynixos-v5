@@ -15,7 +15,7 @@
 # ---ENDNIXMETA
 
 { config, lib, pkgs, ... }: {
-  # 🚀 PRODUCTION HARDENED ADMIN TRIGGERS (ADR 007)
+  # 🚀 HARDENED ADMIN TRIGGERS (ADR 007)
   # Hardened systemd units for administrative tasks.
   # Usage: sudo systemctl start admin-<trigger>
   

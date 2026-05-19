@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# 🚀 AMP BOOTSTRAP SKRIPT (NixHome v7.1 Strict)
+# 🚀 AMP BOOTSTRAP SKRIPT (v7.1 gehärtet)
 # =============================================================================
 # Dieses Skript bereitet die initiale Installation von AMP in der FHS-Sandbox vor.
 # =============================================================================

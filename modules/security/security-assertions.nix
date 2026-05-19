@@ -26,7 +26,7 @@ let
     audit.complexity = 2;
   };
 
-  # Master List of Security Rules (v7.1 Strict Enforcement)
+  # Master List of Security Rules (v7.1 Enforcement)
   # cond = true means the check passes.
   securityChecks = [
     {
@@ -73,7 +73,7 @@ in
     # 📊 Metadata for Traceability
     my.meta.security_assertions = nms;
 
-    # 🛡️ Hard Policy Enforcement (v7.1 Strict)
+    # 🛡️ Hard Policy Enforcement (v7.1)
     # Zero-tolerance for security misconfigurations in production.
     assertions = (map (c: {
       assertion = c.cond;

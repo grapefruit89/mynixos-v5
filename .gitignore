@@ -3,7 +3,7 @@
 .env.*
 *.env
 
-# SOPS Secrets (Production Hardened Shield)
+# SOPS Secrets (Hardened Shield)
 secrets/secrets.yaml
 !secrets/secrets.yaml.example
 !secrets/INJECTION_GUIDE.md
