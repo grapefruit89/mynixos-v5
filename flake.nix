@@ -92,7 +92,7 @@
          myLib = import ./modules/core/lib-helpers.nix { inherit (nixpkgs) lib; };
        };
        modules = [
-         ./hardware/q958/hardware-configuration.nix
+         # ./hardware/q958/hardware-configuration.nix # Template: hardware-configuration.template.nix
          ./hardware/q958/hardware-profile.nix
          ./configuration.nix # Der horizontale Entrypoint
        ];

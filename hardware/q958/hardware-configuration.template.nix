@@ -1,3 +1,4 @@
+# This is a template. Copy to hardware-configuration.nix and fill in actual UUIDs before deployment.
 {
  config,
  lib,
