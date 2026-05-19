@@ -8,6 +8,7 @@ capabilities: [ci-cd, forgejo, cloud-ide, supply-chain-security]
 sources: [GitHub Actions Docs, Forgejo Documentation, NixOS CI Patterns]
 last_reviewed: 2026-05-19
 adr: [ADR-003, ADR-014]
+test: tests/basic.nix
 ---
 
 Dieses Dokument konsolidiert die Strategie für Continuous Integration, Code-Souveränität und Remote-Management im NixHome-Projekt.
@@ -31,9 +32,13 @@ Um Build-Zeiten zu reduzieren, wird der `magic-nix-cache` von Determinate System
 
 Um die Abhängigkeit von externen Plattformen zu minimieren, hosten wir eine eigene Forgejo-Instanz.
 
-### 💎 Forgejo Konfiguration (`modules/services/forgejo.nix`)
+### 🛠️ Konfiguration
+```nix
+my.services.forgejo.enable = true;
+```
+
 - **Leichtgewicht:** Nutzt SQLite3 statt Postgres für minimalen Ressourcenverbrauch.
-- **Hardened:** Integration in das `mkService` Framework (ADR 005) mit strikter Systemd-Sandboxing.
+- **Hardened:** Integration in das `mkService` Framework mit strikter Systemd-Sandboxing.
 - **SSO:** Erreichbar unter `https://git.m7c5.de/` (hinter Caddy & Pocket-ID).
 - **Backup:** `services.forgejo.dump.enable = true` sorgt für tägliche atomare Snapshots des gesamten Git-States.
 
@@ -56,14 +61,35 @@ Codespaces dienen als redundante Entwicklungsumgebung für Notfälle.
 
 ---
 
-## 📝 Nächste Schritte (Offene Punkte aus SSO-TODO)
+## ✅ Verifizierung
 
-| ID | Beschreibung | Status | Notizen |
-|----|--------------|--------|---------|
-| TODO-013 | Legacy Tech Cleanup (Tailscale/ZFS Reste entfernen). | 🟡 Offen | Betrifft `mkService` Factory. |
-| TODO-014 | Batch Update aller NMS-Blöcke auf v4.2 Schema. | 🟡 Offen | Konsistenzprüfung läuft. |
-| TODO-016 | Physischen USB-Key (Age) final einbinden. | 🔴 Hoch | Wichtig für Recovery-Workflows. |
-| TODO-019 | PoW-Verfahren (Hashcash) in Challenge-Seite. | 🟡 Mittel | Schutz gegen L7-DDoS. |
+```bash
+# 1. Prüfe Forgejo Status
+systemctl status forgejo --no-pager
+# Positiv-Test: Web-UI erreichbar (Local)
+curl -f -s http://127.0.0.1:20003 | grep "Forgejo"
+
+# 2. Prüfe Backup-Aktivität
+ls -l /var/lib/forgejo/dump/
+
+# 3. Teste CI-Konformität (Lokal)
+./scripts/ci/audit-code-quality.sh
+```
+
+---
+
+## 🔗 Quellen & Verweise
+
+### Externe Repositories
+- [forgejo/forgejo](https://github.com/forgejo/forgejo) - Sovereign Git
+- [DeterminateSystems/magic-nix-cache](https://github.com/DeterminateSystems/magic-nix-cache)
+
+### Context7 Observability
+<!-- context7: nixpkgs/nixos/modules/services/misc/forgejo.nix -->
+<!-- context7: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/services/forgejo.nix -->
+
+### Nix MCP Index
+<!-- mcp: nixos:repo_v5/modules/services/forgejo.nix -->
 
 ---
 *Status: Production Hardened | Letzte Aktualisierung: 19. Mai 2026*
