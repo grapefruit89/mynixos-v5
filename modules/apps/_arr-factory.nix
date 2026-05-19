@@ -1,3 +1,19 @@
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-040-MED-ARR-FAC",
+#   "title": "Arr-Stack Service Factory",
+#   "layer": 40,
+#   "category": "apps/media",
+#   "lastReviewed": "2026-05-19",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 4,
+#   "tags": ["media", "factory", "automation", "sandboxing"],
+#   "description": "Central factory for generating hardened Servarr application modules with ABC-Tiering."
+# }
+# ---ENDNIXMETA
+
 { config, lib, pkgs, utils, myLib, ... }:
 
 let

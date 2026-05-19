@@ -1,10 +1,19 @@
-# ---
-# nms_id: APP-MEDIA-NAVIDROME
-# title: Navidrome (hardened Music Server)
-# capabilities: [ "music", "streaming" ]
-# status: "hardened"
-# tier_strategy: "ABC-v5.1"
-# ---
+# ---NIXMETA
+# {
+#   "specVersion": "2.0",
+#   "id": "NIXH-040-MED-NAV-001",
+#   "title": "Navidrome Music Server",
+#   "layer": 40,
+#   "category": "services/media",
+#   "lastReviewed": "2026-05-19",
+#   "reviewedBy": "Gemini",
+#   "status": "production",
+#   "complexity": 2,
+#   "tags": ["music", "streaming", "subsonic", "hardened"],
+#   "description": "Hardened Navidrome configuration with Subsonic API enabled and ABC-Tiering."
+# }
+# ---ENDNIXMETA
+
 { config, lib, pkgs, myLib, ... }:
 let
  nms = {

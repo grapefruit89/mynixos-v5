@@ -2,7 +2,9 @@
 title: 60-media-stack
 category: architecture/consolidated
 status: [ACTIVE-SSoT]
-last_reviewed: 2026-05-18
+last_reviewed: 2026-05-19
+adr: [ADR-004, ADR-009, ADR-013]
+test: tests/media.nix
 nix_modules:
   - path: modules/apps/service-media-jellyfin.nix
     anchor: quicksync-mastery
@@ -31,9 +33,13 @@ Dieses Dokument beschreibt die hochperformante Medien-Architektur von mynixos. W
 
 Jellyfin ist unser primärer Video-Streaming-Server. Auf dem Fujitsu Q958 nutzen wir Intel QuickSync (iHD), um 4K-Transcoding mit minimaler CPU-Last (~2%) zu ermöglichen.
 
+### 🛠️ Konfiguration
+```nix
+my.media.jellyfin.enable = true;
+```
+
 - **Hardware-Zugriff**: Erfolgt über `/dev/dri/renderD128`.
 - **Transcoding-Cache** (anchor: jellyfin-transcode): Wir nutzen eine 2GB RAM-Disk (`tmpfs`), um HDD-Spinups während des Streamings zu vermeiden und die Latenz zu minimieren.
-- **Konfiguration**: `modules/apps/service-media-jellyfin.nix`.
 
 ---
 
@@ -41,11 +47,20 @@ Jellyfin ist unser primärer Video-Streaming-Server. Auf dem Fujitsu Q958 nutzen
 
 ### 🎶 Navidrome (anchor: navidrome-streaming)
 Hocheffizienter Musik-Server mit Subsonic-API Support.
+
+### 🛠️ Konfiguration
+```nix
+my.media.navidrome.enable = true;
+```
 - **Vorteil**: Extrem niedriger RAM-Footprint im Vergleich zu Jellyfin.
-- **Konfiguration**: `modules/apps/service-app-navidrome.nix`.
 
 ### 📚 Audiobookshelf (anchor: abs-library)
 Spezialisierter Server für Hörbücher und Podcasts.
+
+### 🛠️ Konfiguration
+```nix
+my.apps.audiobookshelf.enable = true;
+```
 - **Identity**: Volle Pocket-ID Integration via OIDC (siehe Cluster 50).
 - **Pfad-Strategie**: Nutzt Tier A für Metadaten und Tier C für die Medien-Bibliothek.
 
@@ -54,6 +69,12 @@ Spezialisierter Server für Hörbücher und Podcasts.
 ## 🤖 Automation: Der Arr-Stack (anchor: arr-tiering)
 
 Die Automatisierung (Sonarr, Radarr, Prowlarr) basiert auf einer zentralen Factory (`modules/apps/_arr-factory.nix`).
+
+### 🛠️ Konfiguration
+```nix
+my.media.sonarr.enable = true;
+my.media.radarr.enable = true;
+```
 
 - **ABC-Tiering**: Datenbanken liegen auf Tier A (NVMe), während der Cover-Cache auf Tier B (SSD) ausgelagert wird.
 - **Sandboxing**: Alle Dienste laufen in isolierten Systemd-Units mit eingeschränktem Dateisystem-Zugriff.
@@ -65,16 +86,23 @@ Die Automatisierung (Sonarr, Radarr, Prowlarr) basiert auf einer zentralen Facto
 
 ```bash
 # 1. Prüfe Hardware-Beschleunigung (Jellyfin)
-intel_gpu_top # Erwartet Aktivität im Video-Engine während des Transcodings
+# Positiv-Test: Intel GPU muss im System sichtbar sein
+ls -l /dev/dri/renderD128
+# Positiv-Test (Interaktiv): Erwartet Aktivität im Video-Engine während des Transcodings
+# intel_gpu_top
 
 # 2. Prüfe RAM-Disk Mount für Transcoding
 df -h | grep jellyfin-transcode
+# Negativ-Test: Transcode Verzeichnis darf NICHT auf der SSD/HDD liegen
+! findmnt /run/jellyfin-transcode | grep "ext4\|xfs"
 
 # 3. Teste Navidrome Ping-API (Subsonic)
-curl -s "http://127.0.0.1:4533/rest/ping.view?u=user&p=pass&v=1.12.0&c=test"
+curl -f -s "http://127.0.0.1:20533/rest/ping.view?u=user&p=pass&v=1.12.0&c=test" | grep "status=\"ok\""
 
 # 4. Prüfe Status des Arr-Stacks
-systemctl status sonarr radarr prowlarr sabnzbd
+systemctl status sonarr radarr prowlarr sabnzbd --no-pager
+# Negativ-Test: Arr-Dienste dürfen NICHT als Root laufen
+! ps aux | grep -E "sonarr|radarr" | grep "^root"
 ```
 
 ---
@@ -87,12 +115,18 @@ systemctl status sonarr radarr prowlarr sabnzbd
 - [advplyr/audiobookshelf](https://github.com/advplyr/audiobookshelf) - Audiobooks
 
 ### Context7 Observability
+<!-- context7: nixpkgs/nixos/modules/services/video/jellyfin.nix -->
+<!-- context7: nixpkgs/nixos/modules/services/audio/navidrome.nix -->
+<!-- context7: nixpkgs/nixos/modules/services/misc/audiobookshelf.nix -->
 <!-- context7: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/apps/service-media-jellyfin.nix -->
 <!-- context7: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/apps/service-app-navidrome.nix -->
 <!-- context7: https://github.com/grapefruit89/mynixos-v5/blob/main/modules/apps/_arr-factory.nix -->
 
 ### Nix MCP Index
-<!-- mcp: repo_v5/modules/apps/service-media-jellyfin.nix -->
-<!-- mcp: repo_v5/modules/apps/service-app-navidrome.nix -->
-<!-- mcp: repo_v5/modules/apps/service-app-audiobookshelf.nix -->
-<!-- mcp: repo_v5/modules/apps/_arr-factory.nix -->
+<!-- mcp: nixos:repo_v5/modules/apps/service-media-jellyfin.nix -->
+<!-- mcp: nixos:repo_v5/modules/apps/service-app-navidrome.nix -->
+<!-- mcp: nixos:repo_v5/modules/apps/service-app-audiobookshelf.nix -->
+<!-- mcp: nixos:repo_v5/modules/apps/_arr-factory.nix -->
+
+---
+*Status: Production Hardened | Letzte Aktualisierung: 19. Mai 2026*
