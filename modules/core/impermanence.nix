@@ -47,6 +47,8 @@
         "/var/lib/caddy"
         "/var/lib/geoip"
         "/var/lib/postgresql" # PostgreSQL socket, database runs on tmpfs
+        "/var/lib/blocky"
+        "/var/log/vector"
         "/home/moritz"
         "/etc/nixos"
         "/etc/NetworkManager/system-connections"
