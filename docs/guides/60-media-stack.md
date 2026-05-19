@@ -113,6 +113,11 @@ systemctl status sonarr radarr prowlarr sabnzbd --no-pager
 - [jellyfin/jellyfin](https://github.com/jellyfin/jellyfin) - Video Streaming
 - [navidrome/navidrome](https://github.com/navidrome/navidrome) - Music Server
 - [advplyr/audiobookshelf](https://github.com/advplyr/audiobookshelf) - Audiobooks
+- [Radarr/Radarr](https://github.com/Radarr/Radarr) - Movie Management
+- [Sonarr/Sonarr](https://github.com/Sonarr/Sonarr) - TV Series Management
+- [Lidarr/Lidarr](https://github.com/Lidarr/Lidarr) - Music Collection
+- [Prowlarr/Prowlarr](https://github.com/Prowlarr/Prowlarr) - Indexer Manager
+- [sabnzbd/sabnzbd](https://github.com/sabnzbd/sabnzbd) - Usenet Downloader
 
 ### Context7 Observability
 <!-- context7: nixpkgs/nixos/modules/services/video/jellyfin.nix -->
