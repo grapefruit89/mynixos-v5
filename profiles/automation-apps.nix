@@ -5,7 +5,8 @@
   imports = [
     ../modules/apps/service-app-n8n.nix
     ../modules/apps/service-app-home-assistant.nix
-    ../modules/apps/service-app-semaphore.nix
+    # Auskommentiert – Semaphore ist noch nicht implementiert (siehe NIXH-30-AUT-006)
+    # ../modules/apps/service-app-semaphore.nix
     ../modules/services/service-app-zigbee-stack.nix
   ];
 
