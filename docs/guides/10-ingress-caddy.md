@@ -1,5 +1,6 @@
 ---
 title: 10-ingress-caddy
+domain: 10
 category: architecture/consolidated
 status: [ACTIVE-SSoT]
 last_reviewed: 2026-05-19

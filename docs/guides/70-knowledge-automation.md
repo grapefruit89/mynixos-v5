@@ -1,5 +1,6 @@
 ---
 title: 70-knowledge-automation
+domain: 70
 category: architecture/consolidated
 status: [ACTIVE-SSoT]
 last_reviewed: 2026-05-19

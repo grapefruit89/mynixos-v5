@@ -1,13 +1,11 @@
 ---
-title: ADR-010: Headless Server Law (No-GUI Mandate)
-status: [ACCEPTED]
-category: architecture/decision
-capabilities: [resource-efficiency, security-hardening, headless-operations]
-last_reviewed: 2026-05-18
-nix_modules:
-  - path: modules/security/security-assertions.nix
-  - path: modules/services/service-forbidden-tech.nix
-sources: [User Mandate, Manifest v7.1]
+title: "ADR-010: Headless Server Law (No-GUI Mandate)"
+status: ACCEPTED
+date: 2026-05-20
+domain: 10
+related:
+  guide: docs/guides/30-security-hardening.md
+  modules: modules/security/security-assertions.nix
 ---
 
 <!-- context7: repo_v5/modules/security/security-assertions.nix -->

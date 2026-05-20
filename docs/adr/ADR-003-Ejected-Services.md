@@ -1,14 +1,11 @@
 ---
-title: ADR-003: Ejected Services & Efficiency Cleanup
-status: [ACCEPTED]
-category: architecture/decision
-capabilities: [resource-efficiency, binary-mandate, no-legacy]
-last_reviewed: 2026-05-18
-nix_modules:
-  - path: modules/services/service-forbidden-tech.nix
-  - path: modules/core/architecture-rules.nix
-    anchor: architecture-violations
-sources: [User Rauswurf-Liste, GEMINI.md V2026]
+title: "ADR-003: Ejected Services & Efficiency Cleanup"
+status: ACCEPTED
+date: 2026-05-20
+domain: 03
+related:
+  guide: docs/guides/00-core-hardware-packaging.md
+  modules: modules/services/service-forbidden-tech.nix
 ---
 
 <!-- context7: repo_v5/modules/services/service-forbidden-tech.nix -->

@@ -17,9 +17,10 @@ Veraltete Entscheidungen wurden ins Archiv (`../archive/adr/legacy/`) verschoben
 | ADR-012 | Selection Criteria for Socket Activation | ACCEPTED |
 | ADR-013 | Resource Priority & Throttling | ACCEPTED |
 | ADR-014 | Systemic Governance & Purity Mandate | ACCEPTED |
-| ADR-015 | Distance Over Local Parity (Anti-RAID) | ACCEPTED |
 | ADR-016 | Sops-Nix Boot Timing Fix | ACCEPTED |
 | ADR-017 | Cloudflare DNS-Only Mandate | ACCEPTED |
+| ADR-040 | Storage Strategy & HDD Lifecycle | ACCEPTED |
+| ADR-041 | Distance Over Local Parity (Anti-RAID) | ACCEPTED |
 | ADR_Chat_Destillat | Gesammelte Konzepte (historisch, teilweise umgesetzt) | REFERENCE |
 
 Für eine vollständige Liste der aktuell gültigen Regeln und Anti-Patterns siehe [`ANTIPATTERN.md`](../ANTIPATTERN.md) und [`RISKS.md`](../RISKS.md).

@@ -1,4 +1,12 @@
-﻿# 🚫 NixHome Anti-Patterns (ANTIPATTERN.md)
+﻿---
+title: "NixHome Anti-Patterns"
+domain: 98
+category: reference/standards
+status: [ACTIVE-SSoT]
+last_reviewed: 2026-05-18
+---
+
+# 🚫 NixHome Anti-Patterns (ANTIPATTERN.md)
 
 Dieses Dokument listet explizit abgelehnte Technologien, Muster und Konzepte auf. Jede Entscheidung basiert auf den Prinzipien von NixHome (Hardening, KISS, Pure Nix, Minimal Attack Surface).
 

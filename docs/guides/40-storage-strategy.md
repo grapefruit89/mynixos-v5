@@ -1,8 +1,11 @@
 ---
-title: 40-storage-strategy
+title: "Storage Strategy & Disaster Recovery"
+domain: 40
 category: architecture/consolidated
 status: [ACTIVE-SSoT]
 last_reviewed: 2026-05-19
+related:
+  adr: docs/adr/ADR-041-Distance-Parity.md
 nix_modules:
   - path: modules/core/storage.nix
     anchor: mergerfs-pool
@@ -157,6 +160,22 @@ Jeder Zustandswechsel der HDDs (Standby -> Active) wird lückenlos protokolliert
 
 ### 📅 Gesteuerte Scans
 Zusätzlich werden **Jellyfin-Bibliotheks-Scans** nur nachts um **02:00 Uhr** durchgeführt. Dies stellt sicher, dass die Platten tagsüber im Tiefschlaf bleiben können, sofern keine Medien aktiv gestreamt werden. Die manuelle Konfiguration erfolgt in der Jellyfin Web-UI unter *Einstellungen -> Dashboard -> Bibliotheken -> Geplanter Aufgaben-Trigger*.
+
+### 🛠️ Verifikation des HDD-Spindown
+
+- Prüfe die aktuelle TLP-Konfiguration:
+  ```bash
+  tlp-stat --disk
+  ```
+  Erwartet wird `DISK_SPINDOWN_TIMEOUT_ON_AC = 30m`.
+
+- Prüfe den aktuellen Zustand einer Platte (z.B. `/dev/sda`):
+  ```bash
+  sudo hdparm -C /dev/sda
+  ```
+  Ausgabe `standby` bedeutet die Platte schläft, `active/idle` bedeutet sie ist wach.
+
+- Der Jellyfin-Scan ist manuell im Web-UI unter `Dashboard -> Scheduled Tasks` auf 02:00 Uhr zu konfigurieren.
 
 ---
 

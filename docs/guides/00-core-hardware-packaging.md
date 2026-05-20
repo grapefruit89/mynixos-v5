@@ -1,5 +1,6 @@
 ---
 title: 00-core-hardware-packaging
+domain: 00
 category: architecture/consolidated
 status: [ACTIVE-SSoT]
 last_reviewed: 2026-05-19

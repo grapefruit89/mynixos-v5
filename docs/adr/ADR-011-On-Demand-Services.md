@@ -1,5 +1,6 @@
 ---
 title: ADR-011: On-Demand Service Orchestration (Socket Activation)
+domain: 11
 status: [SUPERSEDED]
 category: architecture/decision
 capabilities: [resource-efficiency, systemd-socket-activation, wake-on-request]

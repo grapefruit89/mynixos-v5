@@ -1,8 +1,14 @@
 ---
-title: 30-security-hardening
+title: "Security Hardening"
+domain: 30
 category: architecture/consolidated
 status: [ACTIVE-SSoT]
 last_reviewed: 2026-05-18
+related:
+  adr:
+    - docs/adr/ADR-010-Headless-Server-Law.md
+    - docs/adr/ADR-014-Systemic-Governance.md
+    - docs/adr/ADR-016-Sops-Boot-Timing.md
 nix_modules:
   - path: modules/core/kernel-hardening.nix
     anchor: kernel-hardening

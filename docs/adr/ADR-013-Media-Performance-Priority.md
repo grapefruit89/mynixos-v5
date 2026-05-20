@@ -1,13 +1,11 @@
 ---
-title: ADR-013: Resource Priority & Throttling
-status: [ACCEPTED]
-category: architecture/decision
-last_reviewed: 2026-05-18
-nix_modules:
-  - path: modules/apps/service-media-sabnzbd.nix
-    anchor: sabnzbd-resource-priority
-  - path: modules/apps/service-media-jellyfin.nix
-    anchor: jellyfin-resource-priority
+title: "ADR-013: Resource Priority & Throttling"
+status: ACCEPTED
+date: 2026-05-20
+domain: 13
+related:
+  guide: docs/guides/40-media-stack.md
+  modules: modules/40-media/
 ---
 
 <!-- context7: repo_v5/modules/apps/service-media-sabnzbd.nix -->

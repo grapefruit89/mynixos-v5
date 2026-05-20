@@ -1,5 +1,6 @@
 ---
 title: ADR-009: Media Stack Consolidation (Simplicity over Complexity)
+domain: 40
 status: [ACCEPTED]
 category: architecture/decision
 capabilities: [sqlite-reliability, service-bundling, zero-maintenance]
@@ -14,7 +15,8 @@ sources: [nixarr, user-feedback, Internal SRE Audit]
 
 # 🏛️ ADR-009: Der konsolidierte Media Stack (Simplicity Edition)
 
-## Kontext
+**Status:** SUPERSEDED by [ADR-018](./ADR-018-Media-Stack-Architecture.md)  
+**Date:** 2026-05-20  
 Wir haben die Wahl zwischen PostgreSQL und SQLite für den ARR-Stack analysiert.
 
 ## Entscheidung

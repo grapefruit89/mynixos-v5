@@ -1,9 +1,12 @@
 ---
-title: 📡 Under-the-Radar Services (Zigbee, MQTT, nftables)
+title: "📡 Under-the-Radar Services (Zigbee, MQTT, nftables)"
+domain: 15
 category: architecture/services
 status: [ACTIVE-SSoT]
 capabilities: [iot-communication, firewall-mastery, declarative-iot]
 sources: [NixOS Search, official nixpkgs modules]
+related:
+  adr: docs/adr/ADR-015-IoT-Services.md (TBD)
 ---
 
 # 📡 Under-the-Radar: Die versteckten Kraftpakete

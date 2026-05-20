@@ -1,17 +1,16 @@
 ---
-title: ADR-015: Distance Over Local Parity (The anti-RAID Mandate)
-status: [ACCEPTED]
-category: architecture/decision
-capabilities: [offsite-recovery, 3-2-1-rule, state-minimization]
-last_reviewed: 2026-05-18
-nix_modules:
-  - path: modules/core/storage-policy.nix
-  - path: modules/core/backup.nix
+title: "ADR-041: Distance Over Local Parity (The anti-RAID Mandate)"
+status: ACCEPTED
+date: 2026-05-20
+domain: 40
+related:
+  guide: docs/guides/40-storage-strategy.md
+  modules: modules/core/storage-policy.nix
 ---
 
 <!-- context7: repo_v5/modules/core/storage-policy.nix -->
 
-# 🏛️ ADR-015: Distanz ist die bessere Parität
+# 🏛️ ADR-041: Distanz ist die bessere Parität
 
 ## Kontext
 Lokale Redundanz (RAID) schützt nicht gegen Katastrophen und verhindert HDD-Spindown.

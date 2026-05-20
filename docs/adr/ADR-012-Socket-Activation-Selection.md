@@ -1,12 +1,11 @@
 ---
-title: ADR-012: Selection Criteria for Socket Activation (Safety First)
-status: [ACCEPTED]
-category: architecture/decision
-capabilities: [pragmatic-efficiency, connectivity-guarantee, security-hardening]
-last_reviewed: 2026-05-18
-nix_modules:
-  - path: modules/core/ssh.nix
-sources: [User Feedback, Connectivity Audit]
+title: "ADR-012: Selection Criteria for Socket Activation (Safety First)"
+status: ACCEPTED
+date: 2026-05-20
+domain: 12
+related:
+  guide: docs/guides/10-ingress-caddy.md
+  modules: modules/core/ssh.nix
 ---
 
 <!-- context7: repo_v5/modules/core/ssh.nix -->

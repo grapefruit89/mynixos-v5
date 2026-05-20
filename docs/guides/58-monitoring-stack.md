@@ -1,9 +1,10 @@
 ---
 title: 58-monitoring-stack
+domain: 58
 category: architecture/consolidated
 status: [ACTIVE-SSoT]
 last_reviewed: 2026-05-19
-adr: [ADR-010, ADR-015]
+adr: [ADR-010]
 test: tests/basic.nix
 nix_modules:
   - path: modules/services/service-gatus.nix

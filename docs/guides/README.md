@@ -12,7 +12,7 @@ Dieses Verzeichnis enthält die konsolidierte Dokumentation für das NixHome v7.
 - **[40-storage-strategy.md](./40-storage-strategy.md)**: Tiered Storage (ABC), Restic/Rclone Backups, Disaster Recovery & S3-Vault (Garage).
 - **[50-identity-authentication.md](./50-identity-authentication.md)**: Pocket-ID SSO, Forward-Auth (Caddy), Passkeys & Sovereign Identity.
 - **[58-monitoring-stack.md](./58-monitoring-stack.md)**: Health-Checks (Gatus), System-Telemetry (Netdata) & Logging-Infrastruktur.
-- **[60-media-stack.md](./60-media-stack.md)**: Video (Jellyfin), Audio (Navidrome), Books (Audiobookshelf) & Download-Management.
+- **[40-media-stack.md](./40-media-stack.md)**: Video (Jellyfin), Audio (Navidrome), Books (Audiobookshelf) & Download-Management.
 - **[70-knowledge-automation.md](./70-knowledge-automation.md)**: Dokumenten-Management (Paperless), Sync (OCIS), Automation (n8n), Vaultwarden & Home Assistant.
 - **[80-matrix-sovereign.md](./80-matrix-sovereign.md)**: Sovereign Communication (Matrix/Conduit) & Alerting-Orchestrierung.
 - **[90-github-workflows.md](./90-github-workflows.md)**: CI/CD Pipelines (GitHub Actions), Security Hardening, Sovereign Git & Codespaces.

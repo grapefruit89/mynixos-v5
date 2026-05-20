@@ -1,14 +1,11 @@
 ---
-title: ADR-014: Systemic Governance & Purity Mandate
-status: [ACCEPTED]
-category: architecture/decision
-capabilities: [evaluation-performance, dependency-integrity, security-purity]
-last_reviewed: 2026-05-18
-nix_modules:
-  - path: modules/core/architecture-rules.nix
-    anchor: architecture-violations
-  - path: modules/security/security-assertions.nix
-sources: [Nixpkgs Maintainer Guide, Manifest v7.1]
+title: "ADR-014: Systemic Governance & Purity Mandate"
+status: ACCEPTED
+date: 2026-05-20
+domain: 14
+related:
+  guide: docs/guides/00-core-hardware-packaging.md
+  modules: modules/core/architecture-rules.nix
 ---
 
 <!-- context7: repo_v5/modules/core/architecture-rules.nix -->

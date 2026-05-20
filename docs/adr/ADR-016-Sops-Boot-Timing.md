@@ -1,10 +1,11 @@
 ---
-title: ADR-016: Sops-Nix Boot Timing Fix
-status: [ACCEPTED]
-category: architecture/decision
-last_reviewed: 2026-05-18
-nix_modules:
-  - path: modules/core/secrets.nix
+title: "ADR-016: Sops-Nix Boot Timing Fix"
+status: ACCEPTED
+date: 2026-05-20
+domain: 16
+related:
+  guide: docs/guides/30-security-hardening.md
+  modules: modules/core/secrets.nix
 ---
 
 <!-- context7: repo_v5/modules/core/secrets.nix -->

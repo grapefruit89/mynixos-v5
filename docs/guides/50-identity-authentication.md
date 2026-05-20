@@ -1,8 +1,11 @@
 ---
-title: 50-identity-authentication
+title: "Identity & Authentication"
+domain: 50
 category: architecture/consolidated
 status: [ACTIVE-SSoT]
 last_reviewed: 2026-05-18
+related:
+  adr: docs/adr/ADR-003-Ejected-Services.md
 nix_modules:
   - path: modules/services/pocket-id.nix
     anchor: pocket-id-sso

@@ -1,15 +1,17 @@
-# 🚀 Guide 90: GitHub Workflows & Sovereign Git
-
 ---
-title: 🚀 GitHub Workflows & Sovereign Git
+title: "🚀 GitHub Workflows & Sovereign Git"
+domain: 90
 category: architecture/automation
 status: [ACTIVE-SSoT]
 capabilities: [ci-cd, forgejo, cloud-ide, supply-chain-security]
 sources: [GitHub Actions Docs, Forgejo Documentation, NixOS CI Patterns]
 last_reviewed: 2026-05-19
-adr: [ADR-003, ADR-014]
+related:
+  adr: docs/adr/ADR-014-Systemic-Governance.md
 test: tests/basic.nix
 ---
+
+# 🚀 Guide 90: GitHub Workflows & Sovereign Git
 
 Dieses Dokument konsolidiert die Strategie für Continuous Integration, Code-Souveränität und Remote-Management im NixHome-Projekt.
 

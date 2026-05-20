@@ -1,8 +1,13 @@
 ---
-title: 20-networking-basics
+title: "Networking Basics"
+domain: 20
 category: architecture/consolidated
 status: [ACTIVE-SSoT]
 last_reviewed: 2026-05-18
+related:
+  adr:
+    - docs/adr/ADR-008-SSH-ProxyJump-Standard.md
+    - docs/adr/ADR-017-Cloudflare-DNS-Only.md
 nix_modules:
   - path: modules/core/network.nix
     anchor: network-interfaces

@@ -54,6 +54,16 @@ for DISK in $DISKS; do
                 if [ "$CURRENT_COUNT" -gt "$PREV_COUNT" ]; then
                     DIFF=$((CURRENT_COUNT - PREV_COUNT))
                     logger -t hdd-spinup-monitor "🚨 HDD $DISK ($DISK_NAME) aufgewacht. Zyklen-Zuwachs: $DIFF (Aktuell: $CURRENT_COUNT)"
+                    
+                    # ntfy alert (optional)
+                    if [ -n "$NTFY_URL" ]; then
+                        curl -s \
+                            -H "Title: HDD Spin-up detected" \
+                            -H "Priority: low" \
+                            -H "Tags: floppy_disk,warning" \
+                            -d "Festplatte $DISK ($DISK_NAME) ist aufgewacht. Zyklen-Zuwachs: $DIFF (Aktuell: $CURRENT_COUNT)" \
+                            "$NTFY_URL" > /dev/null
+                    fi
                 fi
             fi
             echo "$CURRENT_COUNT" > "$STATE_FILE"

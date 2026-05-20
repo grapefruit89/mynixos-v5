@@ -1,15 +1,17 @@
-# 🎮 Guide 95: Gaming & AMP (Native FHS)
-
 ---
-title: 🎮 Gaming & AMP (Native FHS)
+title: "🎮 Gaming & AMP (Native FHS)"
+domain: 95
 category: services/gaming
 status: [ACTIVE-SSoT]
 capabilities: [game-server, fhs-env, steamcmd, amp-panel]
 sources: [CubeCoders AMP Docs, NixOS Wiki: FHS]
 last_reviewed: 2026-05-19
-adr: [ADR-013]
+related:
+  adr: docs/adr/ADR-013-Media-Performance-Priority.md
 test: tests/gaming.nix
 ---
+
+# 🎮 Guide 95: Gaming & AMP (Native FHS)
 
 Dieses Dokument beschreibt die native Integration des **AMP Game Server Panels** in der NixHome-Umgebung. Wir verzichten bewusst auf Docker und nutzen stattdessen **FHS-Sandboxing**.
 

@@ -1,7 +1,13 @@
-# ADR-017: Cloudflare DNS-Only Mandate
+---
+title: "Cloudflare DNS-Only Mandate"
+status: ACCEPTED
+date: 2026-05-20
+domain: 17
+related:
+  guide: docs/guides/10-ingress-caddy.md
+---
 
-## Status
-Accepted
+# ADR-017: Cloudflare DNS-Only Mandate
 
 ## Context
 The project uses Cloudflare for DNS management and Dynamic DNS (DDNS). Cloudflare offers a proxy service ("Orange Cloud") that provides CDN, WAF, and other security features. However, the project's core functionality involves high-bandwidth media streaming (Jellyfin, Navidrome, etc.) and specific API traffic.

@@ -1,13 +1,11 @@
 ---
-title: ADR-008: Admin Access Standard (SSH & ProxyJump)
-status: [ACCEPTED]
-category: architecture/administration
-capabilities: [ed25519-keys, bastion-host, proxyjump, ssh-abstraction]
-last_reviewed: 2026-05-18
-nix_modules:
-  - path: modules/core/ssh.nix
-  - path: modules/core/firewall.nix
-sources: [https://blog.ktz.me/ssh-tips-and-why-proxyjump-is-awesome/]
+title: "ADR-008: Admin Access Standard (SSH & ProxyJump)"
+status: ACCEPTED
+date: 2026-05-20
+domain: 08
+related:
+  guide: docs/guides/10-ingress-caddy.md
+  modules: modules/core/ssh.nix
 ---
 
 <!-- context7: repo_v5/modules/core/ssh.nix -->

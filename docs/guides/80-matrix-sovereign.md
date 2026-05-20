@@ -1,5 +1,6 @@
 ---
 title: 80-matrix-sovereign
+domain: 80
 category: architecture/consolidated
 status: [ACTIVE-SSoT]
 last_reviewed: 2026-05-19

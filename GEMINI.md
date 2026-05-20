@@ -6,10 +6,12 @@
 1. **Context7 Enforcement:** NEVER rely on internal training data for NixOS versions, EOL dates, or module options.
 2. **Architecture Codex:** Strictly adhere to the mandates in `docs/ANTIPATTERN.md` (verbotene Technologien) und `docs/adr/` (Entscheidungen).
 3. **Required Tooling:** Use `context7/query-docs` before proposing any changes to the flake or core modules.
-4. **Core Library IDs:**
-   - `nixpkgs`: `/nixos/nixpkgs`
-   - `home-manager`: `/nix-community/home-manager`
-   - `sops-nix`: `/mic92/sops-nix`
+5. **Forbidden AI Actions (NON-NEGOTIABLE):**
+   - NEVER create metadata files like `assertions.yaml` – all anti-patterns belong exclusively in ADRs.
+   - NEVER include NZBGeek or secondary indexers – SceneNZBs via Prowlarr is the ONLY allowed setup.
+   - NEVER modify isomorphic numbering (Domain 40 stays 40, 41 stays 41, etc.).
+   - NEVER execute `nixos-rebuild` or `systemctl` – only file operations are permitted.
+   - NEVER delete old files automatically – explicit user approval is mandatory.
 
 ---
 
@@ -102,6 +104,15 @@ Ein LLM kann mit `rg "anchor: ssh-hardening" modules/ docs/` alle Verweise finde
 3. **Metadaten nutzen:** Suche nach Modulen mit `rg "# ---NIXMETA" modules/core/` oder nach spezifischen IDs.
 4. **Änderungen idempotent durchführen:** Vor jeder Änderung prüfen, ob das Ziel bereits erreicht ist.
 5. **Konsistenz wahren:** Wenn du ein Modul änderst, prüfe, ob die zugehörigen ADRs/Guides aktualisiert werden müssen (Suche nach dem Anchor oder der Datei in `docs/`).
+6. **Domain 40 (Media) Mandatory Structure:** Alle Media-Module MÜSSEN in `modules/40-media/` liegen (isomorphe Nummerierung). `modules/apps/` ist für neue Media-Services verboten.
+7. **Documentation Metadata Standard:** All ADRs and Guides must strictly follow the schema defined in `docs/METADATA-STANDARD.md`. Traceability between decisions (ADRs) and implementation (Guides/Modules) is mandatory.
+
+## 7. Umgang mit ADRs und Guides
+
+- Vor jeder Änderung an einer ADR oder einem Guide MUSS die Datei `docs/METADATA-STANDARD.md` konsultiert werden.
+- Nach jeder Änderung MUSS das Skript `scripts/validate-adr-guide-metadata.ps1` (oder ein gleichwertiger Check) ausgeführt werden, um Konsistenz sicherzustellen.
+- Fehlende Verknüpfungen (z.B. ADR ohne Guide oder Guide ohne ADR) sind nicht erlaubt und müssen durch Erstellung des fehlenden Artefakts behoben werden.
+- Die KI darf keine ADR oder Guide erstellen, ohne den entsprechenden Gegenpart (Guide zu ADR, ADR zu Guide) zu verlinken.
 
 ---
 

@@ -19,26 +19,10 @@
  # Bündelt Jellyfin, *arr-Suite und Storage-Pool.
 
   imports = [
-    ../modules/apps/service-media-jellyfin.nix
-    # Deaktiviert, da service-media-seerr nicht implementiert (siehe LAYER_CONSOLIDATED)
-    # ../modules/apps/service-media-seerr.nix
-    ../modules/apps/service-media-sonarr.nix
-    ../modules/apps/service-media-sonarr-setup.nix # 🔥 API-Setup PoC
-    ../modules/apps/service-media-radarr.nix
-    ../modules/apps/service-media-radarr-setup.nix # 🔥 API-Setup PoC
-    ../modules/apps/service-media-prowlarr.nix
-    ../modules/apps/service-media-prowlarr-setup.nix # 🔥 Indexer-Sync
-    ../modules/apps/service-media-readarr.nix
-    ../modules/apps/service-media-lidarr.nix
-    ../modules/apps/service-media-sabnzbd.nix
-    # Deaktiviert, da service-media-recyclarr nicht implementiert
-    # ../modules/apps/service-media-recyclarr.nix
-    # Deaktiviert, da service-app-audiobookshelf nicht implementiert
-    # ../modules/apps/service-app-audiobookshelf.nix
-    ../modules/apps/service-app-navidrome.nix
-    ../modules/apps/media-stack.nix
-    # Deaktiviert, da storage.nix durch storage-policy.nix ersetzt wurde
-    # ../modules/core/storage.nix
+    ../modules/40-media/42-arr-stack.nix
+    ../modules/40-media/43-download.nix
+    ../modules/40-media/44-streaming.nix
+    ../modules/40-media/45-discovery.nix
   ];
 
  # Standard-Metadaten für das Profil

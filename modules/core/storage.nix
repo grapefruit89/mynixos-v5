@@ -97,8 +97,9 @@ in
         Type = "oneshot";
         ExecStart = "${pkgs.bash}/bin/bash /etc/nixos/scripts/hdd-spinup-monitor.sh";
         User = "root";
+        Environment = "NTFY_URL=${config.my.configs.identity.ntfyUrl}";
       };
-      path = with pkgs; [ smartmontools gawk utillinux coreutils ];
+      path = with pkgs; [ smartmontools gawk utillinux coreutils curl ];
     };
 
     systemd.timers.hdd-spinup-monitor = {
